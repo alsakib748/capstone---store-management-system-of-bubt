@@ -27,30 +27,34 @@
                         </div><!-- end card header -->
 
                         <div class="card-body">
-                            <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
+                            <div class="table-responsive">
+                                <table id="datatable" class="table table-bordered table-striped align-middle w-100 nowrap">
                                 <thead>
                                     <tr>
-                                        <th>Sl</th>
-                                        {{-- <th>WareHouse</th> --}}
                                         <th>Date</th>
-                                        <th>Status</th>
+                                        <th>Tracking No</th>
+                                        <th>Note No</th>
+                                        <th>Semester</th>
+                                        <th>Department</th>
                                         <th>Grand Total</th>
-                                        <th>Payment</th>
-                                        <th>Created</th>
+                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($allData as $key => $item)
+                                    @foreach ($allData as $item)
                                         <tr>
-                                            <td>{{ $key + 1 }}</td>
-                                            {{-- <td>{{ $item['warehouse']['name'] }}</td> --}}
                                             <td>{{ \Carbon\Carbon::parse($item->date)->format('Y-m-d') }}</td>
-                                            <td>{{ $item->status }}</td>
-                                            <td>${{ $item->grand_total }}</td>
-                                            <td>Cash</td>
-                                            <td>{{ \Carbon\Carbon::parse($item->created_at)->format('Y-m-d') }}</td>
+                                            <td>{{ $item->tracking_no ?? '-' }}</td>
+                                            <td>{{ $item->note_no ?? '-' }}</td>
                                             <td>
+                                                {{ $item->semester ? (($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name) : '-' }}
+                                            </td>
+                                            <td>{{ $item->department->name ?? '-' }}</td>
+                                            <td>${{ $item->grand_total }}</td>
+                                            <td>{{ $item->status }}</td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1">
                                                 <a title="Details" href="{{ route('details.purchase', $item->id) }}"
                                                     class="btn btn-info btn-sm"> <span
                                                         class="mdi mdi-eye-circle mdi-18px"></span> </a>
@@ -66,12 +70,14 @@
                                                 <a title="Delete" href="{{ route('delete.purchase', $item->id) }}"
                                                     class="btn btn-danger btn-sm" id="delete"><span
                                                         class="mdi mdi-delete-circle  mdi-18px"></span></a>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
 
                                 </tbody>
-                            </table>
+                                </table>
+                            </div>
                         </div>
 
                     </div>

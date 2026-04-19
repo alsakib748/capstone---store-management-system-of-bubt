@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,13 +13,13 @@ return new class extends Migration
         Schema::create('return_purchases', function (Blueprint $table) {
             $table->id();
             $table->date('date');
-            $table->unsignedBigInteger('warehouse_id');
+            $table->unsignedBigInteger('warehouse_id')->nullable();
             $table->unsignedBigInteger('supplier_id');
-            $table->decimal('discount', 10 , 2)->default(0.00);
-            $table->decimal('shipping', 10 , 2)->default(0.00);
-            $table->enum('status', ['Return','Pending','Ordered'])->default('Pending');
+            $table->decimal('discount', 10, 2)->default(0.00);
+            $table->decimal('shipping', 10, 2)->default(0.00);
+            $table->enum('status', ['Return', 'Pending', 'Ordered'])->default('Pending');
             $table->text('note')->nullable();
-            $table->decimal('grand_total', 15 , 2);
+            $table->decimal('grand_total', 15, 2);
             $table->timestamps();
 
             $table->foreign('warehouse_id')->references('id')->on('ware_houses')->onDelete('cascade');

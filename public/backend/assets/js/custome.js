@@ -4,50 +4,58 @@ document.addEventListener("DOMContentLoaded", function () {
     let productList = document.getElementById("product_list");
     let warehouseError = document.getElementById("warehouse_error");
     let orderItemsTableBody = document.querySelector("tbody");
+    let useWarehouseForProductSearch =
+        typeof window.useWarehouseForProductSearch === "boolean"
+            ? window.useWarehouseForProductSearch
+            : true;
 
     // This script is included globally, but many pages don't have these elements.
+    // Warehouse / warehouse_error are optional (e.g. Create Purchase has no warehouse field).
     // If the purchase/sale UI isn't present, exit early to avoid runtime errors.
-    if (
-        !productSearchInput ||
-        !warehouseDropdown ||
-        !productList ||
-        !warehouseError ||
-        !orderItemsTableBody
-    ) {
+    if (!productSearchInput || !productList || !orderItemsTableBody) {
         return;
     }
 
     productSearchInput.addEventListener("keyup", function () {
-        let query = this.value;
-        let warehouse_id = warehouseDropdown.value;
+        let query = this.value.trim();
 
-        if (!warehouse_id) {
-            warehouseError.classList.remove("d-none");
-            productList.innerHTML = "";
-            return;
-        } else {
+        // Optional warehouse: only some screens have a warehouse dropdown + error hint.
+        if (useWarehouseForProductSearch && warehouseDropdown && warehouseError) {
+            let warehouse_id = warehouseDropdown.value;
+            if (!warehouse_id) {
+                warehouseError.classList.remove("d-none");
+                productList.innerHTML = "";
+                return;
+            }
             warehouseError.classList.add("d-none");
         }
+
         if (query.length > 1) {
-            fetchProducts(query, warehouse_id);
+            fetchProducts(query);
         } else {
             productList.innerHTML = "";
         }
     });
 
-    function fetchProducts(query, warehouse_id) {
-        fetch(
-            productSearchUrl +
-                "?query=" +
-                query +
-                "&warehouse_id=" +
-                warehouse_id,
-        )
+    function fetchProducts(query) {
+        let url = productSearchUrl + "?query=" + encodeURIComponent(query);
+        if (
+            useWarehouseForProductSearch &&
+            warehouseDropdown &&
+            warehouseDropdown.value
+        ) {
+            url +=
+                "&warehouse_id=" + encodeURIComponent(warehouseDropdown.value);
+        }
+        fetch(url)
             .then((response) => response.json())
             .then((data) => {
                 productList.innerHTML = "";
                 if (data.length > 0) {
                     data.forEach((product) => {
+                        let skuPart = product.sku
+                            ? ` <small class="text-muted">(${product.sku})</small>`
+                            : "";
                         let item = `<a href="#" class="list-group-item list-group-item-action product-item"
                             data-id="${product.id}"
                             data-code="${product.code}"
@@ -55,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             data-cost="${product.price}"
                             data-stock="${product.product_qty}">
                             <span class="mdi mdi-text-search"></span>
-                            ${product.code} - ${product.name}
+                            ${product.code} - ${product.name}${skuPart}
                             </a> `;
                         productList.innerHTML += item;
                         // console.log(item);
@@ -106,8 +114,9 @@ document.addEventListener("DOMContentLoaded", function () {
               <input type="hidden" name="products[${productId}][name]" value="${productName}">
               <input type="hidden" name="products[${productId}][code]" value="${productCode}">
           </td>
-          <td>${netUnitCost.toFixed(2)}
-              <input type="hidden" name="products[${productId}][cost]" value="${netUnitCost}">
+          <td>
+              <input type="number" class="form-control net-unit-cost-input"
+                  name="products[${productId}][net_unit_cost]" value="${netUnitCost.toFixed(2)}" min="0" step="0.01" style="width:120px">
           </td>
           <td style="color:#ffc121">${stock}</td>
           <td>
@@ -138,28 +147,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateEvents() {
         document
-            .querySelectorAll(".qty-input, .discount-input")
+            .querySelectorAll(".qty-input, .discount-input, .net-unit-cost-input")
             .forEach((input) => {
                 input.addEventListener("input", function () {
                     let row = this.closest("tr");
-                    let qty =
-                        parseInt(row.querySelector(".qty-input").value) || 1;
-                    let unitCost =
-                        parseFloat(
-                            row
-                                .querySelector(".qty-input")
-                                .getAttribute("data-cost"),
-                        ) || 0;
-                    let discount =
-                        parseFloat(
-                            row.querySelector(".discount-input").value,
-                        ) || 0;
-
-                    let subtotal = unitCost * qty - discount;
-                    row.querySelector(".subtotal").textContent =
-                        subtotal.toFixed(2);
-
-                    updateGrandTotal();
+                    updateSubtotal(row);
                 });
             });
 
@@ -204,9 +196,10 @@ document.addEventListener("DOMContentLoaded", function () {
         let qty = parseFloat(row.querySelector(".qty-input").value);
         let discount =
             parseFloat(row.querySelector(".discount-input").value) || 0;
-        let netUnitCost = parseFloat(
-            row.querySelector(".qty-input").dataset.cost,
-        );
+        let netUnitCost =
+            parseFloat(row.querySelector(".net-unit-cost-input").value) || 0;
+
+        row.querySelector(".qty-input").dataset.cost = netUnitCost;
 
         // Calculate subtotal after discount
         let subtotal = netUnitCost * qty - discount;
@@ -398,7 +391,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 let subtotalCell = row.querySelector(".subtotal");
 
                 // Update price in table
-                priceCell.innerText = updatedPrice.toFixed(2);
+                let netUnitCostInput = row.querySelector(".net-unit-cost-input");
+                netUnitCostInput.value = updatedPrice.toFixed(2);
                 qtyInput.setAttribute("data-cost", updatedPrice);
 
                 // Set discount value
@@ -413,6 +407,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 let subtotal = updatedPrice * qty - discountAmount;
 
                 subtotalCell.innerText = subtotal.toFixed(2);
+                row.querySelector(".net-unit-cost-input").value =
+                    updatedPrice.toFixed(2);
 
                 modal.style.display = "none"; // Close modal
                 updateGrandTotal();

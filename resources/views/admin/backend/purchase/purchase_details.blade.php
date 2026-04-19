@@ -15,7 +15,7 @@
                         <div class="row">
 
                             {{-- supplier info --}}
-                            <div class="col-md-4 mb-4">
+                            <div class="col-md-6 mb-4">
                                 <div class="card shadow-sm border-0 h-100" style="border-radius: 10px; transition: 0.2s">
                                     <div class="card-header text-white text-center"
                                         style="background: linear-gradient(135deg, #17a2b8, #0d6efd); border-radius:10px 10px 0 0;">
@@ -61,7 +61,7 @@
 
 
                             {{-- Purchase info --}}
-                            <div class="col-md-4 mb-4">
+                            <div class="col-md-6 mb-4">
                                 <div class="card shadow-sm border-0 h-100" style="border-radius: 10px; transition: 0.2s">
                                     <div class="card-header text-white text-center"
                                         style="background: linear-gradient(135deg, #17a2b8, #0d6efd); border-radius:10px 10px 0 0;">
@@ -73,12 +73,47 @@
                                             <span>{{ $purchase->date }}</span>
                                         </div>
                                         <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Tracking No:</strong>
+                                            <span>{{ $purchase->tracking_no ?: '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Note No:</strong>
+                                            <span>{{ $purchase->note_no ?: '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Semester:</strong>
+                                            <span>{{ $purchase->semester ? (($purchase->semester->code ? $purchase->semester->code . ' : ' : '') . $purchase->semester->name) : '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Department:</strong>
+                                            <span>{{ $purchase->department->name ?? '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Users:</strong>
+                                            <span>{{ $purchase->roles->pluck('name')->implode(', ') ?: '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">Color Number:</strong>
+                                            <span>{{ $purchase->color_number ?: '-' }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
                                             <strong class="me-2 text-muted">Status:</strong>
                                             <span>{{ $purchase->status }}</span>
                                         </div>
                                         <div class="d-flex align-items-center mb-3">
                                             <strong class="me-2 text-muted">Grand Total:</strong>
                                             <span>{{ number_format($purchase->grand_total, 2) }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <strong class="me-2 text-muted">File:</strong>
+                                            <span>
+                                                @if ($purchase->file_upload)
+                                                    <a href="{{ route('view.purchase.file', $purchase->id) }}"
+                                                        target="_blank">View Voucher / File</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
 

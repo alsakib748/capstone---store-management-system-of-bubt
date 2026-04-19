@@ -27,7 +27,8 @@
                         </div><!-- end card header -->
 
                         <div class="card-body">
-                            <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
+                            <div class="table-responsive">
+                            <table id="datatable" class="table table-bordered table-striped nowrap w-100">
                                 <thead>
                                     <tr>
                                         <th>Sl</th>
@@ -36,7 +37,9 @@
                                         <th>Category</th>
                                         <th>Subcategory</th>
                                         {{-- <th>Warehouse</th> --}}
-                                        <th>Price</th>
+                                        {{-- <th>Price</th> --}}
+                                        <th>Brand</th>
+                                        <th>Roles has permission</th>
                                         <th>In Stock</th>
                                         <th>Action</th>
                                     </tr>
@@ -56,7 +59,15 @@
                                             <td>{{ $item->category->category_name ?? '-' }}</td>
                                             <td>{{ $item->subcategory->subcategory_name ?? '-' }}</td>
                                             {{-- <td>{{ $item['warehouse']['name'] }}</td> --}}
-                                            <td>{{ $item->price }}</td>
+                                            {{-- <td>{{ $item->price }}</td> --}}
+                                            <td>{{ $item->brand->name ?? '—' }}</td>
+                                            <td class="text-wrap" style="min-width: 10rem;">
+                                                @forelse ($item->allowedRoles as $role)
+                                                    <span class="badge text-bg-primary me-1 mb-1">{{ $role->name }}</span>
+                                                @empty
+                                                    <span class="text-muted">—</span>
+                                                @endforelse
+                                            </td>
                                             <td>
                                                 @if ($item->product_qty <= 3)
                                                     <span class="badge text-bg-danger">{{ $item->product_qty }}</span>
@@ -84,6 +95,7 @@
 
                                 </tbody>
                             </table>
+                            </div>
                         </div>
 
                     </div>

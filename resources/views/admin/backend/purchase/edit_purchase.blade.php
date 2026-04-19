@@ -30,7 +30,19 @@
                                                 @enderror
                                             </div>
 
-                                            <input type="hidden" name="warehouse_id" value="{{ $editData->warehouse_id }}">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Product:</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                        <input type="search" id="product_search" name="search"
+                                                            class="form-control" placeholder="Search product by code or name">
+                                                    </div>
+                                                    <div id="product_list" class="list-group mt-2"></div>
+                                                </div>
+
+                                            {{-- <input type="hidden" name="warehouse_id" value="{{ $editData->warehouse_id }}"> --}}
 
                                             {{-- <div class="col-md-4 mb-3">
                 <div class="form-group w-100">
@@ -60,20 +72,62 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
 
-
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <label class="form-label">Product:</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <i class="fas fa-search"></i>
-                                                    </span>
-                                                    <input type="search" id="product_search" name="search"
-                                                        class="form-control" placeholder="Search product by code or name">
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Semester : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="semester_id" id="semester_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select Semester</option>
+                                                        @foreach ($semesters as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $editData->semester_id == $item->id ? 'selected' : '' }}>
+                                                                {{ $item->code }} : {{ $item->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                                <div id="product_list" class="list-group mt-2"></div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Department : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="department_id" id="department_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select Department</option>
+                                                        @foreach ($departments as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $editData->department_id == $item->id ? 'selected' : '' }}>
+                                                                {{ $item->name }} - ({{ $item->code }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Users : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="role_ids[]" id="role_id"
+                                                        class="form-control form-select select2" multiple>
+                                                        @foreach ($roles as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $editData->roles->contains('id', $item->id) ? 'selected' : '' }}>
+                                                                {{ $item->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Color Number: </label>
+                                                <input type="text" id="color_number" name="color_number"
+                                                    value="{{ $editData->color_number }}" class="form-control"
+                                                    placeholder="Color Number">
                                             </div>
                                         </div>
 
@@ -237,6 +291,26 @@
 
 
                                         <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Tracking No: </label>
+                                                <input type="text" id="tracking_no" name="tracking_no"
+                                                    value="{{ $editData->tracking_no }}" class="form-control"
+                                                    placeholder="Tracking No">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Note No: </label>
+                                                <input type="text" id="note_no" name="note_no"
+                                                    value="{{ $editData->note_no }}" class="form-control"
+                                                    placeholder="Note No">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Voucher / File Upload: </label>
+                                                <input type="file" id="file_upload" name="file_upload"
+                                                    class="form-control" placeholder="Voucher / File Upload">
+                                                @if ($editData->file_upload)
+                                                    <small class="text-muted">Current: {{ $editData->file_upload }}</small>
+                                                @endif
+                                            </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Discount: </label>
                                                 <input type="number" id="inputDiscount" name="discount"
@@ -295,29 +369,60 @@
 
 
     <script>
+        var productSearchUrl = "{{ route('purchase.product.search') }}";
+        window.useWarehouseForProductSearch = false;
+
         document.addEventListener("DOMContentLoaded", function() {
             const productBody = document.getElementById("productBody");
+            function updateSubtotal(row) {
+                let qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
+                let discount = parseFloat(row.querySelector(".discount-input")?.value) || 0;
+                let netUnitCost = parseFloat(row.querySelector(".qty-input")?.dataset.cost) || 0;
 
-            // Update subtotal when quantity or net unit cost changes
+                let subtotal = (netUnitCost * qty) - discount;
+                if (subtotal < 0) subtotal = 0;
+
+                row.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+
+                const hiddenSubtotalInput = row.querySelector("input[name$='[subtotal]']");
+                if (hiddenSubtotalInput) {
+                    hiddenSubtotalInput.value = subtotal.toFixed(2);
+                }
+
+                updateGrandTotal();
+            }
+
+            function updateGrandTotal() {
+                let grandTotal = 0;
+
+                document.querySelectorAll(".subtotal").forEach(function(item) {
+                    grandTotal += parseFloat(item.textContent) || 0;
+                });
+
+                let discount = parseFloat(document.getElementById("inputDiscount").value) || 0;
+                let shipping = parseFloat(document.getElementById("inputShipping").value) || 0;
+
+                grandTotal = grandTotal - discount + shipping;
+
+                if (grandTotal < 0) {
+                    grandTotal = 0;
+                }
+
+                document.getElementById("grandTotal").textContent = `TK ${grandTotal.toFixed(2)}`;
+                document.querySelector("input[name='grand_total']").value = grandTotal.toFixed(2);
+            }
+
             productBody.addEventListener("input", function(e) {
-                if (e.target.classList.contains("qty-input") || e.target.classList.contains("net-cost")) {
-                    let row = e.target.closest("tr");
-                    let qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-                    let cost = parseFloat(row.querySelector(".net-cost").value) || 0;
-                    let discount = parseFloat(row.querySelector(".discount-input").value) || 0;
-
-                    let subtotal = (qty * cost) - discount;
-                    row.querySelector(".subtotal").textContent = subtotal.toFixed(2);
+                if (e.target.classList.contains("qty-input") || e.target.classList.contains("discount-input")) {
+                    updateSubtotal(e.target.closest("tr"));
                 }
             });
 
-
-            // Increment quantity
             document.querySelectorAll(".increment-qty").forEach(button => {
                 button.addEventListener("click", function() {
                     let input = this.closest(".input-group").querySelector(".qty-input");
                     let max = parseInt(input.getAttribute("max"));
-                    let value = parseInt(input.value);
+                    let value = parseInt(input.value) || 0;
                     if (value < max) {
                         input.value = value + 1;
                         updateSubtotal(this.closest("tr"));
@@ -325,12 +430,11 @@
                 });
             });
 
-            // Decrement quantity
             document.querySelectorAll(".decrement-qty").forEach(button => {
                 button.addEventListener("click", function() {
                     let input = this.closest(".input-group").querySelector(".qty-input");
                     let min = parseInt(input.getAttribute("min"));
-                    let value = parseInt(input.value);
+                    let value = parseInt(input.value) || 0;
                     if (value > min) {
                         input.value = value - 1;
                         updateSubtotal(this.closest("tr"));
@@ -338,65 +442,18 @@
                 });
             });
 
+            document.getElementById("inputDiscount").addEventListener("input", updateGrandTotal);
+            document.getElementById("inputShipping").addEventListener("input", updateGrandTotal);
 
-            function updateSubtotal(row) {
-                let qty = parseFloat(row.querySelector(".qty-input").value);
-                let discount = parseFloat(row.querySelector(".discount-input").value) || 0;
-                let netUnitCost = parseFloat(row.querySelector(".qty-input").dataset.cost);
-
-                // Calculate subtotal after discount
-                let subtotal = (netUnitCost * qty) - discount;
-
-                // Update visible subtotal
-                row.querySelector(".subtotal").innerText = subtotal.toFixed(2);
-
-                // Update hidden input for subtotal
-                row.querySelector("input[name^='products['][name$='][subtotal]']").value = subtotal.toFixed(2);
-
-                // Update Grand Total
-                updateGrandTotal();
-            }
-
-
-
-            // Grand total update function
-            function updateGrandTotal() {
-                let grandTotal = 0;
-
-                // Calculate subtotal sum
-                document.querySelectorAll(".subtotal").forEach(function(item) {
-                    grandTotal += parseFloat(item.textContent) || 0;
-                });
-
-                // Get discount and shipping values
-                let discount = parseFloat(document.getElementById("inputDiscount").value) || 0;
-                let shipping = parseFloat(document.getElementById("inputShipping").value) || 0;
-
-                // Apply discount and add shipping cost
-                grandTotal = grandTotal - discount + shipping;
-
-                // Ensure grand total is not negative
-                if (grandTotal < 0) {
-                    grandTotal = 0;
-                }
-
-                // Update Grand Total display
-                document.getElementById("grandTotal").textContent = `TK ${grandTotal.toFixed(2)}`;
-
-                // Also update the hidden input field
-                document.getElementById("grandTotalInput").value = grandTotal.toFixed(2);
-            }
-
-
-            // Remove item
             productBody.addEventListener("click", function(e) {
-                if (e.target.classList.contains("remove-item")) {
-                    e.target.closest("tr").remove();
+                const removeBtn = e.target.closest(".remove-item");
+                if (removeBtn) {
+                    removeBtn.closest("tr").remove();
                     updateGrandTotal();
                 }
             });
 
-
+            updateGrandTotal();
         });
     </script>
 @endsection

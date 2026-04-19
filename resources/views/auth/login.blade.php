@@ -63,12 +63,12 @@
             @enderror
         </div>
 
-        <div class="form-group d-flex mb-3"> 
+        <div class="form-group d-flex mb-3">
             <div class="col-sm-6 text-end">
-                <a class='text-muted fs-14' href='{{ route('password.request') }}'>Forgot password?</a>                             
+                <a class='text-muted fs-14' href='{{ route('password.request') }}'>Forgot password?</a>
             </div>
         </div>
-        
+
         <div class="form-group mb-0 row">
             <div class="col-12">
                 <div class="d-grid">
@@ -84,7 +84,7 @@
                                 <p class="mb-0">Don't have an account ?<a class='text-primary ms-2 fw-medium' href='{{ route('register') }}'>Sing up</a></p>
                             </div>
 
-                           
+
 
                         </div>
                     </div>
@@ -95,7 +95,7 @@
         <div class="col-xl-7">
             <div class="account-page-bg p-md-5 p-4">
                 <div class="text-center">
-                    <h3 class="text-dark mb-3 pera-title">Login Page for Inventory Managment System</h3>
+                    <h3 class="text-dark mb-3 pera-title">Login Page for Store Management System Of BUBT</h3>
                     <div class="auth-image">
                         <img src="{{ asset('backend/assets/images/authentication.svg')}}" class="mx-auto img-fluid"  alt="images">
                     </div>
@@ -105,7 +105,7 @@
     </div>
             </div>
         </div>
-        
+
         <!-- END wrapper -->
 
         <!-- Vendor -->
@@ -128,20 +128,20 @@
             case 'info':
             toastr.info(" {{ Session::get('message') }} ");
             break;
-        
+
             case 'success':
             toastr.success(" {{ Session::get('message') }} ");
             break;
-        
+
             case 'warning':
             toastr.warning(" {{ Session::get('message') }} ");
             break;
-        
+
             case 'error':
             toastr.error(" {{ Session::get('message') }} ");
-            break; 
+            break;
          }
-         @endif 
+         @endif
         </script>
     </body>
 </html>

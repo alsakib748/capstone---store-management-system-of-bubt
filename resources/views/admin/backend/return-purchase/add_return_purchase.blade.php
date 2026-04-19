@@ -29,6 +29,20 @@
                                                 @enderror
                                             </div>
 
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Product:</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">
+                                                            <i class="fas fa-search"></i>
+                                                        </span>
+                                                        <input type="search" id="product_search" name="search"
+                                                            class="form-control" placeholder="Search product by code or name">
+                                                    </div>
+                                                    <div id="product_list" class="list-group mt-2"></div>
+                                                </div>
+                                            </div>
+
                                             {{-- <div class="col-md-4 mb-3">
                 <div class="form-group w-100">
                 <label class="form-label" for="formBasic">Warehouse : <span class="text-danger">*</span></label>
@@ -58,22 +72,60 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                        </div>
 
-
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <label class="form-label">Product:</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">
-                                                        <i class="fas fa-search"></i>
-                                                    </span>
-                                                    <input type="search" id="product_search" name="search"
-                                                        class="form-control" placeholder="Search product by code or name">
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Semester : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="semester_id" id="semester_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select Semester</option>
+                                                        @foreach ($semesters as $item)
+                                                            <option value="{{ $item->id }}">{{ $item->code }} : {{ $item->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                                <div id="product_list" class="list-group mt-2"></div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Department : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="department_id" id="department_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select Department</option>
+                                                        @foreach ($departments as $item)
+                                                            <option value="{{ $item->id }}">{{ $item->name }} - ({{ $item->code }})</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Users : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="role_ids[]" id="role_id"
+                                                        class="form-control form-select select2" multiple>
+                                                        @foreach ($roles as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ in_array($item->id, old('role_ids', [])) ? 'selected' : '' }}>
+                                                                {{ $item->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Color Number: </label>
+                                                <input type="text" id="color_number" name="color_number"
+                                                    class="form-control" placeholder="Color Number">
                                             </div>
                                         </div>
+
+
+
 
 
 
@@ -158,6 +210,21 @@
 
 
                                         <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Tracking No: </label>
+                                                <input type="text" id="tracking_no" name="tracking_no"
+                                                    class="form-control" placeholder="Tracking No">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Note No: </label>
+                                                <input type="text" id="note_no" name="note_no"
+                                                    class="form-control" placeholder="Note No">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Voucher / File Upload: </label>
+                                                <input type="file" id="file_upload" name="file_upload"
+                                                    class="form-control" placeholder="Voucher / File Upload">
+                                            </div>
                                             <div class="col-md-4">
                                                 <label class="form-label">Discount: </label>
                                                 <input type="number" id="inputDiscount" name="discount"
@@ -211,5 +278,6 @@
 
     <script>
         var productSearchUrl = "{{ route('purchase.product.search') }}"
+        window.useWarehouseForProductSearch = false;
     </script>
 @endsection

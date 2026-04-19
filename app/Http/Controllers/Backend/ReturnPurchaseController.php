@@ -8,17 +8,21 @@ use App\Models\ProductCategory;
 use App\Models\Product; 
 use App\Models\Supplier; 
 use App\Models\WareHouse;
+use App\Models\Semester;
+use App\Models\Department;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use App\Models\ReturnPurchase; 
 use App\Models\ReturnPurchaseItem; 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Spatie\Permission\Models\Role;
 
 class ReturnPurchaseController extends Controller
 {
     public function AllReturnPurchase(){
-        $allData = ReturnPurchase::orderBy('id','desc')->get();
+        $allData = ReturnPurchase::with(['semester', 'department'])->orderBy('id','desc')->get();
         return view('admin.backend.return-purchase.all_return_purchase',compact('allData')); 
     }
     // End Method 
@@ -26,7 +30,10 @@ class ReturnPurchaseController extends Controller
     public function AddReturnPurchase(){
         $suppliers = Supplier::all();
         $warehouses = WareHouse::all();
-        return view('admin.backend.return-purchase.add_return_purchase',compact('suppliers','warehouses'));
+        $semesters = Semester::all();
+        $departments = Department::all();
+        $roles = Role::all();
+        return view('admin.backend.return-purchase.add_return_purchase',compact('suppliers','warehouses', 'semesters', 'departments', 'roles'));
     }
      // End Method 
 
@@ -48,12 +55,22 @@ class ReturnPurchaseController extends Controller
             'date' => $request->date,
             'warehouse_id' => $request->warehouse_id,
             'supplier_id' => $request->supplier_id,
+            'tracking_no' => $request->tracking_no,
+            'note_no' => $request->note_no,
+            'semester_id' => $request->semester_id,
+            'department_id' => $request->department_id,
+            'color_number' => $request->color_number,
             'discount' => $request->discount ?? 0,
             'shipping' => $request->shipping ?? 0,
             'status' => $request->status,
             'note' => $request->note,
             'grand_total' => 0, 
         ]);
+
+        if ($request->hasFile('file_upload')) {
+            $purchase->file_upload = $request->file('file_upload')->store('return-purchase-files', 'public');
+            $purchase->save();
+        }
 
         /// Store Purchase Items & Update Stock 
     foreach($request->products as $productData){
@@ -81,6 +98,7 @@ class ReturnPurchaseController extends Controller
     }
 
     $purchase->update(['grand_total' => $grandTotal + $request->shipping - $request->discount]);
+    $purchase->roles()->sync($request->input('role_ids', []));
 
     DB::commit();
 
@@ -98,14 +116,14 @@ class ReturnPurchaseController extends Controller
     // End Method 
 
     public function DetailsReturnPurchase($id){
-        $purchase = ReturnPurchase::with(['supplier','purchaseItems.product'])->find($id);
+        $purchase = ReturnPurchase::with(['supplier', 'warehouse', 'semester', 'department', 'roles', 'purchaseItems.product'])->find($id);
         return view('admin.backend.return-purchase.return_purchase_details',compact('purchase'));
 
     }
      // End Method 
 
      public function InvoiceReturnPurchase($id){
-        $purchase = ReturnPurchase::with(['supplier','warehouse','purchaseItems.product'])->find($id);
+        $purchase = ReturnPurchase::with(['supplier','warehouse', 'semester', 'department', 'roles', 'purchaseItems.product'])->find($id);
 
         $pdf = Pdf::loadView('admin.backend.return-purchase.invoice_pdf',compact('purchase'));
         return $pdf->download('purchase_'.$id.'.pdf');
@@ -114,10 +132,13 @@ class ReturnPurchaseController extends Controller
      // End Method 
 
      public function EditReturnPurchase($id){
-        $editData = ReturnPurchase::with('purchaseItems.product')->findOrFail($id);
+        $editData = ReturnPurchase::with(['purchaseItems.product', 'roles'])->findOrFail($id);
         $suppliers = Supplier::all();
         $warehouses = WareHouse::all();
-        return view('admin.backend.return-purchase.edit_return_purchase',compact('editData','suppliers','warehouses'));
+        $semesters = Semester::all();
+        $departments = Department::all();
+        $roles = Role::all();
+        return view('admin.backend.return-purchase.edit_return_purchase',compact('editData','suppliers','warehouses', 'semesters', 'departments', 'roles'));
     }
     // End Method 
 
@@ -138,12 +159,25 @@ class ReturnPurchaseController extends Controller
                 'date' => $request->date,
                 'warehouse_id' => $request->warehouse_id,
                 'supplier_id' => $request->supplier_id,
+                'tracking_no' => $request->tracking_no,
+                'note_no' => $request->note_no,
+                'semester_id' => $request->semester_id,
+                'department_id' => $request->department_id,
+                'color_number' => $request->color_number,
                 'discount' => $request->discount ?? 0,
                 'shipping' => $request->shipping ?? 0,
                 'status' => $request->status,
                 'note' => $request->note,
                 'grand_total' => $request->grand_total, 
             ]);
+
+            if ($request->hasFile('file_upload')) {
+                if ($purchase->file_upload) {
+                    Storage::disk('public')->delete($purchase->file_upload);
+                }
+                $purchase->file_upload = $request->file('file_upload')->store('return-purchase-files', 'public');
+                $purchase->save();
+            }
 
         /// Get Old Purchase Items 
         $oldPurchaseItems = ReturnPurchaseItem::where('return_purchase_id',$purchase->id)->get();
@@ -181,6 +215,8 @@ class ReturnPurchaseController extends Controller
          } 
        }
 
+      $purchase->roles()->sync($request->input('role_ids', []));
+
        DB::commit();
 
        $notification = array(
@@ -195,6 +231,18 @@ class ReturnPurchaseController extends Controller
           }   
     }
     // End Method 
+
+    public function ViewReturnPurchaseFile($id)
+    {
+        $purchase = ReturnPurchase::findOrFail($id);
+
+        if (!$purchase->file_upload || !Storage::disk('public')->exists($purchase->file_upload)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->file(storage_path('app/public/' . $purchase->file_upload));
+    }
+    // End Method
 
     public function DeleteReturnPurchase($id){
         try {

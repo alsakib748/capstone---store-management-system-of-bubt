@@ -127,13 +127,19 @@
 <p><strong>Email:</strong> {{ $purchase->supplier->email }}</p>
 <p><strong>Phone:</strong> {{ $purchase->supplier->phone }} </p>
                 </td>
-                <td class="info-box">
+                {{-- <td class="info-box">
                     <h5>Warehouse</h5>
                     <p>{{ $purchase->warehouse->name }} </p>
-                </td>
+                </td> --}}
                 <td class="info-box">
                     <h5>Purchase Info</h5>
 <p><strong>Date:</strong> {{ $purchase->date }} </p>
+<p><strong>Tracking No:</strong> {{ $purchase->tracking_no ?: '-' }} </p>
+<p><strong>Note No:</strong> {{ $purchase->note_no ?: '-' }} </p>
+<p><strong>Semester:</strong> {{ $purchase->semester ? (($purchase->semester->code ? $purchase->semester->code . ' : ' : '') . $purchase->semester->name) : '-' }} </p>
+<p><strong>Department:</strong> {{ $purchase->department->name ?? '-' }} </p>
+<p><strong>Users:</strong> {{ $purchase->roles->pluck('name')->implode(', ') ?: '-' }} </p>
+<p><strong>Color Number:</strong> {{ $purchase->color_number ?: '-' }} </p>
 <p><strong>Status:</strong> {{ $purchase->status }} </p>
 <p><strong>Grand Total:</strong> ${{ number_format($purchase->grand_total, 2)  }} </p>
                 </td>

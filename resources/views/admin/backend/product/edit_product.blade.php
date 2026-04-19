@@ -38,6 +38,12 @@
 
                                             </div>
                                             <div class="col-md-6 mb-3">
+                                                <label class="form-label">SKU</label>
+                                                <input type="text" class="form-control bg-light"
+                                                    value="{{ $editData->sku ?? '' }}" readonly tabindex="-1"
+                                                    aria-readonly="true">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
                                                 <div class="form-group w-100">
                                                     <label class="form-label" for="formBasic">Product Category : <span
                                                             class="text-danger">*</span></label>
@@ -84,20 +90,72 @@
 
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-3">
+
+                                            {{-- <div class="col-md-6 mb-3">
                                                 <label class="form-label">Product Price: </label>
                                                 <input type="text" name="price" class="form-control"
                                                     value="{{ $editData->price }}">
 
-                                            </div>
+                                            </div> --}}
 
 
-                                            <div class="col-md-6 mb-3">
+                                            {{-- <div class="col-md-6 mb-3">
                                                 <label class="form-label">Stock Alert: <span
                                                         class="text-danger">*</span></label>
                                                 <input type="number" name="stock_alert" class="form-control"
                                                     value="{{ $editData->stock_alert }}" min="0" required>
 
+                                            </div> --}}
+
+                                            @php
+                                                $selectedRoleIds = $editData->allowedRoles->pluck('id')->all();
+                                            @endphp
+                                            <div class="col-md-12 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="role_id">Product Roles Permission : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="role_ids[]" id="role_id"
+                                                        class="form-control form-select select2" multiple
+                                                        data-placeholder="Select roles">
+                                                        @foreach ($roles as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ in_array($item->id, $selectedRoleIds, true) ? 'selected' : '' }}>
+                                                                {{ $item->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('role_ids')
+                                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="card">
+                                                <label class="form-label">Multiple Image: <span class="text-danger">*</span></label>
+                                                <div class="mb-3">
+                                                    <input name="image[]" accept=".png, .jpg, .jpeg" multiple="" type="file"
+                                                        id="multiImg" class="upload-input-file form-control">
+                                                </div>
+
+                                                <div class="row" id="preview_img">
+                                                    @if (isset($editData) && $editData->images->count() > 0)
+                                                        @foreach ($editData->images as $img)
+                                                            <div class="col-md-3 mb-2">
+                                                                <img src="{{ asset($img->image) }}" alt="Product image"
+                                                                    class="img-thumbnail">
+
+                                                                <div class="form-check mt-1">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                        name="remove_image[]" value="{{ $img->id }}"
+                                                                        id="remove_image_{{ $img->id }}">
+                                                                    <label for="remove_image_{{ $img->id }}"
+                                                                        class="form-check-label">Remove</label>
+                                                                </div>
+
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
+
+                                                </div>
                                             </div>
 
                                             <div class="col-md-12">
@@ -108,40 +166,12 @@
                                     </div>
                                 </div>
                                 <div class="col-xl-4">
-                                    <div class="card">
-                                        <label class="form-label">Multiple Image: <span class="text-danger">*</span></label>
-                                        <div class="mb-3">
-                                            <input name="image[]" accept=".png, .jpg, .jpeg" multiple="" type="file"
-                                                id="multiImg" class="upload-input-file form-control">
-                                        </div>
 
-                                        <div class="row" id="preview_img">
-                                            @if (isset($editData) && $editData->images->count() > 0)
-                                                @foreach ($editData->images as $img)
-                                                    <div class="col-md-3 mb-2">
-                                                        <img src="{{ asset($img->image) }}" alt="Product image"
-                                                            class="img-thumbnail">
-
-                                                        <div class="form-check mt-1">
-                                                            <input class="form-check-input" type="checkbox"
-                                                                name="remove_image[]" value="{{ $img->id }}"
-                                                                id="remove_image_{{ $img->id }}">
-                                                            <label for="remove_image_{{ $img->id }}"
-                                                                class="form-check-label">Remove</label>
-                                                        </div>
-
-                                                    </div>
-                                                @endforeach
-                                            @endif
-
-
-                                        </div>
-                                    </div>
                                     <div>
                                         <div class="col-md-12 mb-3">
                                             <h4 class="text-center">Add Stock : </h4>
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        {{-- <div class="col-md-12 mb-3">
                                             <div class="form-group w-100">
                                                 <label class="form-label" for="formBasic">Warehouse : <span
                                                         class="text-danger">*</span></label>
@@ -156,8 +186,8 @@
                                                 </select>
 
                                             </div>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
+                                        </div> --}}
+                                        {{-- <div class="col-md-12 mb-3">
                                             <div class="form-group w-100">
                                                 <label class="form-label" for="formBasic">Supplier : <span
                                                         class="text-danger">*</span></label>
@@ -172,17 +202,17 @@
                                                 </select>
 
                                             </div>
-                                        </div>
+                                        </div> --}}
 
                                         <div class="col-md-12 mb-3">
-                                            <label class="form-label">Product Quantity: <span
+                                            <label class="form-label">Initial Quantity: <span
                                                     class="text-danger">*</span></label>
                                             <input type="number" name="product_qty" class="form-control"
                                                 value="{{ $editData->product_qty }}" min="1" required>
 
                                         </div>
 
-                                        <div class="col-md-12">
+                                        {{-- <div class="col-md-12">
                                             <div class="form-group w-100">
                                                 <label class="form-label" for="formBasic">Status : <span
                                                         class="text-danger">*</span></label>
@@ -199,7 +229,8 @@
                                                         Pending</option>
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div> --}}
+
                                     </div>
                                 </div>
                                 <div class="col-xl-12">

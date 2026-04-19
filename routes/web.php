@@ -142,6 +142,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/update/purchase/{id}', 'UpdatePurchase')->name('update.purchase');
 
         Route::get('/details/purchase/{id}', 'DetailsPurchase')->name('details.purchase');
+        Route::get('/view/purchase/file/{id}', 'ViewPurchaseFile')->name('view.purchase.file');
         Route::get('/invoice/purchase/{id}', 'InvoicePurchase')->name('invoice.purchase');
         Route::get('/delete/purchase/{id}', 'DeletePurchase')->name('delete.purchase');
 
@@ -154,6 +155,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/details/return/purchase/{id}', 'DetailsReturnPurchase')->name('details.return.purchase');
         Route::get('/invoice/return/purchase/{id}', 'InvoiceReturnPurchase')->name('invoice.return.purchase');
+        Route::get('/view/return/purchase/file/{id}', 'ViewReturnPurchaseFile')->name('view.return.purchase.file');
         Route::get('/edit/return/purchase/{id}', 'EditReturnPurchase')->name('edit.return.purchase');
         Route::post('/update/return/purchase/{id}', 'UpdateReturnPurchase')->name('update.return.purchase');
         Route::get('/delete/return/purchase/{id}', 'DeleteReturnPurchase')->name('delete.return.purchase');
