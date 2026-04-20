@@ -20,7 +20,7 @@
                     <div class="row">
                         <div class="col-md-12 d-flex align-items-center position-relative">
                             <select id="date-range" class="form-control large-select">
-                                <option value="" selected disabled>Select Date Range</option>
+                                <option value="" selected disabled>Date Range</option>
                                 <option value="today">Today</option>
                                 <option value="this_week">This Week</option>
                                 <option value="last_week">Last Week</option>
@@ -29,7 +29,35 @@
                                 <option value="custom">Custom Range</option>
                             </select>
 
+                            {{-- <select id="date-range" class="form-control large-select">
+                                <option value="" selected disabled>Semester</option>
+                                @forelse($semesters as $key => $value)
+                                   <option value="{{ $value->id }}"> {{ $value->code }} : {{ $value->name }}</option>
+                                @empty
+
+                                @endforelse
+                            </select>
+
+                            <select id="date-range" class="form-control large-select">
+                                <option value="" selected disabled>Department</option>
+                                @forelse($departments as $key => $value)
+                                   <option value="{{ $value->id }}">{{ $value->name }} - {{ $value->code }} </option>
+                                @empty
+
+                                @endforelse
+                            </select>
+
+                            <select id="date-range" class="form-control large-select">
+                                <option value="" selected disabled>Users</option>
+                                @forelse($roles as $key => $value)
+                                   <option value="{{ $value->id }}">{{ $value->name }}</option>
+                                @empty
+
+                                @endforelse
+                            </select> --}}
+
                         </div>
+
 
                         {{-- // Custom date field  --}}
                         <div class="dropdown-menu p-3 custom-dropdown position-absolute shadow bg-white">

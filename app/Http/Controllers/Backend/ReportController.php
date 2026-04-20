@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Product;
 use App\Models\Customer;
-use App\Models\WareHouse;
-use App\Models\Sale;
-use App\Models\SaleReturn;
-use Illuminate\Support\Facades\DB;
+use App\Models\Department;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\Purchase;
 use App\Models\ReturnPurchase;
+use App\Models\Sale;
+use App\Models\SaleReturn;
+use App\Models\Semester;
+use App\Models\WareHouse;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class ReportController extends Controller
 {
@@ -21,24 +25,69 @@ class ReportController extends Controller
         $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse'])->get();
         return view('admin.backend.report.all_report', compact('purchases'));
     }
+
+    public function PurchaseReport()
+    {
+        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department'])->get();
+        $semesters = Semester::all();
+        $departments = Department::all();
+        $roles = Role::all();
+        $categories = ProductCategory::all();
+        $products = Product::all();
+        return view('admin.backend.report.purchase_report', compact('purchases', 'semesters', 'departments', 'roles', 'categories', 'products'));
+    }
+
     // End Method
-
-
 
     public function FilterPurchases(Request $request)
     {
+        $fromDate = $request->input('from_date', $request->input('start_date'));
+        $toDate = $request->input('to_date', $request->input('end_date'));
+        $semesterId = $request->input('semester_id');
+        $departmentId = $request->input('department_id');
+        $roleId = $request->input('role_id');
+        $categoryId = $request->input('category_id');
+        $productId = $request->input('product_id');
 
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $query = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse']);
+        $query = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department']);
 
-        if ($startDate && $endDate) {
-            $startDate = Carbon::parse($startDate)->startOfDay();
-            $endDate = Carbon::parse($endDate)->endOfDay();
+        if ($fromDate && $toDate) {
+            $startDate = Carbon::parse($fromDate)->startOfDay();
+            $endDate = Carbon::parse($toDate)->endOfDay();
             $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($fromDate) {
+            $query->whereDate('date', '>=', Carbon::parse($fromDate)->toDateString());
+        } elseif ($toDate) {
+            $query->whereDate('date', '<=', Carbon::parse($toDate)->toDateString());
         }
 
-        $purchases = $query->get();
+        if ($semesterId) {
+            $query->where('semester_id', $semesterId);
+        }
+
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+
+        if ($roleId) {
+            $query->whereHas('roles', function ($roleQuery) use ($roleId) {
+                $roleQuery->where('roles.id', $roleId);
+            });
+        }
+
+        if ($productId) {
+            $query->whereHas('purchaseItems', function ($itemQuery) use ($productId) {
+                $itemQuery->where('product_id', $productId);
+            });
+        }
+
+        if ($categoryId) {
+            $query->whereHas('purchaseItems.product', function ($productQuery) use ($categoryId) {
+                $productQuery->where('category_id', $categoryId);
+            });
+        }
+
+        $purchases = $query->latest('date')->get();
         return response()->json(['purchases' => $purchases]);
 
     }

@@ -181,15 +181,19 @@
                 <li>
                     <a href="#Report" data-bs-toggle="collapse">
                         <i data-feather="bar-chart-2"></i>
-                        <span> Report Setup </span>
+                        <span> Reports </span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="Report">
                         <ul class="nav-second-level">
+
+                            <li>
+                                <a href="{{ route('purchase.report') }}" class="tp-link">Purchase Report </a>
+                            </li>
+
                             <li>
                                 <a href="{{ route('all.report') }}" class="tp-link">All Reports </a>
                             </li>
-
 
                         </ul>
                     </div>
