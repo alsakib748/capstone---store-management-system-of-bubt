@@ -80,28 +80,18 @@
 
                                             <div class="col-md-4 mb-3">
                                                 <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Users : <span
+                                                    <label class="form-label" for="formBasic">User : <span
                                                             class="text-danger">*</span></label>
-                                                    <select name="role_ids[]" id="role_id"
-                                                        class="form-control form-select select2" multiple>
-                                                        @foreach ($roles as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ in_array($item->id, old('role_ids', [])) ? 'selected' : '' }}>
-                                                                {{ $item->name }}
-                                                            </option>
-                                                        @endforeach
+                                                    <select name="user_id" id="user_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select User</option>
                                                     </select>
-                                                    @error('role_ids')
+                                                    @error('user_id')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-4">
-                                                <label class="form-label">Color Number: </label>
-                                                <input type="text" id="color_number" name="color_number"
-                                                    class="form-control" placeholder="Color Number">
-                                            </div>
 
                                             {{-- <div class="col-md-4 mb-3">
                 <div class="form-group w-100">
@@ -240,22 +230,6 @@
                                                 <input type="number" id="inputShipping" name="shipping"
                                                     class="form-control" value="0.00">
                                             </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Status : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="status" id="status"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Status</option>
-                                                        <option value="Received">Received</option>
-                                                        <option value="Pending">Pending</option>
-                                                        <option value="Ordered">Ordered</option>
-                                                    </select>
-                                                    @error('status')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <div class="col-md-12 mt-2">
@@ -281,8 +255,72 @@
     </div>
 
 
+    @push('scripts')
     <script>
         var productSearchUrl = "{{ route('purchase.product.search') }}"
         window.useWarehouseForProductSearch = false;
+
+        $(function() {
+            var $department = $('#department_id');
+            var $user = $('#user_id');
+            var initialUserId = "{{ old('user_id') }}";
+            var endpointBase = "{{ url('get/users/by/department') }}";
+
+            function resetUser() {
+                $user.empty().append('<option value="">Select User</option>');
+                $user.prop('disabled', true).trigger('change');
+            }
+
+            function populateUsers(data, selectedId) {
+                $user.empty().append('<option value="">Select User</option>');
+
+                if (!data || !data.length) {
+                    $user.prop('disabled', true).trigger('change');
+                    return;
+                }
+
+                $.each(data, function(_, item) {
+                    $user.append(
+                        $('<option/>', {
+                            value: item.id,
+                            text: item.name + ' (' + item.email + ')',
+                            selected: String(selectedId) === String(item.id)
+                        })
+                    );
+                });
+
+                $user.prop('disabled', false).trigger('change');
+            }
+
+            function loadUsers(departmentId, selectedId) {
+                resetUser();
+                if (!departmentId) return;
+
+                $.ajax({
+                    url: endpointBase + '/' + encodeURIComponent(departmentId),
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(res) {
+                        populateUsers(res, selectedId);
+                    },
+                    error: resetUser
+                });
+            }
+
+            $(document).on('change', '#department_id', function() {
+                loadUsers($(this).val(), '');
+            });
+
+            if ($department.val()) {
+                loadUsers($department.val(), initialUserId);
+            } else {
+                resetUser();
+            }
+        });
     </script>
+    @endpush
 @endsection

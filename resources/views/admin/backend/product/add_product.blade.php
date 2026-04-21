@@ -29,14 +29,17 @@
                                                     class="form-control">
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label class="form-label">Code: <span class="text-danger">*</span></label>
+                                                <label class="form-label">Variant: <span
+                                                        class="text-danger">*</span></label>
                                                 <input type="text" name="code" class=" form-control"
-                                                    placeholder="Enter Code">
+                                                    placeholder="Enter Variant">
 
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">SKU</label>
-                                                <input type="text" class="form-control bg-light" value="Generated automatically when saved" readonly tabindex="-1" aria-readonly="true">
+                                                <input type="text" class="form-control bg-light"
+                                                    value="Generated automatically when saved" readonly tabindex="-1"
+                                                    aria-readonly="true">
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-group w-100">
@@ -96,10 +99,12 @@
                                             </div> --}}
 
                                             <div class="card">
-                                                <label class="form-label">Multiple Image: <span class="text-danger">*</span></label>
+                                                <label class="form-label">Multiple Image: <span
+                                                        class="text-danger">*</span></label>
                                                 <div class="mb-3">
-                                                    <input name="image[]" accept=".png, .jpg, .jpeg" multiple="" type="file"
-                                                        id="multiImg" class="upload-input-file form-control">
+                                                    <input name="image[]" accept=".png, .jpg, .jpeg" multiple=""
+                                                        type="file" id="multiImg"
+                                                        class="upload-input-file form-control">
                                                 </div>
 
                                                 <div class="row" id="preview_img"></div>
@@ -107,8 +112,8 @@
 
                                             <div class="col-md-12 mb-3">
                                                 <div class="form-group w-100">
-                                                    <label class="form-label" for="role_id">Product Roles Permission : <span
-                                                            class="text-danger">*</span></label>
+                                                    <label class="form-label" for="role_id">Product Roles Permission :
+                                                        <span class="text-danger">*</span></label>
                                                     <select name="role_ids[]" id="role_id"
                                                         class="form-control form-select select2" multiple
                                                         data-placeholder="Select roles">
@@ -119,6 +124,15 @@
                                                     @error('role_ids')
                                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                                     @enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="fixed_asset" value="1" id="fixed_asset">
+                                                    <label class="form-check-label" for="fixed_asset">
+                                                        Fixed Asset
+                                                    </label>
                                                 </div>
                                             </div>
 
@@ -284,7 +298,10 @@
                     }
 
                     $.each(data, function(_, item) {
-                        $subcategory.append($('<option/>', { value: item.id, text: item.subcategory_name }));
+                        $subcategory.append($('<option/>', {
+                            value: item.id,
+                            text: item.subcategory_name
+                        }));
                     });
 
                     $subcategory.prop('disabled', false).trigger('change');
@@ -301,7 +318,9 @@
                         type: 'GET',
                         dataType: 'json',
                         cache: false,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
                         success: populateSubcategories,
                         error: resetSubcategory
                     });

@@ -34,8 +34,7 @@ class PurchaseController extends Controller
         $warehouses = WareHouse::all();
         $semesters = Semester::all();
         $departments = Department::all();
-        $roles = Role::all();
-        return view('admin.backend.purchase.add_purchase', compact('suppliers', 'warehouses', 'semesters', 'departments', 'roles'));
+        return view('admin.backend.purchase.add_purchase', compact('suppliers', 'warehouses', 'semesters', 'departments'));
     }
     // End Method
 
@@ -65,12 +64,26 @@ class PurchaseController extends Controller
     }
     // End Method
 
+    public function GetUsersByDepartment($department_id)
+    {
+        if (!$department_id) {
+            return response()->json([]);
+        }
+
+        $users = \App\Models\User::where('department_id', $department_id)
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
+        return response()->json($users);
+    }
+    // End Method
+
     public function StorePurchase(Request $request)
     {
 
         $request->validate([
             'date' => 'required|date',
-            'status' => 'required',
             'supplier_id' => 'required',
         ]);
 
@@ -88,10 +101,9 @@ class PurchaseController extends Controller
                 'note_no' => $request->note_no,
                 'semester_id' => $request->semester_id,
                 'department_id' => $request->department_id,
-                'color_number' => $request->color_number,
+                'user_id' => $request->user_id,
                 'discount' => $request->discount ?? 0,
                 'shipping' => $request->shipping ?? 0,
-                'status' => $request->status,
                 'note' => $request->note,
                 'grand_total' => 0,
             ]);
@@ -127,7 +139,6 @@ class PurchaseController extends Controller
             }
 
             $purchase->update(['grand_total' => $grandTotal + $request->shipping - $request->discount]);
-            $purchase->roles()->sync($request->input('role_ids', []));
 
             DB::commit();
 
@@ -147,13 +158,12 @@ class PurchaseController extends Controller
 
     public function EditPurchase($id)
     {
-        $editData = Purchase::with(['purchaseItems.product', 'roles'])->findOrFail($id);
+        $editData = Purchase::with(['purchaseItems.product', 'user'])->findOrFail($id);
         $suppliers = Supplier::all();
         $warehouses = WareHouse::all();
         $semesters = Semester::all();
         $departments = Department::all();
-        $roles = Role::all();
-        return view('admin.backend.purchase.edit_purchase', compact('editData', 'suppliers', 'warehouses', 'semesters', 'departments', 'roles'));
+        return view('admin.backend.purchase.edit_purchase', compact('editData', 'suppliers', 'warehouses', 'semesters', 'departments'));
     }
     // End Method
 
@@ -162,7 +172,6 @@ class PurchaseController extends Controller
 
         $request->validate([
             'date' => 'required|date',
-            'status' => 'required',
         ]);
 
         DB::beginTransaction();
@@ -179,10 +188,9 @@ class PurchaseController extends Controller
                 'note_no' => $request->note_no,
                 'semester_id' => $request->semester_id,
                 'department_id' => $request->department_id,
-                'color_number' => $request->color_number,
+                'user_id' => $request->user_id,
                 'discount' => $request->discount ?? 0,
                 'shipping' => $request->shipping ?? 0,
-                'status' => $request->status,
                 'note' => $request->note,
                 'grand_total' => $request->grand_total,
             ]);
@@ -230,8 +238,6 @@ class PurchaseController extends Controller
                     // Increment new quantity
                 }
             }
-
-            $purchase->roles()->sync($request->input('role_ids', []));
 
             DB::commit();
 

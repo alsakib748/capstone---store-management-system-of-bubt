@@ -32,8 +32,9 @@
                                                     class="form-control" value="{{ $editData->name }}">
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label class="form-label">Code: <span class="text-danger">*</span></label>
-                                                <input type="text" name="code" class=" form-control"
+                                                <label class="form-label">Variant: <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" name="code" class="form-control"
                                                     value="{{ $editData->code }}">
 
                                             </div>
@@ -112,8 +113,8 @@
                                             @endphp
                                             <div class="col-md-12 mb-3">
                                                 <div class="form-group w-100">
-                                                    <label class="form-label" for="role_id">Product Roles Permission : <span
-                                                            class="text-danger">*</span></label>
+                                                    <label class="form-label" for="role_id">Product Roles Permission :
+                                                        <span class="text-danger">*</span></label>
                                                     <select name="role_ids[]" id="role_id"
                                                         class="form-control form-select select2" multiple
                                                         data-placeholder="Select roles">
@@ -130,10 +131,12 @@
                                             </div>
 
                                             <div class="card">
-                                                <label class="form-label">Multiple Image: <span class="text-danger">*</span></label>
+                                                <label class="form-label">Multiple Image: <span
+                                                        class="text-danger">*</span></label>
                                                 <div class="mb-3">
-                                                    <input name="image[]" accept=".png, .jpg, .jpeg" multiple="" type="file"
-                                                        id="multiImg" class="upload-input-file form-control">
+                                                    <input name="image[]" accept=".png, .jpg, .jpeg" multiple=""
+                                                        type="file" id="multiImg"
+                                                        class="upload-input-file form-control">
                                                 </div>
 
                                                 <div class="row" id="preview_img">
@@ -155,6 +158,15 @@
                                                         @endforeach
                                                     @endif
 
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="fixed_asset" value="1" id="fixed_asset" {{ $editData->fixed_asset == 1 ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="fixed_asset">
+                                                        Fixed Asset
+                                                    </label>
                                                 </div>
                                             </div>
 
@@ -294,8 +306,12 @@
                         type: 'GET',
                         dataType: 'json',
                         cache: false,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        success: function(res) { populateSubcategories(res, selectedId); },
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(res) {
+                            populateSubcategories(res, selectedId);
+                        },
                         error: resetSubcategory
                     });
                 }

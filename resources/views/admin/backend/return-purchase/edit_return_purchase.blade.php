@@ -409,7 +409,7 @@
                     grandTotal = 0;
                 }
 
-                document.getElementById("grandTotal").textContent = `TK ${grandTotal.toFixed(2)}`;
+                document.getElementById("grandTotal").textContent = `৳ ${grandTotal.toFixed(2)}`;
                 document.querySelector("input[name='grand_total']").value = grandTotal.toFixed(2);
             }
 

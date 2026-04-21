@@ -37,7 +37,6 @@
                                         <th>Semester</th>
                                         <th>Department</th>
                                         <th>Grand Total</th>
-                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -51,8 +50,7 @@
                                                 {{ $item->semester ? (($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name) : '-' }}
                                             </td>
                                             <td>{{ $item->department->name ?? '-' }}</td>
-                                            <td>${{ $item->grand_total }}</td>
-                                            <td>{{ $item->status }}</td>
+                                            <td>৳{{ $item->grand_total }}</td>
                                             <td>
                                                 <div class="d-flex flex-wrap gap-1">
                                                 <a title="Details" href="{{ route('details.purchase', $item->id) }}"

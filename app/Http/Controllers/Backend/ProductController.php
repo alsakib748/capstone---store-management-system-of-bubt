@@ -203,6 +203,7 @@ class ProductController extends Controller
             // 'stock_alert' => $request->stock_alert,
             'note' => $request->note,
             'product_qty' => $request->product_qty,
+            'fixed_asset' => $request->has('fixed_asset') ? 1 : 0,
             // 'status' => $request->status,
             'created_at' => now(),
         ]);
@@ -282,6 +283,7 @@ class ProductController extends Controller
         $product->warehouse_id = $request->warehouse_id;
         $product->supplier_id = $request->supplier_id;
         $product->product_qty = $request->product_qty;
+        $product->fixed_asset = $request->has('fixed_asset') ? 1 : 0;
         $product->status = $request->status;
         $product->save();
 

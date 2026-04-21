@@ -138,10 +138,8 @@
 <p><strong>Note No:</strong> {{ $purchase->note_no ?: '-' }} </p>
 <p><strong>Semester:</strong> {{ $purchase->semester ? (($purchase->semester->code ? $purchase->semester->code . ' : ' : '') . $purchase->semester->name) : '-' }} </p>
 <p><strong>Department:</strong> {{ $purchase->department->name ?? '-' }} </p>
-<p><strong>Users:</strong> {{ $purchase->roles->pluck('name')->implode(', ') ?: '-' }} </p>
-<p><strong>Color Number:</strong> {{ $purchase->color_number ?: '-' }} </p>
-<p><strong>Status:</strong> {{ $purchase->status }} </p>
-<p><strong>Grand Total:</strong> ${{ number_format($purchase->grand_total, 2)  }} </p>
+<p><strong>User:</strong> {{ $purchase->user->name ?? '-' }} </p>
+<p><strong>Grand Total:</strong> ৳{{ number_format($purchase->grand_total, 2)  }} </p>
                 </td>
             </tr>
         </table>
@@ -164,9 +162,9 @@
                 <td>{{ $key + 1 }}</td>
                 <td>{{ $item->product->name }}</td>
                 <td>{{ $item->quantity }}</td>
-                <td>${{ number_format($item->net_unit_cost,2)  }}</td>
-                <td>${{ number_format($item->discount,2)  }}</td>
-                <td>${{ number_format($item->subtotal,2)  }}</td>
+                <td>৳{{ number_format($item->net_unit_cost,2)  }}</td>
+                <td>৳{{ number_format($item->discount,2)  }}</td>
+                <td>৳{{ number_format($item->subtotal,2)  }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -174,13 +172,13 @@
 
         <table class="summary-table">
             <tr>
-                <td><strong>Total Discount:</strong> ${{ number_format($purchase->discount,2)  }} </td>
+                <td><strong>Total Discount:</strong> ৳{{ number_format($purchase->discount,2)  }} </td>
             </tr>
             <tr>
-                <td><strong>Shipping Cost:</strong> ${{ number_format($purchase->shipping,2)  }} </td>
+                <td><strong>Shipping Cost:</strong> ৳{{ number_format($purchase->shipping,2)  }} </td>
             </tr>
             <tr>
-                <td><strong>Grand Total:</strong> ${{ number_format($purchase->grand_total,2)  }} </td>
+                <td><strong>Grand Total:</strong> ৳{{ number_format($purchase->grand_total,2)  }} </td>
             </tr>
         </table>
     </div>

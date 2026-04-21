@@ -51,7 +51,7 @@
                                                 {{ $item->semester ? (($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name) : '-' }}
                                             </td>
                                             <td>{{ $item->department->name ?? '-' }}</td>
-                                            <td>${{ $item->grand_total }}</td>
+                                            <td>৳{{ $item->grand_total }}</td>
                                             <td>{{ $item->status }}</td>
                                             <td>
                                                 <div class="d-flex flex-wrap gap-1">

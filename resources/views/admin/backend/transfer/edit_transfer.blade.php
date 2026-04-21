@@ -311,7 +311,7 @@
           }
  
           // Update Grand Total display
-          document.getElementById("grandTotal").textContent = `TK ${grandTotal.toFixed(2)}`;
+          document.getElementById("grandTotal").textContent = `৳ ${grandTotal.toFixed(2)}`;
  
           // Also update the hidden input field
           document.getElementById("grandTotalInput").value = grandTotal.toFixed(2);
