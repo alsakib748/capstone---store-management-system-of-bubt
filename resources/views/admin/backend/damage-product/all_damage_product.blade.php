@@ -7,12 +7,12 @@
 
             <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
                 <div class="flex-grow-1">
-                    <h4 class="fs-18 fw-semibold m-0">All Purchase</h4>
+                    <h4 class="fs-18 fw-semibold m-0">All Damage Product</h4>
                 </div>
 
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0">
-                        <a href="{{ route('add.purchase') }}" class="btn btn-secondary">Add Purchase</a>
+                        <a href="{{ route('add.damage.product') }}" class="btn btn-secondary">Add Damage Product</a>
                     </ol>
                 </div>
             </div>
@@ -35,8 +35,6 @@
                                             <th>Tracking No</th>
                                             <th>Note No</th>
                                             <th>Semester</th>
-                                            <th>Department</th>
-                                            <th>Grand Total</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -49,24 +47,25 @@
                                                 <td>
                                                     {{ $item->semester ? ($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name : '-' }}
                                                 </td>
-                                                <td>{{ $item->department->name ?? '-' }}</td>
-                                                <td>৳{{ $item->grand_total }}</td>
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-1">
-                                                        <a title="Details" href="{{ route('details.purchase', $item->id) }}"
+                                                        <a title="Details"
+                                                            href="{{ route('details.damage.product', $item->id) }}"
                                                             class="btn btn-info btn-sm"> <span
                                                                 class="mdi mdi-eye-circle mdi-18px"></span> </a>
 
                                                         <a title="PDF Invoice"
-                                                            href="{{ route('invoice.purchase', $item->id) }}"
+                                                            href="{{ route('invoice.damage.product', $item->id) }}"
                                                             class="btn btn-primary btn-sm"> <span
                                                                 class="mdi mdi-download-circle mdi-18px"></span> </a>
 
-                                                        <a title="Edit" href="{{ route('edit.purchase', $item->id) }}"
+                                                        <a title="Edit"
+                                                            href="{{ route('edit.damage.product', $item->id) }}"
                                                             class="btn btn-success btn-sm"> <span
                                                                 class="mdi mdi-book-edit mdi-18px"></span> </a>
 
-                                                        <a title="Delete" href="{{ route('delete.purchase', $item->id) }}"
+                                                        <a title="Delete"
+                                                            href="{{ route('delete.damage.product', $item->id) }}"
                                                             class="btn btn-danger btn-sm" id="delete"><span
                                                                 class="mdi mdi-delete-circle  mdi-18px"></span></a>
                                                     </div>

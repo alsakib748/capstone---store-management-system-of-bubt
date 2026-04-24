@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Backend\BrandController;
+use App\Http\Controllers\Backend\DamageProductController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\PurchaseController;
@@ -132,6 +133,21 @@ Route::middleware('auth')->group(function () {
 
     });
 
+    Route::controller(DamageProductController::class)->group(function () {
+        Route::get('/all/damage-product', 'AllDamageProduct')->name('all.damage.product');
+        Route::get('/add/damage-product', 'AddDamageProduct')->name('add.damage.product');
+        Route::get('/damage-product/product/search', 'DamageProductProductSearch')->name('damage.product.product.search');
+        Route::get('/damage-product/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('damage.product.get.users.by.department');
+
+        Route::post('/store/damage-product', 'StoreDamageProduct')->name('store.damage.product');
+        Route::get('/edit/damage-product/{id}', 'EditDamageProduct')->name('edit.damage.product');
+        Route::post('/update/damage-product/{id}', 'UpdateDamageProduct')->name('update.damage.product');
+
+        Route::get('/details/damage-product/{id}', 'DetailsDamageProduct')->name('details.damage.product');
+        Route::get('/invoice/damage-product/{id}', 'InvoiceDamageProduct')->name('invoice.damage.product');
+        Route::get('/delete/damage-product/{id}', 'DeleteDamageProduct')->name('delete.damage.product');
+    });
+
     Route::controller(PurchaseController::class)->group(function () {
         Route::get('/all/purchase', 'AllPurchase')->name('all.purchase');
         Route::get('/add/purchase', 'AddPurchase')->name('add.purchase');
@@ -229,8 +245,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/admin/{id}', 'DeleteAdmin')->name('delete.admin');
 
     });
-
-
 
 
 

@@ -139,6 +139,21 @@
                     </div>
                 </li>
 
+                <li>
+                    <a href="#DamageProduct" data-bs-toggle="collapse">
+                        <i data-feather="package"></i>
+                        <span>Damage Product</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="DamageProduct">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{{ route('all.damage.product') }}" class="tp-link">All Damage Product</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
 
                 <li>
                     <a href="#Purchase" data-bs-toggle="collapse">
