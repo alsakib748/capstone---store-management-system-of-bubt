@@ -53,15 +53,14 @@ class BrandController extends Controller
 
     public function EditBrand($id)
     {
-        if (!auth()->user()->hasPermissionTo('edit.brand')) {
-            abort(403, 'Unauthorized Action');
-        }
+        // if (!auth()->user()->hasPermissionTo('edit.brand')) {
+        //     abort(403, 'Unauthorized Action');
+        // }
         $brand = Brand::find($id);
         return view('admin.backend.brand.edit_brand', compact('brand'));
 
     }
     //End Method
-
 
     public function UpdateBrand(Request $request)
     {
@@ -124,7 +123,5 @@ class BrandController extends Controller
         return redirect()->back()->with($notification);
     }
     //End Method
-
-
 
 }

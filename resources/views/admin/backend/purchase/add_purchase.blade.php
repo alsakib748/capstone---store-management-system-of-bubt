@@ -313,12 +313,35 @@
 
             $(document).on('change', '#department_id', function() {
                 loadUsers($(this).val(), '');
+                generateTrackingNumber($(this).val());
             });
 
             if ($department.val()) {
                 loadUsers($department.val(), initialUserId);
+                generateTrackingNumber($department.val());
             } else {
                 resetUser();
+            }
+
+            function generateTrackingNumber(departmentId) {
+                if (!departmentId) {
+                    $('#tracking_no').val('');
+                    return;
+                }
+
+                var now = new Date();
+                var year = String(now.getFullYear());
+                var month = String(now.getMonth() + 1).padStart(2, '0');
+                var date = String(now.getDate()).padStart(2, '0');
+                var hours = String(now.getHours()).padStart(2, '0');
+
+                var selectedOption = $('#department_id option:selected');
+                var deptText = selectedOption.text();
+                var deptCodeMatch = deptText.match(/\(([^)]+)\)/);
+                var deptCode = deptCodeMatch ? deptCodeMatch[1].toUpperCase() : '';
+
+                var trackingNo = deptCode + '-' + year + '-' + month + '-' + date + '-' + hours;
+                $('#tracking_no').val(trackingNo);
             }
         });
     </script>

@@ -29,11 +29,8 @@ class ReturnPurchaseController extends Controller
 
     public function AddReturnPurchase(){
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $semesters = Semester::all();
-        $departments = Department::all();
-        $roles = Role::all();
-        return view('admin.backend.return-purchase.add_return_purchase',compact('suppliers','warehouses', 'semesters', 'departments', 'roles'));
+        return view('admin.backend.return-purchase.add_return_purchase',compact('suppliers', 'semesters'));
     }
      // End Method 
 
@@ -41,7 +38,6 @@ class ReturnPurchaseController extends Controller
 
         $request->validate([
             'date' => 'required|date',
-            'status' => 'required',
             'supplier_id' => 'required',
         ]);
 
@@ -58,13 +54,9 @@ class ReturnPurchaseController extends Controller
             'tracking_no' => $request->tracking_no,
             'note_no' => $request->note_no,
             'semester_id' => $request->semester_id,
-            'department_id' => $request->department_id,
-            'color_number' => $request->color_number,
-            'discount' => $request->discount ?? 0,
             'shipping' => $request->shipping ?? 0,
-            'status' => $request->status,
             'note' => $request->note,
-            'grand_total' => 0, 
+            'grand_total' => 0,
         ]);
 
         if ($request->hasFile('file_upload')) {
@@ -72,7 +64,7 @@ class ReturnPurchaseController extends Controller
             $purchase->save();
         }
 
-        /// Store Purchase Items & Update Stock 
+        /// Store Purchase Items & Update Stock
     foreach($request->products as $productData){
         $product = Product::findOrFail($productData['id']);
         $netUnitCost = $productData['net_unit_cost'] ?? $product->price;
@@ -91,27 +83,26 @@ class ReturnPurchaseController extends Controller
             'stock' => $product->product_qty + $productData['quantity'],
             'quantity' => $productData['quantity'],
             'discount' => $productData['discount'] ?? 0,
-            'subtotal' => $subtotal, 
+            'subtotal' => $subtotal,
         ]);
 
-        $product->decrement('product_qty', $productData['quantity']); 
+        $product->decrement('product_qty', $productData['quantity']);
     }
 
-    $purchase->update(['grand_total' => $grandTotal + $request->shipping - $request->discount]);
-    $purchase->roles()->sync($request->input('role_ids', []));
+    $purchase->update(['grand_total' => $grandTotal + $request->shipping]);
 
     DB::commit();
 
     $notification = array(
         'message' => 'Return Purchase Stored Successfully',
         'alert-type' => 'success'
-     ); 
-     return redirect()->route('all.return.purchase')->with($notification);  
+     );
+     return redirect()->route('all.return.purchase')->with($notification);
 
     } catch (\Exception $e) {
         DB::rollBack();
         return response()->json(['error' => $e->getMessage()], 500);
-      } 
+      }
     }
     // End Method 
 
@@ -132,13 +123,10 @@ class ReturnPurchaseController extends Controller
      // End Method 
 
      public function EditReturnPurchase($id){
-        $editData = ReturnPurchase::with(['purchaseItems.product', 'roles'])->findOrFail($id);
+        $editData = ReturnPurchase::with(['purchaseItems.product'])->findOrFail($id);
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $semesters = Semester::all();
-        $departments = Department::all();
-        $roles = Role::all();
-        return view('admin.backend.return-purchase.edit_return_purchase',compact('editData','suppliers','warehouses', 'semesters', 'departments', 'roles'));
+        return view('admin.backend.return-purchase.edit_return_purchase',compact('editData','suppliers', 'semesters'));
     }
     // End Method 
 
@@ -146,10 +134,9 @@ class ReturnPurchaseController extends Controller
 
         $request->validate([
             'date' => 'required|date',
-            'status' => 'required', 
-        ]); 
+        ]);
 
-        DB::beginTransaction(); 
+        DB::beginTransaction();
 
         try {
 
@@ -162,13 +149,9 @@ class ReturnPurchaseController extends Controller
                 'tracking_no' => $request->tracking_no,
                 'note_no' => $request->note_no,
                 'semester_id' => $request->semester_id,
-                'department_id' => $request->department_id,
-                'color_number' => $request->color_number,
-                'discount' => $request->discount ?? 0,
                 'shipping' => $request->shipping ?? 0,
-                'status' => $request->status,
                 'note' => $request->note,
-                'grand_total' => $request->grand_total, 
+                'grand_total' => $request->grand_total,
             ]);
 
             if ($request->hasFile('file_upload')) {
@@ -179,7 +162,7 @@ class ReturnPurchaseController extends Controller
                 $purchase->save();
             }
 
-        /// Get Old Purchase Items 
+        /// Get Old Purchase Items
         $oldPurchaseItems = ReturnPurchaseItem::where('return_purchase_id',$purchase->id)->get();
 
         /// Loop for old purchase items and decrement product qty
@@ -187,11 +170,11 @@ class ReturnPurchaseController extends Controller
             $product = Product::find($oldItem->product_id);
             if ($product) {
                 $product->increment('product_qty',$oldItem->quantity);
-                // Increment old quantity 
+                // Increment old quantity
             }
          }
 
-         /// Delete old Purchase Items 
+         /// Delete old Purchase Items
          ReturnPurchaseItem::where('return_purchase_id',$purchase->id)->delete();
 
          // loop for new products and insert new purchase items
@@ -204,31 +187,29 @@ class ReturnPurchaseController extends Controller
             'stock' => $productData['stock'],
             'quantity' => $productData['quantity'],
             'discount' => $productData['discount'] ?? 0,
-            'subtotal' => $productData['subtotal'],  
+            'subtotal' => $productData['subtotal'],
         ]);
 
-        /// Update product stock by incremeting new quantity 
+        /// Update product stock by incremeting new quantity
         $product = Product::find($product_id);
         if ($product) {
             $product->decrement('product_qty',$productData['quantity']);
             // Increment new quantity
-         } 
+         }
        }
-
-      $purchase->roles()->sync($request->input('role_ids', []));
 
        DB::commit();
 
        $notification = array(
            'message' => 'Return Purchase Updated Successfully',
            'alert-type' => 'success'
-        ); 
-        return redirect()->route('all.return.purchase')->with($notification);  
+        );
+        return redirect()->route('all.return.purchase')->with($notification);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
-          }   
+          }
     }
     // End Method 
 

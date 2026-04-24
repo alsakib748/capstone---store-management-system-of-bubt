@@ -1,5 +1,190 @@
 @extends('admin.admin_master')
 @section('admin')
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('purchaseFilterForm');
+            const tbody = document.querySelector('#example tbody');
+            const endpoint = "{{ route('filter-purchases') }}";
+            var usersEndpointBase = "{{ url('/get/users/by/department') }}";
+
+            if (!form || !tbody) {
+                return;
+            }
+
+            const departmentSelect = document.getElementById('filter_department');
+            const userSelect = document.getElementById('filter_user');
+
+            // Initialize select2 manually and listen for changes
+            if (typeof $.fn.select2 !== 'undefined') {
+                $(departmentSelect).select2({
+                    allowClear: true,
+                    placeholder: $(departmentSelect).data('placeholder') || 'Select Department',
+                    width: '100%'
+                });
+
+                $(userSelect).select2({
+                    allowClear: true,
+                    placeholder: $(userSelect).data('placeholder') || 'Select User',
+                    width: '100%'
+                });
+
+                // Listen to select2 change event
+                $(departmentSelect).on('change', function() {
+                    var deptId = $(this).val();
+                    console.log('Department selected:', deptId);
+                    loadUsersByDepartment(deptId);
+                });
+            }
+
+            function loadUsersByDepartment(departmentId, selectedUserId) {
+                console.log('loadUsersByDepartment called with:', departmentId);
+                if (!departmentId) {
+                    userSelect.innerHTML = '<option value="" selected disabled>Select User</option>';
+                    if (typeof $.fn.select2 !== 'undefined') {
+                        $(userSelect).trigger('change');
+                    }
+                    return;
+                }
+
+                var fetchUrl = usersEndpointBase + '/' + encodeURIComponent(departmentId);
+                console.log('Fetching from:', fetchUrl);
+
+                fetch(fetchUrl, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        cache: 'no-cache'
+                    })
+                    .then(response => response.json())
+                    .then(users => {
+                        console.log('Users received:', users);
+                        userSelect.innerHTML = '<option value="" selected disabled>Select User</option>';
+                        users.forEach(user => {
+                            const option = document.createElement('option');
+                            option.value = user.id;
+                            option.textContent = user.name + ' (' + user.email + ')';
+                            if (selectedUserId && String(user.id) === String(selectedUserId)) {
+                                option.selected = true;
+                            }
+                            userSelect.appendChild(option);
+                        });
+                        if (typeof $.fn.select2 !== 'undefined') {
+                            $(userSelect).trigger('change');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading users:', error);
+                        userSelect.innerHTML = '<option value="" selected disabled>Select User</option>';
+                        if (typeof $.fn.select2 !== 'undefined') {
+                            $(userSelect).trigger('change');
+                        }
+                    });
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                fetchFilteredData();
+            });
+
+            // Print function
+            window.printTable = function() {
+                var printContent = document.querySelector('#example');
+                if (!printContent) {
+                    alert('No data to print');
+                    return;
+                }
+                var tableHTML = printContent.outerHTML;
+                var today = new Date().toISOString().split('T')[0];
+
+                var printWindow = window.open('', '', 'height=600,width=800');
+                printWindow.document.write('<html><head><title>Purchase Report</title>');
+                printWindow.document.write('<style>');
+                printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }');
+                printWindow.document.write('.text-center { text-align: center; }');
+                printWindow.document.write('.mb-4 { margin-bottom: 20px; }');
+                printWindow.document.write('.mb-1 { margin-bottom: 5px; }');
+                printWindow.document.write('.mb-0 { margin-bottom: 0; }');
+                printWindow.document.write('img { width: 80px; }');
+                printWindow.document.write('h2 { margin: 10px 0 5px; }');
+                printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+                printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
+                printWindow.document.write('th { background-color: #f2f2f2; }');
+                printWindow.document.write('td:last-child, th:last-child { display: none; }');
+                printWindow.document.write('</style>');
+                printWindow.document.write('</head><body>');
+                printWindow.document.write('<div class="text-center mb-4">');
+                printWindow.document.write('<img src="{{ asset('backend/assets/images/bubt.png') }}" alt="BUBT Logo">');
+                printWindow.document.write('<h2 class="mb-1">Purchase Report</h2>');
+                printWindow.document.write('<p class="mb-0">Date: ' + today + '</p>');
+                printWindow.document.write('</div>');
+                printWindow.document.write(tableHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.print();
+            };
+
+            function fetchFilteredData() {
+                const params = new URLSearchParams(new FormData(form));
+
+                fetch(endpoint + '?' + params.toString(), {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data.purchases || []);
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            function updateTable(purchases) {
+                tbody.innerHTML = '';
+                let sl = 1;
+
+                if (!purchases.length) {
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center">No purchase data found for selected filters.</td></tr>';
+                    return;
+                }
+
+                purchases.forEach(purchase => {
+                    const items = purchase.purchase_items || [];
+                    const totalQty = items.reduce(function(sum, item) { return sum + (parseFloat(item.quantity) || 0); }, 0);
+                    const avgUnitPrice = items.length ? (items.reduce(function(sum, item) { return sum + (parseFloat(item.net_unit_cost) || 0); }, 0) / items.length) : 0;
+
+                    const semesterText = purchase.semester ? (purchase.semester.code ? purchase.semester.code + ' : ' : '') + (purchase.semester.name || '') : '-';
+
+                    const row = '<tr>' +
+                        '<td>' + (purchase.date || 'N/A') + '</td>' +
+                        '<td>' + (purchase.tracking_no || '-') + '</td>' +
+                        '<td>' + (purchase.note_no || '-') + '</td>' +
+                        '<td>' + semesterText + '</td>' +
+                        '<td>' + (purchase.department ? purchase.department.name : '-') + '</td>' +
+                        '<td>' + totalQty + '</td>' +
+                        '<td>' + avgUnitPrice.toFixed(2) + '</td>' +
+                        '<td>' + (purchase.status || 'N/A') + '</td>' +
+                        '<td>' + (purchase.grand_total ? parseFloat(purchase.grand_total).toFixed(2) : '0.00') + '</td>' +
+                        '<td>' +
+                            '<div class="d-flex flex-wrap gap-1">' +
+                                '<a title="Details" href="/details/purchase/' + purchase.id + '" class="btn btn-info btn-sm">' +
+                                    '<span class="mdi mdi-eye-circle mdi-18px"></span>' +
+                                '</a>' +
+                                '<a title="PDF Invoice" href="/invoice/purchase/' + purchase.id + '" class="btn btn-primary btn-sm">' +
+                                    '<span class="mdi mdi-download-circle mdi-18px"></span>' +
+                                '</a>' +
+                            '</div>' +
+                        '</td>' +
+                    '</tr>';
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+        });
+    </script>
+    @endpush
     <div class="page-content m-2">
         <div class="container">
             {{-- @include('admin.backend.report.body.report_top') --}}
@@ -48,22 +233,17 @@
                             </select>
                         </div>
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_users" class="form-label">Users</label>
-                            <select id="filter_users" name="role_id" class="form-control large-select select2" data-placeholder="Users">
-                                <option value="" selected disabled>Users</option>
-                                @forelse($roles as $key => $value)
-                                   <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                @empty
-
-                                @endforelse
+                            <label for="filter_user" class="form-label">User</label>
+                            <select id="filter_user" name="user_id" class="form-control large-select select2" data-placeholder="User">
+                                <option value="" selected disabled>Select User</option>
                             </select>
                         </div>
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_category" class="form-label">Category</label>
-                            <select id="filter_category" name="category_id" class="form-control large-select select2" data-placeholder="Category">
-                                <option value="" selected disabled>Category</option>
-                                @forelse($categories as $key => $value)
-                                   <option value="{{ $value->id }}">{{ $value->category_name }}</option>
+                            <label for="filter_subcategory" class="form-label">Subcategory</label>
+                            <select id="filter_subcategory" name="subcategory_id" class="form-control large-select select2" data-placeholder="Subcategory">
+                                <option value="" selected disabled>Subcategory</option>
+                                @forelse($subcategories as $key => $value)
+                                   <option value="{{ $value->id }}">{{ $value->subcategory_name }}</option>
                                 @empty
 
                                 @endforelse
@@ -83,6 +263,7 @@
 
                         <div class="col-lg-4 col-md-6 col-12 mt-3 mb-3">
                             <button type="submit" class="btn btn-primary">Filter Purchase</button>
+                            <button type="button" class="btn btn-success ms-2" onclick="printTable()">Print</button>
                         </div>
 
                     </div>
@@ -93,6 +274,13 @@
             {{-- </nav> --}}
 
             <div class="card-body">
+                <!-- Report Header -->
+                <div class="text-center mb-4 print-header">
+                    <img src="{{ asset('backend/assets/images/bubt.png') }}" alt="BUBT Logo" style="width: 80px; height: auto; margin-bottom: 10px;">
+                    <h2 class="mb-1">Purchase Report</h2>
+                    <p class="mb-0">Date: {{ date('Y-m-d') }}</p>
+                </div>
+
                 <div class="table-responsive">
                     <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
                         <div class="row">
@@ -233,90 +421,19 @@
                 width: 100%;
             }
         }
+
+        /* Print styles - hide action column */
+        @media print {
+            .btn, .action-column, td:last-child, th:last-child {
+                display: none !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+            }
+            .print-header img {
+                width: 60px;
+            }
+        }
     </style>
-
-
-    <script>
-        (function() {
-            const form = document.getElementById('purchaseFilterForm');
-            const tbody = document.querySelector('#example tbody');
-            const endpoint = "{{ route('filter-purchases') }}";
-
-            if (!form || !tbody) {
-                return;
-            }
-
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                fetchFilteredData();
-            });
-
-            function fetchFilteredData() {
-                const params = new URLSearchParams(new FormData(form));
-
-                fetch(`${endpoint}?${params.toString()}`, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        updateTable(data.purchases || []);
-                    })
-                    .catch(error => console.error('Error fetching data:', error));
-            }
-
-            function updateTable(purchases) {
-                tbody.innerHTML = '';
-                let sl = 1;
-
-                if (!purchases.length) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="10" class="text-center">No purchase data found for selected filters.</td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                purchases.forEach(purchase => {
-                    const items = purchase.purchase_items || [];
-                    const totalQty = items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0), 0);
-                    const avgUnitPrice = items.length
-                        ? (items.reduce((sum, item) => sum + (parseFloat(item.net_unit_cost) || 0), 0) / items.length)
-                        : 0;
-
-                    const semesterText = purchase.semester
-                        ? `${purchase.semester.code ? purchase.semester.code + ' : ' : ''}${purchase.semester.name || ''}`
-                        : '-';
-
-                    const row = `
-                        <tr>
-                            <td>${purchase.date || 'N/A'}</td>
-                            <td>${purchase.tracking_no || '-'}</td>
-                            <td>${purchase.note_no || '-'}</td>
-                            <td>${semesterText}</td>
-                            <td>${purchase.department ? purchase.department.name : '-'}</td>
-                            <td>${totalQty}</td>
-                            <td>${avgUnitPrice.toFixed(2)}</td>
-                            <td>${purchase.status || 'N/A'}</td>
-                            <td>${purchase.grand_total ? parseFloat(purchase.grand_total).toFixed(2) : '0.00'}</td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <a title="Details" href="/details/purchase/${purchase.id}" class="btn btn-info btn-sm">
-                                        <span class="mdi mdi-eye-circle mdi-18px"></span>
-                                    </a>
-                                    <a title="PDF Invoice" href="/invoice/purchase/${purchase.id}" class="btn btn-primary btn-sm">
-                                        <span class="mdi mdi-download-circle mdi-18px"></span>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.insertAdjacentHTML('beforeend', row);
-                });
-            }
-        })();
-    </script>
 @endsection

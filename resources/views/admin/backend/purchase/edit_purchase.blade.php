@@ -30,17 +30,17 @@
                                                 @enderror
                                             </div>
 
-                                                <div class="col-md-12 mb-3">
-                                                    <label class="form-label">Product:</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text">
-                                                            <i class="fas fa-search"></i>
-                                                        </span>
-                                                        <input type="search" id="product_search" name="search"
-                                                            class="form-control" placeholder="Search product by code or name">
-                                                    </div>
-                                                    <div id="product_list" class="list-group mt-2"></div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Product:</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-search"></i>
+                                                    </span>
+                                                    <input type="search" id="product_search" name="search"
+                                                        class="form-control" placeholder="Search product by code or name">
                                                 </div>
+                                                <div id="product_list" class="list-group mt-2"></div>
+                                            </div>
 
                                             {{-- <input type="hidden" name="warehouse_id" value="{{ $editData->warehouse_id }}"> --}}
 
@@ -56,22 +56,6 @@
                 <small id="warehouse_error" class="text-danger d-none">Please select the first warehouse.</small>
                 </div>
           </div> --}}
-
-                                            <div class="col-md-4 mb-3">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Supplier : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="supplier_id" id="supplier_id"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Supplier</option>
-                                                        @foreach ($suppliers as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $editData->supplier_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
 
                                             <div class="col-md-4 mb-3">
                                                 <div class="form-group w-100">
@@ -114,11 +98,27 @@
                                                     <select name="user_id" id="user_id"
                                                         class="form-control form-select select2">
                                                         <option value="">Select User</option>
-                                                        @if($editData->user)
+                                                        @if ($editData->user)
                                                             <option value="{{ $editData->user->id }}" selected>
                                                                 {{ $editData->user->name }} ({{ $editData->user->email }})
                                                             </option>
                                                         @endif
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group w-100">
+                                                    <label class="form-label" for="formBasic">Supplier : <span
+                                                            class="text-danger">*</span></label>
+                                                    <select name="supplier_id" id="supplier_id"
+                                                        class="form-control form-select select2">
+                                                        <option value="">Select Supplier</option>
+                                                        @foreach ($suppliers as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                {{ $editData->supplier_id == $item->id ? 'selected' : '' }}>
+                                                                {{ $item->name }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                             </div>
@@ -302,7 +302,8 @@
                                                 <input type="file" id="file_upload" name="file_upload"
                                                     class="form-control" placeholder="Voucher / File Upload">
                                                 @if ($editData->file_upload)
-                                                    <small class="text-muted">Current: {{ $editData->file_upload }}</small>
+                                                    <small class="text-muted">Current:
+                                                        {{ $editData->file_upload }}</small>
                                                 @endif
                                             </div>
                                             <div class="col-md-4">
@@ -341,155 +342,179 @@
 
 
     @push('scripts')
-    <script>
-        var productSearchUrl = "{{ route('purchase.product.search') }}";
-        window.useWarehouseForProductSearch = false;
+        <script>
+            var productSearchUrl = "{{ route('purchase.product.search') }}";
+            window.useWarehouseForProductSearch = false;
 
-        $(function() {
-            var $department = $('#department_id');
-            var $user = $('#user_id');
-            var initialUserId = "{{ $editData->user_id ?? '' }}";
-            var endpointBase = "{{ url('get/users/by/department') }}";
+            $(function() {
+                var $department = $('#department_id');
+                var $user = $('#user_id');
+                var initialUserId = "{{ $editData->user_id ?? '' }}";
+                var endpointBase = "{{ url('get/users/by/department') }}";
 
-            function resetUser() {
-                $user.empty().append('<option value="">Select User</option>');
-                $user.prop('disabled', true).trigger('change');
-            }
-
-            function populateUsers(data, selectedId) {
-                $user.empty().append('<option value="">Select User</option>');
-
-                if (!data || !data.length) {
+                function resetUser() {
+                    $user.empty().append('<option value="">Select User</option>');
                     $user.prop('disabled', true).trigger('change');
-                    return;
                 }
 
-                $.each(data, function(_, item) {
-                    $user.append(
-                        $('<option/>', {
-                            value: item.id,
-                            text: item.name + ' (' + item.email + ')',
-                            selected: String(selectedId) === String(item.id)
-                        })
-                    );
-                });
+                function populateUsers(data, selectedId) {
+                    $user.empty().append('<option value="">Select User</option>');
 
-                $user.prop('disabled', false).trigger('change');
-            }
-
-            function loadUsers(departmentId, selectedId) {
-                resetUser();
-                if (!departmentId) return;
-
-                $.ajax({
-                    url: endpointBase + '/' + encodeURIComponent(departmentId),
-                    type: 'GET',
-                    dataType: 'json',
-                    cache: false,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(res) {
-                        populateUsers(res, selectedId);
-                    },
-                    error: resetUser
-                });
-            }
-
-            $(document).on('change', '#department_id', function() {
-                loadUsers($(this).val(), '');
-            });
-
-            if ($department.val()) {
-                loadUsers($department.val(), initialUserId);
-            } else {
-                resetUser();
-            }
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const productBody = document.getElementById("productBody");
-            function updateSubtotal(row) {
-                let qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
-                let discount = parseFloat(row.querySelector(".discount-input")?.value) || 0;
-                let netUnitCost = parseFloat(row.querySelector(".qty-input")?.dataset.cost) || 0;
-
-                let subtotal = (netUnitCost * qty) - discount;
-                if (subtotal < 0) subtotal = 0;
-
-                row.querySelector(".subtotal").innerText = subtotal.toFixed(2);
-
-                const hiddenSubtotalInput = row.querySelector("input[name$='[subtotal]']");
-                if (hiddenSubtotalInput) {
-                    hiddenSubtotalInput.value = subtotal.toFixed(2);
-                }
-
-                updateGrandTotal();
-            }
-
-            function updateGrandTotal() {
-                let grandTotal = 0;
-
-                document.querySelectorAll(".subtotal").forEach(function(item) {
-                    grandTotal += parseFloat(item.textContent) || 0;
-                });
-
-                let discount = parseFloat(document.getElementById("inputDiscount").value) || 0;
-                let shipping = parseFloat(document.getElementById("inputShipping").value) || 0;
-
-                grandTotal = grandTotal - discount + shipping;
-
-                if (grandTotal < 0) {
-                    grandTotal = 0;
-                }
-
-                document.getElementById("grandTotal").textContent = `৳ ${grandTotal.toFixed(2)}`;
-                document.querySelector("input[name='grand_total']").value = grandTotal.toFixed(2);
-            }
-
-            productBody.addEventListener("input", function(e) {
-                if (e.target.classList.contains("qty-input") || e.target.classList.contains("discount-input")) {
-                    updateSubtotal(e.target.closest("tr"));
-                }
-            });
-
-            document.querySelectorAll(".increment-qty").forEach(button => {
-                button.addEventListener("click", function() {
-                    let input = this.closest(".input-group").querySelector(".qty-input");
-                    let max = parseInt(input.getAttribute("max"));
-                    let value = parseInt(input.value) || 0;
-                    if (value < max) {
-                        input.value = value + 1;
-                        updateSubtotal(this.closest("tr"));
+                    if (!data || !data.length) {
+                        $user.prop('disabled', true).trigger('change');
+                        return;
                     }
-                });
-            });
 
-            document.querySelectorAll(".decrement-qty").forEach(button => {
-                button.addEventListener("click", function() {
-                    let input = this.closest(".input-group").querySelector(".qty-input");
-                    let min = parseInt(input.getAttribute("min"));
-                    let value = parseInt(input.value) || 0;
-                    if (value > min) {
-                        input.value = value - 1;
-                        updateSubtotal(this.closest("tr"));
+                    $.each(data, function(_, item) {
+                        $user.append(
+                            $('<option/>', {
+                                value: item.id,
+                                text: item.name + ' (' + item.email + ')',
+                                selected: String(selectedId) === String(item.id)
+                            })
+                        );
+                    });
+
+                    $user.prop('disabled', false).trigger('change');
+                }
+
+                function loadUsers(departmentId, selectedId) {
+                    resetUser();
+                    if (!departmentId) return;
+
+                    $.ajax({
+                        url: endpointBase + '/' + encodeURIComponent(departmentId),
+                        type: 'GET',
+                        dataType: 'json',
+                        cache: false,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(res) {
+                            populateUsers(res, selectedId);
+                        },
+                        error: resetUser
+                    });
+                }
+
+                $(document).on('change', '#department_id', function() {
+                    loadUsers($(this).val(), '');
+                    generateTrackingNumber($(this).val());
+                });
+
+                if ($department.val()) {
+                    loadUsers($department.val(), initialUserId);
+                } else {
+                    resetUser();
+                }
+
+                function generateTrackingNumber(departmentId) {
+                    if (!departmentId) {
+                        $('#tracking_no').val('');
+                        return;
                     }
-                });
+
+                    var now = new Date();
+                    var year = String(now.getFullYear());
+                    var month = String(now.getMonth() + 1).padStart(2, '0');
+                    var date = String(now.getDate()).padStart(2, '0');
+                    var hours = String(now.getHours()).padStart(2, '0');
+
+                    var selectedOption = $('#department_id option:selected');
+                    var deptText = selectedOption.text();
+                    var deptCodeMatch = deptText.match(/\(([^)]+)\)/);
+                    var deptCode = deptCodeMatch ? deptCodeMatch[1].toUpperCase() : '';
+
+                    var trackingNo = deptCode + '-' + year + '-' + month + '-' + date + '-' + hours;
+                    $('#tracking_no').val(trackingNo);
+                }
             });
 
-            document.getElementById("inputDiscount").addEventListener("input", updateGrandTotal);
-            document.getElementById("inputShipping").addEventListener("input", updateGrandTotal);
+            document.addEventListener("DOMContentLoaded", function() {
+                const productBody = document.getElementById("productBody");
 
-            productBody.addEventListener("click", function(e) {
-                const removeBtn = e.target.closest(".remove-item");
-                if (removeBtn) {
-                    removeBtn.closest("tr").remove();
+                function updateSubtotal(row) {
+                    let qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
+                    let discount = parseFloat(row.querySelector(".discount-input")?.value) || 0;
+                    let netUnitCost = parseFloat(row.querySelector(".qty-input")?.dataset.cost) || 0;
+
+                    let subtotal = (netUnitCost * qty) - discount;
+                    if (subtotal < 0) subtotal = 0;
+
+                    row.querySelector(".subtotal").innerText = subtotal.toFixed(2);
+
+                    const hiddenSubtotalInput = row.querySelector("input[name$='[subtotal]']");
+                    if (hiddenSubtotalInput) {
+                        hiddenSubtotalInput.value = subtotal.toFixed(2);
+                    }
+
                     updateGrandTotal();
                 }
-            });
 
-            updateGrandTotal();
-        });
-    </script>
+                function updateGrandTotal() {
+                    let grandTotal = 0;
+
+                    document.querySelectorAll(".subtotal").forEach(function(item) {
+                        grandTotal += parseFloat(item.textContent) || 0;
+                    });
+
+                    let discount = parseFloat(document.getElementById("inputDiscount").value) || 0;
+                    let shipping = parseFloat(document.getElementById("inputShipping").value) || 0;
+
+                    grandTotal = grandTotal - discount + shipping;
+
+                    if (grandTotal < 0) {
+                        grandTotal = 0;
+                    }
+
+                    document.getElementById("grandTotal").textContent = `৳ ${grandTotal.toFixed(2)}`;
+                    document.querySelector("input[name='grand_total']").value = grandTotal.toFixed(2);
+                }
+
+                productBody.addEventListener("input", function(e) {
+                    if (e.target.classList.contains("qty-input") || e.target.classList.contains(
+                            "discount-input")) {
+                        updateSubtotal(e.target.closest("tr"));
+                    }
+                });
+
+                document.querySelectorAll(".increment-qty").forEach(button => {
+                    button.addEventListener("click", function() {
+                        let input = this.closest(".input-group").querySelector(".qty-input");
+                        let max = parseInt(input.getAttribute("max"));
+                        let value = parseInt(input.value) || 0;
+                        if (value < max) {
+                            input.value = value + 1;
+                            updateSubtotal(this.closest("tr"));
+                        }
+                    });
+                });
+
+                document.querySelectorAll(".decrement-qty").forEach(button => {
+                    button.addEventListener("click", function() {
+                        let input = this.closest(".input-group").querySelector(".qty-input");
+                        let min = parseInt(input.getAttribute("min"));
+                        let value = parseInt(input.value) || 0;
+                        if (value > min) {
+                            input.value = value - 1;
+                            updateSubtotal(this.closest("tr"));
+                        }
+                    });
+                });
+
+                document.getElementById("inputDiscount").addEventListener("input", updateGrandTotal);
+                document.getElementById("inputShipping").addEventListener("input", updateGrandTotal);
+
+                productBody.addEventListener("click", function(e) {
+                    const removeBtn = e.target.closest(".remove-item");
+                    if (removeBtn) {
+                        removeBtn.closest("tr").remove();
+                        updateGrandTotal();
+                    }
+                });
+
+                updateGrandTotal();
+            });
+        </script>
     @endpush
 @endsection

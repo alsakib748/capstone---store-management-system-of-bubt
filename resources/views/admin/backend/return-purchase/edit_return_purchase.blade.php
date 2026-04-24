@@ -91,46 +91,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Department : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="department_id" id="department_id"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Department</option>
-                                                        @foreach ($departments as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $editData->department_id == $item->id ? 'selected' : '' }}>
-                                                                {{ $item->name }} - ({{ $item->code }})
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Users : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="role_ids[]" id="role_id"
-                                                        class="form-control form-select select2" multiple>
-                                                        @foreach ($roles as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ $editData->roles->contains('id', $item->id) ? 'selected' : '' }}>
-                                                                {{ $item->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Color Number: </label>
-                                                <input type="text" id="color_number" name="color_number"
-                                                    value="{{ $editData->color_number }}" class="form-control"
-                                                    placeholder="Color Number">
-                                            </div>
                                         </div>
 
 
@@ -146,7 +106,6 @@
                                                             <th>Net Unit Cost</th>
                                                             <th>Stock</th>
                                                             <th>Qty</th>
-                                                            <th>Discount</th>
                                                             <th>Subtotal</th>
                                                             <th>Action</th>
                                                         </tr>
@@ -204,14 +163,6 @@
                                                                     </div>
                                                                 </td>
 
-                                                                <td>
-                                                                    <input type="number"
-                                                                        class="form-control discount-input"
-                                                                        name="products[{{ $item->product->id }}][discount]"
-                                                                        value="{{ $item->discount }}"
-                                                                        style="max-width: 100px;">
-                                                                </td>
-
                                                                 <td class="subtotal">
                                                                     {{ number_format($item->subtotal, 2) }}</td>
                                                                 <input type="hidden"
@@ -239,11 +190,6 @@
                                                         <div class="table-responsive">
                                                             <table class="table border">
                                                                 <tbody>
-                                                                    <tr>
-                                                                        <td class="py-3">Discount</td>
-                                                                        <td class="py-3" id="displayDiscount">TK
-                                                                            {{ $editData->discount }}</td>
-                                                                    </tr>
                                                                     <tr>
                                                                         <td class="py-3">Shipping</td>
                                                                         <td class="py-3" id="shippingDisplay">TK
@@ -312,36 +258,9 @@
                                                 @endif
                                             </div>
                                             <div class="col-md-4">
-                                                <label class="form-label">Discount: </label>
-                                                <input type="number" id="inputDiscount" name="discount"
-                                                    class="form-control" value="{{ $editData->discount }}">
-                                            </div>
-                                            <div class="col-md-4">
                                                 <label class="form-label">Shipping: </label>
                                                 <input type="number" id="inputShipping" name="shipping"
                                                     class="form-control" value="{{ $editData->shipping }}">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Status : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="status" id="status"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Status</option>
-                                                        <option value="Return"
-                                                            {{ $editData->status == 'Return' ? 'selected' : '' }}>Return
-                                                        </option>
-                                                        <option value="Pending"
-                                                            {{ $editData->status == 'Pending' ? 'selected' : '' }}>Pending
-                                                        </option>
-                                                        <option value="Ordered"
-                                                            {{ $editData->status == 'Ordered' ? 'selected' : '' }}>Ordered
-                                                        </option>
-                                                    </select>
-                                                    @error('status')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
                                             </div>
                                         </div>
 
@@ -377,11 +296,9 @@
 
             function updateSubtotal(row) {
                 let qty = parseFloat(row.querySelector(".qty-input")?.value) || 0;
-                let discount = parseFloat(row.querySelector(".discount-input")?.value) || 0;
                 let netUnitCost = parseFloat(row.querySelector(".qty-input")?.dataset.cost) || 0;
 
-                let subtotal = (netUnitCost * qty) - discount;
-                if (subtotal < 0) subtotal = 0;
+                let subtotal = netUnitCost * qty;
 
                 row.querySelector(".subtotal").innerText = subtotal.toFixed(2);
 
@@ -400,10 +317,9 @@
                     grandTotal += parseFloat(item.textContent) || 0;
                 });
 
-                let discount = parseFloat(document.getElementById("inputDiscount").value) || 0;
                 let shipping = parseFloat(document.getElementById("inputShipping").value) || 0;
 
-                grandTotal = grandTotal - discount + shipping;
+                grandTotal = grandTotal + shipping;
 
                 if (grandTotal < 0) {
                     grandTotal = 0;
@@ -414,7 +330,7 @@
             }
 
             productBody.addEventListener("input", function(e) {
-                if (e.target.classList.contains("qty-input") || e.target.classList.contains("discount-input")) {
+                if (e.target.classList.contains("qty-input")) {
                     updateSubtotal(e.target.closest("tr"));
                 }
             });
@@ -443,7 +359,6 @@
                 });
             });
 
-            document.getElementById("inputDiscount").addEventListener("input", updateGrandTotal);
             document.getElementById("inputShipping").addEventListener("input", updateGrandTotal);
 
             productBody.addEventListener("click", function(e) {

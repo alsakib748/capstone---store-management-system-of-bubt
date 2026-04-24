@@ -86,42 +86,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Department : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="department_id" id="department_id"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Department</option>
-                                                        @foreach ($departments as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->name }} - ({{ $item->code }})</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Users : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="role_ids[]" id="role_id"
-                                                        class="form-control form-select select2" multiple>
-                                                        @foreach ($roles as $item)
-                                                            <option value="{{ $item->id }}"
-                                                                {{ in_array($item->id, old('role_ids', [])) ? 'selected' : '' }}>
-                                                                {{ $item->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">Color Number: </label>
-                                                <input type="text" id="color_number" name="color_number"
-                                                    class="form-control" placeholder="Color Number">
-                                            </div>
                                         </div>
 
 
@@ -142,7 +106,6 @@
                                                             <th>Net Unit Cost</th>
                                                             <th>Stock</th>
                                                             <th>Qty</th>
-                                                            <th>Discount</th>
                                                             <th>Subtotal</th>
                                                             <th>Action</th>
                                                         </tr>
@@ -161,10 +124,6 @@
                                                         <div class="table-responsive">
                                                             <table class="table border">
                                                                 <tbody>
-                                                                    <tr>
-                                                                        <td class="py-3">Discount</td>
-                                                                        <td class="py-3" id="displayDiscount">TK 0.00</td>
-                                                                    </tr>
                                                                     <tr>
                                                                         <td class="py-3">Shipping</td>
                                                                         <td class="py-3" id="shippingDisplay">TK 0.00</td>
@@ -226,30 +185,9 @@
                                                     class="form-control" placeholder="Voucher / File Upload">
                                             </div>
                                             <div class="col-md-4">
-                                                <label class="form-label">Discount: </label>
-                                                <input type="number" id="inputDiscount" name="discount"
-                                                    class="form-control" value="0.00">
-                                            </div>
-                                            <div class="col-md-4">
                                                 <label class="form-label">Shipping: </label>
                                                 <input type="number" id="inputShipping" name="shipping"
                                                     class="form-control" value="0.00">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group w-100">
-                                                    <label class="form-label" for="formBasic">Status : <span
-                                                            class="text-danger">*</span></label>
-                                                    <select name="status" id="status"
-                                                        class="form-control form-select select2">
-                                                        <option value="">Select Status</option>
-                                                        <option value="Return">Return</option>
-                                                        <option value="Pending">Pending</option>
-                                                        <option value="Ordered">Ordered</option>
-                                                    </select>
-                                                    @error('status')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
                                             </div>
                                         </div>
 

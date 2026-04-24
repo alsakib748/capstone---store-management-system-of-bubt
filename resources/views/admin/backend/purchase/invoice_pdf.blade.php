@@ -26,13 +26,11 @@
             page-break-inside: avoid;
         }
         .invoice-header {
-            background-color: #0d6efd; /* Fallback for gradient */
-            background: linear-gradient(135deg, #0d6efd, #17a2b8);
-            color: #fff;
-            padding: 15px;
             text-align: center;
-            border-radius: 8px 8px 0 0;
             margin-bottom: 20px;
+        }
+        .invoice-header img {
+            max-width: 150px;
         }
         .invoice-header h2 {
             font-size: 18px;
@@ -116,7 +114,8 @@
 <body>
     <div class="invoice-container">
         <div class="invoice-header">
-            <h5>Purchase Invoice</h5>
+            <img src="{{ public_path('backend/assets/images/bubt.png') }}" alt="BUBT Logo">
+            <h5 style="margin-top: 10px;">Purchase Invoice</h5>
         </div>
 
         <table class="info-section">
@@ -181,6 +180,19 @@
                 <td><strong>Grand Total:</strong> ৳{{ number_format($purchase->grand_total,2)  }} </td>
             </tr>
         </table>
+
+        <div class="signature-section" style="margin-top: 50px; width: 100%; display: table; border-collapse: collapse;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 50%; text-align: left; padding-top: 50px;">
+                    <div style="border-top: 1px solid #333; width: 200px; margin-bottom: 5px;"></div>
+                    <p style="font-weight: bold; margin: 0;">Supervisor Signature</p>
+                </div>
+                <div style="display: table-cell; width: 50%; text-align: right; padding-top: 50px;">
+                    <div style="border-top: 1px solid #333; width: 200px; margin-bottom: 5px; margin-left: auto;"></div>
+                    <p style="font-weight: bold; margin: 0;">Get Entry Signature</p>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Purchase;
+use App\Models\Subcategory;
 use App\Models\ReturnPurchase;
 use App\Models\Sale;
 use App\Models\SaleReturn;
@@ -16,25 +17,23 @@ use App\Models\WareHouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
 class ReportController extends Controller
 {
     public function AllReport()
     {
-        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse'])->get();
+        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'user'])->get();
         return view('admin.backend.report.all_report', compact('purchases'));
     }
 
     public function PurchaseReport()
     {
-        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department'])->get();
+        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department', 'user'])->get();
         $semesters = Semester::all();
         $departments = Department::all();
-        $roles = Role::all();
-        $categories = ProductCategory::all();
+        $subcategories = Subcategory::all();
         $products = Product::all();
-        return view('admin.backend.report.purchase_report', compact('purchases', 'semesters', 'departments', 'roles', 'categories', 'products'));
+        return view('admin.backend.report.purchase_report', compact('purchases', 'semesters', 'departments', 'subcategories', 'products'));
     }
 
     // End Method
@@ -45,11 +44,11 @@ class ReportController extends Controller
         $toDate = $request->input('to_date', $request->input('end_date'));
         $semesterId = $request->input('semester_id');
         $departmentId = $request->input('department_id');
-        $roleId = $request->input('role_id');
-        $categoryId = $request->input('category_id');
+        $userId = $request->input('user_id');
+        $subcategoryId = $request->input('subcategory_id');
         $productId = $request->input('product_id');
 
-        $query = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department']);
+        $query = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department', 'user']);
 
         if ($fromDate && $toDate) {
             $startDate = Carbon::parse($fromDate)->startOfDay();
@@ -69,10 +68,8 @@ class ReportController extends Controller
             $query->where('department_id', $departmentId);
         }
 
-        if ($roleId) {
-            $query->whereHas('roles', function ($roleQuery) use ($roleId) {
-                $roleQuery->where('roles.id', $roleId);
-            });
+        if ($userId) {
+            $query->where('user_id', $userId);
         }
 
         if ($productId) {
@@ -81,9 +78,9 @@ class ReportController extends Controller
             });
         }
 
-        if ($categoryId) {
-            $query->whereHas('purchaseItems.product', function ($productQuery) use ($categoryId) {
-                $productQuery->where('category_id', $categoryId);
+        if ($subcategoryId) {
+            $query->whereHas('purchaseItems.product', function ($productQuery) use ($subcategoryId) {
+                $productQuery->where('subcategory_id', $subcategoryId);
             });
         }
 
