@@ -167,7 +167,20 @@ class ProductController extends Controller
 
     public function AllProduct()
     {
-        $allData = Product::with(['category', 'subcategory', 'images', 'brand', 'allowedRoles'])->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+        $roleIds = $user ? $user->roles()->pluck('roles.id')->toArray() : [];
+
+        if (empty($roleIds)) {
+            $allData = collect();
+        } else {
+            $allData = Product::with(['category', 'subcategory', 'images', 'brand', 'allowedRoles'])
+                ->whereHas('allowedRoles', function ($q) use ($roleIds) {
+                    $q->whereIn('roles.id', $roleIds);
+                })
+                ->orderBy('id', 'desc')
+                ->get();
+        }
+
         return view('admin.backend.product.product_list', compact('allData'));
     }
     //End Method

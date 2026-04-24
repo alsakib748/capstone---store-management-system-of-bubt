@@ -7,6 +7,7 @@ use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\PurchaseController;
 use App\Http\Controllers\Backend\ReportController;
+use App\Http\Controllers\Backend\RequisitionController;
 use App\Http\Controllers\Backend\ReturnPurchaseController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleController;
@@ -130,7 +131,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/update/product', 'UpdateProduct')->name('update.product');
         Route::get('/delete/product/{id}', 'DeleteProduct')->name('delete.product');
         Route::get('/details/product/{id}', 'DetailsProduct')->name('details.product');
-
     });
 
     Route::controller(DamageProductController::class)->group(function () {
@@ -162,7 +162,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/view/purchase/file/{id}', 'ViewPurchaseFile')->name('view.purchase.file');
         Route::get('/invoice/purchase/{id}', 'InvoicePurchase')->name('invoice.purchase');
         Route::get('/delete/purchase/{id}', 'DeletePurchase')->name('delete.purchase');
-
     });
 
     Route::controller(ReturnPurchaseController::class)->group(function () {
@@ -177,6 +176,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/update/return/purchase/{id}', 'UpdateReturnPurchase')->name('update.return.purchase');
         Route::get('/delete/return/purchase/{id}', 'DeleteReturnPurchase')->name('delete.return.purchase');
 
+    });
+
+    Route::controller(RequisitionController::class)->group(function () {
+        Route::get('/all/requisition', 'AllRequisition')->name('all.requisition');
+        Route::get('/add/requisition', 'AddRequisition')->name('add.requisition');
+        Route::get('/requisition/product/search', 'RequisitionProductSearch')->name('requisition.product.search');
+        Route::post('/store/requisition', 'StoreRequisition')->name('store.requisition');
+        Route::get('/edit/requisition/{id}', 'EditRequisition')->name('edit.requisition');
+        Route::post('/update/requisition/{id}', 'UpdateRequisition')->name('update.requisition');
+        Route::get('/details/requisition/{id}', 'DetailsRequisition')->name('details.requisition');
+        Route::get('/invoice/requisition/{id}', 'InvoiceRequisition')->name('invoice.requisition');
+        Route::get('/delete/requisition/{id}', 'DeleteRequisition')->name('delete.requisition');
     });
 
     Route::controller(TransferController::class)->group(function () {

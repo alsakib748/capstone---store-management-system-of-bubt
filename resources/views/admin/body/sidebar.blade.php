@@ -175,6 +175,22 @@
                     </div>
                 </li>
 
+                <li>
+                    <a href="#Requisition" data-bs-toggle="collapse">
+                        <i data-feather="package"></i>
+                        <span> Requisition Manage</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="Requisition">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{{ route('all.requisition') }}" class="tp-link">All Requisition</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+
                 {{-- <li>
                     <a href="#Transfers" data-bs-toggle="collapse">
                         <i data-feather="repeat"></i>
