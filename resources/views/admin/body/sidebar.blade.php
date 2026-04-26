@@ -184,9 +184,11 @@
                     <div class="collapse" id="Requisition">
                         <ul class="nav-second-level">
                             <li>
-                                <a href="{{ route('all.requisition') }}" class="tp-link">All Requisition</a>
+                                <a href="{{ route('my.requisition') }}" class="tp-link">My Requisitions</a>
                             </li>
-
+                            <li>
+                                <a href="{{ route('all.requisition') }}" class="tp-link">All Requisitions</a>
+                            </li>
                         </ul>
                     </div>
                 </li>

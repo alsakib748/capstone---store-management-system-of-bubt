@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Issue;
+use App\Models\IssueItem;
 use App\Models\Product;
 use App\Models\Requisition;
 use App\Models\RequisitionItem;
@@ -36,6 +39,17 @@ class RequisitionController extends Controller
     {
         $allData = Requisition::with(['semester', 'user'])->orderBy('id', 'desc')->get();
         return view('admin.backend.requisition.all_requisition', compact('allData'));
+    }
+    // End Method
+
+    public function MyRequisition()
+    {
+        $userId = auth()->id();
+        $allData = Requisition::with(['semester', 'user'])
+            ->where('user_id', $userId)
+            ->orderBy('id', 'desc')
+            ->get();
+        return view('admin.backend.requisition.my_requisition', compact('allData'));
     }
     // End Method
 
@@ -191,12 +205,12 @@ class RequisitionController extends Controller
             $requisition = Requisition::findOrFail($id);
             $roleIds = $this->getRoleIdsForRequisitionUser($request);
 
-            // Use authenticated user if no user_id provided
-            $userId = $request->user_id ?? auth()->id();
+            // Keep the original user_id - never change it
+            $originalUserId = $requisition->user_id;
 
             $requisition->update([
                 'date' => $request->date,
-                'user_id' => $userId,
+                'user_id' => $originalUserId,
                 'semester_id' => $request->semester_id,
                 'notes' => $request->notes,
             ]);
@@ -306,6 +320,69 @@ class RequisitionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    // End Method
+
+    public function IssueRequisition(Request $request, $id)
+    {
+        $request->validate([
+            'issue_date' => 'required|date',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $requisition = Requisition::with('requisitionItems')->findOrFail($id);
+
+            if ($requisition->status === 'issued') {
+                throw new \Exception('This requisition has already been issued.');
+            }
+
+            // Create Issue record
+            $issue = Issue::create([
+                'date' => $request->issue_date,
+                'requisition_id' => $requisition->id,
+                'user_id' => $requisition->user_id,
+                'issued_by' => auth()->id(),
+                'semester_id' => $requisition->semester_id,
+                'department_id' => $requisition->department_id,
+                'notes' => $requisition->notes,
+            ]);
+
+            // Create Issue Items from Requisition Items
+            foreach ($requisition->requisitionItems as $item) {
+                IssueItem::create([
+                    'issue_id' => $issue->id,
+                    'product_id' => $item->product_id,
+                    'qty' => $item->qty,
+                ]);
+
+                // Decrement product stock when issued
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    $product->decrement('product_qty', $item->qty);
+                }
+            }
+
+            // Update requisition status to issued
+            $requisition->update(['status' => 'issued']);
+
+            DB::commit();
+
+            $notification = array(
+                'message' => 'Requisition Issued Successfully',
+                'alert-type' => 'success'
+            );
+            return redirect()->route('all.requisition')->with($notification);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $notification = array(
+                'message' => $e->getMessage(),
+                'alert-type' => 'error'
+            );
+            return redirect()->back()->with($notification);
         }
     }
     // End Method

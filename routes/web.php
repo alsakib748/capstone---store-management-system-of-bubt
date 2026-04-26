@@ -179,6 +179,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::controller(RequisitionController::class)->group(function () {
+        Route::get('/my/requisition', 'MyRequisition')->name('my.requisition');
         Route::get('/all/requisition', 'AllRequisition')->name('all.requisition');
         Route::get('/add/requisition', 'AddRequisition')->name('add.requisition');
         Route::get('/requisition/product/search', 'RequisitionProductSearch')->name('requisition.product.search');
@@ -188,6 +189,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/details/requisition/{id}', 'DetailsRequisition')->name('details.requisition');
         Route::get('/invoice/requisition/{id}', 'InvoiceRequisition')->name('invoice.requisition');
         Route::get('/delete/requisition/{id}', 'DeleteRequisition')->name('delete.requisition');
+        Route::post('/issue/requisition/{id}', 'IssueRequisition')->name('issue.requisition');
     });
 
     Route::controller(TransferController::class)->group(function () {

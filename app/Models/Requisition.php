@@ -9,6 +9,10 @@ class Requisition extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'status' => 'string',
+    ];
+
     public function semester()
     {
         return $this->belongsTo(Semester::class);
