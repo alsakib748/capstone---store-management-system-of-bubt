@@ -141,7 +141,7 @@
 
                 <li>
                     <a href="#DamageProduct" data-bs-toggle="collapse">
-                        <i data-feather="package"></i>
+                        <i data-feather="alert-triangle"></i>
                         <span>Damage Product</span>
                         <span class="menu-arrow"></span>
                     </a>
@@ -177,7 +177,7 @@
 
                 <li>
                     <a href="#Requisition" data-bs-toggle="collapse">
-                        <i data-feather="package"></i>
+                        <i data-feather="file-text"></i>
                         <span> Requisition Manage</span>
                         <span class="menu-arrow"></span>
                     </a>
@@ -188,6 +188,24 @@
                             </li>
                             <li>
                                 <a href="{{ route('all.requisition') }}" class="tp-link">All Requisitions</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#Issue" data-bs-toggle="collapse">
+                        <i data-feather="send"></i>
+                        <span> Issue Manage</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="Issue">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{{ route('my.issue') }}" class="tp-link">My Issues</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('all.issue') }}" class="tp-link">All Issues</a>
                             </li>
                         </ul>
                     </div>

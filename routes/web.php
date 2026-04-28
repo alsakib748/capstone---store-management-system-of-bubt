@@ -8,6 +8,7 @@ use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\PurchaseController;
 use App\Http\Controllers\Backend\ReportController;
 use App\Http\Controllers\Backend\RequisitionController;
+use App\Http\Controllers\Backend\IssueController;
 use App\Http\Controllers\Backend\ReturnPurchaseController;
 use App\Http\Controllers\Backend\RoleController;
 use App\Http\Controllers\Backend\SaleController;
@@ -190,6 +191,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoice/requisition/{id}', 'InvoiceRequisition')->name('invoice.requisition');
         Route::get('/delete/requisition/{id}', 'DeleteRequisition')->name('delete.requisition');
         Route::post('/issue/requisition/{id}', 'IssueRequisition')->name('issue.requisition');
+    });
+
+    Route::controller(IssueController::class)->group(function () {
+        Route::get('/my/issue', 'MyIssue')->name('my.issue');
+        Route::get('/all/issue', 'AllIssue')->name('all.issue');
+        Route::get('/add/issue', 'AddIssue')->name('add.issue');
+        Route::get('/issue/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('issue.get.users.by.department');
+        Route::get('/issue/product/search', 'IssueProductSearch')->name('issue.product.search');
+        Route::post('/store/issue', 'StoreIssue')->name('store.issue');
+        Route::get('/edit/issue/{id}', 'EditIssue')->name('edit.issue');
+        Route::post('/update/issue/{id}', 'UpdateIssue')->name('update.issue');
+        Route::get('/details/issue/{id}', 'DetailsIssue')->name('details.issue');
+        Route::get('/invoice/issue/{id}', 'InvoiceIssue')->name('invoice.issue');
+        Route::get('/delete/issue/{id}', 'DeleteIssue')->name('delete.issue');
     });
 
     Route::controller(TransferController::class)->group(function () {

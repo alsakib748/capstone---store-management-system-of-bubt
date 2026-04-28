@@ -11,7 +11,7 @@ class Issue extends Model
 
     protected $guarded = [];
 
-    public function issueItem()
+    public function issueItems()
     {
         return $this->hasMany(IssueItem::class);
     }
@@ -34,6 +34,11 @@ class Issue extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function issuedByUser()
+    {
+        return $this->belongsTo(User::class, 'issued_by');
     }
 
 }

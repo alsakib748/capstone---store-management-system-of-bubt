@@ -7,12 +7,12 @@
 
             <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
                 <div class="flex-grow-1">
-                    <h4 class="fs-18 fw-semibold m-0">My Requisitions</h4>
+                    <h4 class="fs-18 fw-semibold m-0">All Issues</h4>
                 </div>
 
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0">
-                        <a href="{{ route('add.requisition') }}" class="btn btn-secondary">Add Requisition</a>
+                        <a href="{{ route('add.issue') }}" class="btn btn-secondary">Add Issue</a>
                     </ol>
                 </div>
             </div>
@@ -32,8 +32,10 @@
                                     <thead>
                                         <tr>
                                             <th>Date</th>
+                                            <th>User</th>
                                             <th>Semester</th>
-                                            {{-- <th>Status</th> --}}
+                                            <th>Department</th>
+                                            <th>Issued By</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -41,27 +43,29 @@
                                         @foreach ($allData as $item)
                                             <tr>
                                                 <td>{{ \Carbon\Carbon::parse($item->date)->format('Y-m-d') }}</td>
+                                                <td>{{ $item?->user->name ?? '-' }}</td>
                                                 <td>
                                                     {{ $item->semester ? ($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name : '-' }}
                                                 </td>
-                                                {{-- <td>
-                                                    @if ($item->status === 'issued')
-                                                        <span class="badge bg-success">Issued</span>
-                                                    @else
-                                                        <span class="badge bg-warning">Pending</span>
-                                                    @endif
-                                                </td> --}}
+                                                <td>{{ $item?->department?->name ?? '-' }}</td>
+                                                <td>{{ $item?->issuedByUser?->name ?? '-' }}</td>
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-1">
-                                                        <a title="Details"
-                                                            href="{{ route('details.requisition', $item->id) }}"
+                                                        <a title="Details" href="{{ route('details.issue', $item->id) }}"
                                                             class="btn btn-info btn-sm"> <span
                                                                 class="mdi mdi-eye-circle mdi-18px"></span> </a>
 
-                                                        <a title="Invoice"
-                                                            href="{{ route('invoice.requisition', $item->id) }}"
+                                                        <a title="Invoice" href="{{ route('invoice.issue', $item->id) }}"
                                                             class="btn btn-warning btn-sm" target="_blank"> <span
                                                                 class="mdi mdi-file-pdf-box mdi-18px"></span> </a>
+
+                                                        <a title="Edit" href="{{ route('edit.issue', $item->id) }}"
+                                                            class="btn btn-success btn-sm"> <span
+                                                                class="mdi mdi-book-edit mdi-18px"></span> </a>
+
+                                                        <a title="Delete" href="{{ route('delete.issue', $item->id) }}"
+                                                            class="btn btn-danger btn-sm" id="delete"><span
+                                                                class="mdi mdi-delete-circle  mdi-18px"></span></a>
                                                     </div>
                                                 </td>
                                             </tr>
