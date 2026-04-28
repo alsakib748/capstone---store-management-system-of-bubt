@@ -26,7 +26,31 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return view('admin.index');
+    $totalProducts = \App\Models\Product::count();
+    $totalUsers = \App\Models\User::count();
+    $totalSuppliers = \App\Models\Supplier::count();
+    $totalPurchase = \App\Models\Purchase::count();
+    $totalRequisitions = \App\Models\Requisition::count();
+    $totalIssues = \App\Models\Issue::count();
+    $totalDamageProducts = \App\Models\DamageProduct::count();
+    $totalCategories = \App\Models\ProductCategory::count();
+    $totalBrands = \App\Models\Brand::count();
+    $totalSemesters = \App\Models\Semester::count();
+    $totalDepartments = \App\Models\Department::count();
+
+    return view('admin.index', compact(
+        'totalProducts',
+        'totalUsers',
+        'totalSuppliers',
+        'totalPurchase',
+        'totalRequisitions',
+        'totalIssues',
+        'totalDamageProducts',
+        'totalCategories',
+        'totalBrands',
+        'totalSemesters',
+        'totalDepartments'
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
