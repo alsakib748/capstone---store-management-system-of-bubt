@@ -83,9 +83,29 @@
                     });
             }
 
+            // Store current filter values
+            var currentFilters = {
+                from_date: '',
+                to_date: '',
+                semester_id: '',
+                department_id: '',
+                user_id: '',
+                subcategory_id: '',
+                product_id: ''
+            };
+
             // Handle form submission
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                // Update stored filters
+                var formData = new FormData(form);
+                currentFilters.from_date = formData.get('from_date') || '';
+                currentFilters.to_date = formData.get('to_date') || '';
+                currentFilters.semester_id = formData.get('semester_id') || '';
+                currentFilters.department_id = formData.get('department_id') || '';
+                currentFilters.user_id = formData.get('user_id') || '';
+                currentFilters.subcategory_id = formData.get('subcategory_id') || '';
+                currentFilters.product_id = formData.get('product_id') || '';
                 fetchFilteredData();
             });
 
@@ -99,6 +119,37 @@
                 var tableHTML = printContent.outerHTML;
                 var today = new Date().toISOString().split('T')[0];
 
+                // Build filter summary string
+                var filterParts = [];
+                if (currentFilters.from_date || currentFilters.to_date) {
+                    var dateRange = '';
+                    if (currentFilters.from_date) dateRange += 'From: ' + currentFilters.from_date;
+                    if (currentFilters.to_date) dateRange += ' To: ' + currentFilters.to_date;
+                    if (dateRange) filterParts.push(dateRange);
+                }
+                if (currentFilters.semester_id) {
+                    var semesterText = document.querySelector('#filter_semester option[value="' + currentFilters.semester_id + '"]');
+                    if (semesterText) filterParts.push('Semester: ' + semesterText.textContent.trim());
+                }
+                if (currentFilters.department_id) {
+                    var deptText = document.querySelector('#filter_department option[value="' + currentFilters.department_id + '"]');
+                    if (deptText) filterParts.push('Department: ' + deptText.textContent.trim());
+                }
+                if (currentFilters.user_id) {
+                    var userText = document.querySelector('#filter_user option[value="' + currentFilters.user_id + '"]');
+                    if (userText) filterParts.push('User: ' + userText.textContent.trim());
+                }
+                if (currentFilters.subcategory_id) {
+                    var subcatText = document.querySelector('#filter_subcategory option[value="' + currentFilters.subcategory_id + '"]');
+                    if (subcatText) filterParts.push('Subcategory: ' + subcatText.textContent.trim());
+                }
+                if (currentFilters.product_id) {
+                    var prodText = document.querySelector('#filter_product option[value="' + currentFilters.product_id + '"]');
+                    if (prodText) filterParts.push('Product: ' + prodText.textContent.trim());
+                }
+
+                var filterSummary = filterParts.length > 0 ? filterParts.join(' | ') : 'All Records';
+
                 var printWindow = window.open('', '', 'height=600,width=800');
                 printWindow.document.write('<html><head><title>Purchase Report</title>');
                 printWindow.document.write('<style>');
@@ -107,6 +158,7 @@
                 printWindow.document.write('.mb-4 { margin-bottom: 20px; }');
                 printWindow.document.write('.mb-1 { margin-bottom: 5px; }');
                 printWindow.document.write('.mb-0 { margin-bottom: 0; }');
+                printWindow.document.write('.filter-info { margin-top: 10px; font-size: 14px; color: #555; }');
                 printWindow.document.write('img { width: 80px; }');
                 printWindow.document.write('h2 { margin: 10px 0 5px; }');
                 printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
@@ -119,6 +171,7 @@
                 printWindow.document.write('<img src="{{ asset('backend/assets/images/bubt.png') }}" alt="BUBT Logo">');
                 printWindow.document.write('<h2 class="mb-1">Purchase Report</h2>');
                 printWindow.document.write('<p class="mb-0">Date: ' + today + '</p>');
+                printWindow.document.write('<p class="filter-info">Filters: ' + filterSummary + '</p>');
                 printWindow.document.write('</div>');
                 printWindow.document.write(tableHTML);
                 printWindow.document.write('</body></html>');
