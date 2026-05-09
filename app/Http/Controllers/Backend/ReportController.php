@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\DamageProduct;
 use App\Models\Department;
+use App\Models\Issue;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Purchase;
@@ -13,6 +15,7 @@ use App\Models\ReturnPurchase;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Semester;
+use App\Models\User;
 use App\Models\WareHouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -36,6 +39,162 @@ class ReportController extends Controller
         return view('admin.backend.report.purchase_report', compact('purchases', 'semesters', 'departments', 'subcategories', 'products'));
     }
 
+    public function DamageProductReport()
+    {
+        $damageProducts = DamageProduct::with(['damageProductItem.product', 'semester'])->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        $semesters = Semester::all();
+        $products = Product::all();
+        return view('admin.backend.report.damage_product_report', compact('damageProducts', 'semesters', 'products', 'latestPrices'));
+    }
+
+
+    public function IssueReport()
+    {
+        $issues = Issue::with(['issueItems.product', 'semester', 'department', 'user.department', 'issuedByUser'])->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        $semesters = Semester::all();
+        $departments = Department::all();
+        $products = Product::all();
+        $users = User::all();
+        return view('admin.backend.report.issue_report', compact('issues', 'semesters', 'departments', 'products', 'users', 'latestPrices'));
+    }
+
+    public function FilterIssues(Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $semesterId = $request->input('semester_id');
+        $departmentId = $request->input('department_id');
+        $userId = $request->input('user_id');
+        $issuedBy = $request->input('issued_by');
+        $productId = $request->input('product_id');
+
+        $query = Issue::with(['issueItems.product', 'semester', 'department', 'user.department', 'issuedByUser']);
+
+        if ($fromDate && $toDate) {
+            $startDate = Carbon::parse($fromDate)->startOfDay();
+            $endDate = Carbon::parse($toDate)->endOfDay();
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($fromDate) {
+            $query->whereDate('date', '>=', Carbon::parse($fromDate)->toDateString());
+        } elseif ($toDate) {
+            $query->whereDate('date', '<=', Carbon::parse($toDate)->toDateString());
+        }
+
+        if ($semesterId) {
+            $query->where('semester_id', $semesterId);
+        }
+
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        if ($issuedBy) {
+            $query->where('issued_by', $issuedBy);
+        }
+
+        if ($productId) {
+            $query->whereHas('issueItems', function ($itemQuery) use ($productId) {
+                $itemQuery->where('product_id', $productId);
+            });
+        }
+
+        $issues = $query->latest('date')->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        return response()->json(['issues' => $issues, 'latestPrices' => $latestPrices]);
+    }
+
+
+    public function FilterDamageProducts(Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+        $semesterId = $request->input('semester_id');
+        $productId = $request->input('product_id');
+
+        $query = DamageProduct::with(['damageProductItem.product', 'semester']);
+
+        if ($fromDate && $toDate) {
+            $startDate = Carbon::parse($fromDate)->startOfDay();
+            $endDate = Carbon::parse($toDate)->endOfDay();
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($fromDate) {
+            $query->whereDate('date', '>=', Carbon::parse($fromDate)->toDateString());
+        } elseif ($toDate) {
+            $query->whereDate('date', '<=', Carbon::parse($toDate)->toDateString());
+        }
+
+        if ($semesterId) {
+            $query->where('semester_id', $semesterId);
+        }
+
+        if ($productId) {
+            $query->whereHas('damageProductItem', function ($itemQuery) use ($productId) {
+                $itemQuery->where('product_id', $productId);
+            });
+        }
+
+        $damageProducts = $query->latest('date')->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        return response()->json(['damageProducts' => $damageProducts, 'purchasePrices' => $latestPrices]);
+    }
     // End Method
 
     public function FilterPurchases(Request $request)

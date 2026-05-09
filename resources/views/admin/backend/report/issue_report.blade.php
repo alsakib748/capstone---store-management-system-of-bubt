@@ -3,10 +3,11 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const form = document.getElementById('purchaseFilterForm');
-                const tbody = document.querySelector('#example tbody');
-                const endpoint = "{{ route('filter-purchases') }}";
-                var purchases = {!! json_encode($purchases->toArray()) !!};
+                const form = document.getElementById('issueFilterForm');
+                const tbody = document.querySelector('#issueTable tbody');
+                const endpoint = "{{ route('filter-issues') }}";
+                var issues = {!! json_encode($issues) !!};
+                var latestPrices = {!! json_encode($latestPrices->toArray()) !!};
                 var usersEndpointBase = "{{ url('/get/users/by/department') }}";
 
                 if (!form || !tbody) {
@@ -91,7 +92,7 @@
                     semester_id: '',
                     department_id: '',
                     user_id: '',
-                    subcategory_id: '',
+                    issued_by: '',
                     product_id: ''
                 };
 
@@ -105,14 +106,24 @@
                     currentFilters.semester_id = formData.get('semester_id') || '';
                     currentFilters.department_id = formData.get('department_id') || '';
                     currentFilters.user_id = formData.get('user_id') || '';
-                    currentFilters.subcategory_id = formData.get('subcategory_id') || '';
+                    currentFilters.issued_by = formData.get('issued_by') || '';
                     currentFilters.product_id = formData.get('product_id') || '';
                     fetchFilteredData();
                 });
 
+                // Initialize totals on page load
+                updateSummaryDisplay();
+
                 // Print function
                 window.printTable = function() {
                     var today = new Date().toISOString().split('T')[0];
+
+                    function getIssuedByName(issue) {
+                        return (issue.issuedByUser && issue.issuedByUser.name) ||
+                            (issue.issued_by_user && issue.issued_by_user.name) ||
+                            (issue.user && issue.user.name) ||
+                            '-';
+                    }
 
                     // Build filter summary string
                     var filterParts = [];
@@ -137,10 +148,10 @@
                             .user_id + '"]');
                         if (userText) filterParts.push('User: ' + userText.textContent.trim());
                     }
-                    if (currentFilters.subcategory_id) {
-                        var subcatText = document.querySelector('#filter_subcategory option[value="' +
-                            currentFilters.subcategory_id + '"]');
-                        if (subcatText) filterParts.push('Subcategory: ' + subcatText.textContent.trim());
+                    if (currentFilters.issued_by) {
+                        var issuedText = document.querySelector('#filter_issued_by option[value="' + currentFilters
+                            .issued_by + '"]');
+                        if (issuedText) filterParts.push('Issued By: ' + issuedText.textContent.trim());
                     }
                     if (currentFilters.product_id) {
                         var prodText = document.querySelector('#filter_product option[value="' + currentFilters
@@ -150,65 +161,77 @@
 
                     var filterSummary = filterParts.length > 0 ? filterParts.join(' | ') : 'All Records';
 
-                    // Build table HTML from current `purchases` data (ensures filtered results are used)
+                    // Build table HTML from current `issues` data (ensures filtered results are used)
                     var tableHTML = '<table style="width:100%; border-collapse: collapse;">';
                     tableHTML += '<thead><tr>' +
                         '<th>SL</th>' +
                         '<th>Date</th>' +
-                        '<th>Tracking No</th>' +
-                        '<th>Note No</th>' +
+                        '<th>Product</th>' +
+                        '<th>Issued By</th>' +
+                        '<th>User</th>' +
                         '<th>Semester</th>' +
                         '<th>Department</th>' +
                         '<th>Quantity</th>' +
                         '<th>Unit Price</th>' +
-                        '<th>Status</th>' +
-                        '<th>Grand Total</th>' +
+                        '<th>Total Value</th>' +
                         '</tr></thead><tbody>';
 
-                    var totalItems = purchases.length || 0;
+                    var totalItems = 0;
                     var totalQty = 0;
-                    var grandPrice = 0;
+                    var grandTotal = 0;
 
-                    for (var i = 0; i < (purchases.length || 0); i++) {
-                        var p = purchases[i];
-                        var items = p.purchase_items || p.purchaseItems || [];
-                        var qty = 0;
-                        var sumUnit = 0;
+                    for (var i = 0; i < (issues.length || 0); i++) {
+                        var issue = issues[i];
+                        var items = issue.issue_items || issue.issueItems || [];
+
                         for (var j = 0; j < items.length; j++) {
-                            qty += parseFloat(items[j].quantity) || 0;
-                            sumUnit += parseFloat(items[j].net_unit_cost) || 0;
+                            totalItems++;
+                            var item = items[j];
+                            var qty = parseFloat(item.qty) || 0;
+                            var productId = item.product_id || (item.product ? item.product.id : null);
+                            var price = productId && latestPrices[productId] ? parseFloat(latestPrices[productId]
+                                .net_unit_cost) || 0 : 0;
+                            var totalValue = qty * price;
+
+                            var productName = item.product ? item.product.name : '-';
+                            var issuedByName = getIssuedByName(issue);
+                            var semesterText = issue.semester ? (issue.semester.code ? issue.semester.code + ' : ' :
+                                '') + (issue.semester.name || '') : '-';
+
+                            var user = issue.user ? issue.user.name : '-';
+                            var departmentName = issue.department ? issue.department.name : ((issue.user && issue
+                                .user.department) ? issue.user.department.name : '-');
+
+                            tableHTML += '<tr>' +
+                                '<td>' + totalItems + '</td>' +
+                                '<td>' + (issue.date || 'N/A') + '</td>' +
+                                '<td>' + productName + '</td>' +
+                                '<td>' + issuedByName + '</td>' +
+                                '<td>' + user + '</td>' +
+                                '<td>' + semesterText + '</td>' +
+                                '<td>' + departmentName + '</td>' +
+                                '<td>' + qty + '</td>' +
+                                '<td>TK ' + price.toFixed(2) + '</td>' +
+                                '<td>TK ' + totalValue.toFixed(2) + '</td>' +
+                                '</tr>';
+
+                            totalQty += qty;
+                            grandTotal += totalValue;
                         }
-                        var avgUnit = items.length ? (sumUnit / items.length) : 0;
-
-                        tableHTML += '<tr>' +
-                            '<td>' + (i + 1) + '</td>' +
-                            '<td>' + (p.date || 'N/A') + '</td>' +
-                            '<td>' + (p.tracking_no || '-') + '</td>' +
-                            '<td>' + (p.note_no || '-') + '</td>' +
-                            '<td>' + ((p.semester && ((p.semester.code ? p.semester.code + " : " : "") + (p.semester
-                                .name || ""))) || '-') + '</td>' +
-                            '<td>' + (p.department ? p.department.name : '-') + '</td>' +
-                            '<td>' + qty + '</td>' +
-                            '<td>' + avgUnit.toFixed(2) + '</td>' +
-                            '<td>' + (p.status || 'N/A') + '</td>' +
-                            '<td>' + (p.grand_total ? parseFloat(p.grand_total).toFixed(2) : '0.00') + '</td>' +
-                            '</tr>';
-
-                        totalQty += qty;
-                        grandPrice += parseFloat(p.grand_total) || 0;
                     }
 
                     tableHTML += '</tbody></table>';
 
                     var printWindow = window.open('', '', 'height=800,width=1000');
-                    printWindow.document.write('<html><head><title>Purchase Report</title>');
+                    printWindow.document.write('<html><head><title>Issue Report</title>');
                     printWindow.document.write('<style>');
                     printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }');
                     printWindow.document.write('.text-center { text-align: center; }');
                     printWindow.document.write('.mb-4 { margin-bottom: 20px; }');
                     printWindow.document.write('.mb-1 { margin-bottom: 5px; }');
                     printWindow.document.write('.mb-0 { margin-bottom: 0; }');
-                    printWindow.document.write('.filter-info { margin-top: 10px; font-size: 14px; color: #555; }');
+                    printWindow.document.write(
+                        '.filter-info { margin-top: 10px; font-size: 14px; color: #555; }');
                     printWindow.document.write('img { width: 80px; }');
                     printWindow.document.write('h2 { margin: 10px 0 5px; }');
                     printWindow.document.write(
@@ -221,7 +244,7 @@
                     printWindow.document.write('<div class="text-center mb-4">');
                     printWindow.document.write(
                         '<img src="{{ asset('backend/assets/images/bubt.png') }}" alt="BUBT Logo">');
-                    printWindow.document.write('<h2 class="mb-1">Purchase Report</h2>');
+                    printWindow.document.write('<h2 class="mb-1">Issue Report</h2>');
                     printWindow.document.write('<p class="mb-0">Date: ' + today + '</p>');
                     printWindow.document.write('<p class="filter-info">Filters: ' + filterSummary + '</p>');
                     printWindow.document.write('</div>');
@@ -239,7 +262,7 @@
                         totalQty + '</td></tr>');
                     printWindow.document.write(
                         '<tr><td style="background:#f9f9f9;padding:8px;border:1px solid #ddd;"><strong>Grand Total</strong></td><td style="text-align:right;padding:8px;border:1px solid #ddd;">TK ' +
-                        grandPrice.toFixed(2) + '</td></tr>');
+                        grandTotal.toFixed(2) + '</td></tr>');
                     printWindow.document.write('</table></div>');
 
                     printWindow.document.write('</body></html>');
@@ -258,78 +281,115 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            updateTable(data.purchases || []);
+                            latestPrices = data.latestPrices || {};
+                            updateTable(data.issues || []);
                         })
                         .catch(error => console.error('Error fetching data:', error));
                 }
 
                 function updateTable(data) {
-                    purchases = data;
+                    issues = data || [];
                     tbody.innerHTML = '';
                     let sl = 1;
 
-                    if (!purchases.length) {
+                    function getIssuedByName(issue) {
+                        return (issue.issuedByUser && issue.issuedByUser.name) ||
+                            (issue.issued_by_user && issue.issued_by_user.name) ||
+                            (issue.user && issue.user.name) ||
+                            '-';
+                    }
+
+                    if (!issues.length) {
                         tbody.innerHTML =
-                            '<tr><td colspan="11" class="text-center">No purchase data found for selected filters.</td></tr>';
+                            '<tr><td colspan="10" class="text-center">No issue data found for selected filters.</td></tr>';
                         return;
                     }
 
-                    purchases.forEach(purchase => {
-                        const items = purchase.purchase_items || [];
-                        const totalQty = items.reduce(function(sum, item) {
-                            return sum + (parseFloat(item.quantity) || 0);
-                        }, 0);
-                        const avgUnitPrice = items.length ? (items.reduce(function(sum, item) {
-                            return sum + (parseFloat(item.net_unit_cost) || 0);
-                        }, 0) / items.length) : 0;
+                    issues.forEach(issue => {
+                        const items = issue.issue_items || issue.issueItems || [];
 
-                        const semesterText = purchase.semester ? (purchase.semester.code ? purchase.semester
-                            .code + ' : ' : '') + (purchase.semester.name || '') : '-';
+                        items.forEach(item => {
+                            const qty = parseFloat(item.qty) || 0;
+                            const productId = item.product_id || (item.product ? item.product
+                                .id :
+                                null);
+                            const price = productId && latestPrices[productId] ? parseFloat(
+                                latestPrices[productId].net_unit_cost) || 0 : 0;
+                            const totalValue = qty * price;
+                            const productName = item.product ? item.product.name : '-';
+                            const issuedByName = getIssuedByName(issue);
+                            const semesterText = issue.semester ? (issue.semester.code ? issue
+                                .semester
+                                .code + ' : ' : '') + (issue.semester.name || '') : '-';
 
-                        const row = '<tr>' +
-                            '<td>' + sl + '</td>' +
-                            '<td>' + (purchase.date || 'N/A') + '</td>' +
-                            '<td>' + (purchase.tracking_no || '-') + '</td>' +
-                            '<td>' + (purchase.note_no || '-') + '</td>' +
-                            '<td>' + semesterText + '</td>' +
-                            '<td>' + (purchase.department ? purchase.department.name : '-') + '</td>' +
-                            '<td>' + totalQty + '</td>' +
-                            '<td>' + avgUnitPrice.toFixed(2) + '</td>' +
-                            '<td>' + (purchase.status || 'N/A') + '</td>' +
-                            '<td>' + (purchase.grand_total ? parseFloat(purchase.grand_total).toFixed(2) :
-                                '0.00') + '</td>' +
-                            '<td>' +
-                            '<div class="d-flex flex-wrap gap-1">' +
-                            '<a title="Details" href="/details/purchase/' + purchase.id +
-                            '" class="btn btn-info btn-sm">' +
-                            '<span class="mdi mdi-eye-circle mdi-18px"></span>' +
-                            '</a>' +
-                            '<a title="PDF Invoice" href="/invoice/purchase/' + purchase.id +
-                            '" class="btn btn-primary btn-sm">' +
-                            '<span class="mdi mdi-download-circle mdi-18px"></span>' +
-                            '</a>' +
-                            '</div>' +
-                            '</td>' +
-                            '</tr>';
-                        tbody.insertAdjacentHTML('beforeend', row);
-                        sl++;
+                            const row = '<tr>' +
+                                '<td>' + sl + '</td>' +
+                                '<td>' + (issue.date || 'N/A') + '</td>' +
+                                '<td>' + productName + '</td>' +
+                                '<td>' + issuedByName + '</td>' +
+                                '<td>' + (issue.user ? issue.user.name : '-') + '</td>' +
+                                '<td>' + semesterText + '</td>' +
+                                '<td>' + (issue.department ? issue.department.name : ((issue.user &&
+                                    issue.user.department) ? issue.user.department.name : '-')) +
+                                '</td>' +
+                                '<td>' + qty + '</td>' +
+                                '<td>TK ' + price.toFixed(2) + '</td>' +
+                                '<td>TK ' + totalValue.toFixed(2) + '</td>' +
+                                '</tr>';
+                            tbody.insertAdjacentHTML('beforeend', row);
+                            sl++;
+                        });
                     });
+
+                    updateSummaryDisplay();
+                }
+
+                function updateSummaryDisplay() {
+                    var totalItems = 0;
+                    var totalQty = 0;
+                    var grandTotal = 0;
+
+                    for (var i = 0; i < (issues.length || 0); i++) {
+                        var issue = issues[i];
+                        var items = issue.issue_items || issue.issueItems || [];
+                        for (var j = 0; j < items.length; j++) {
+                            totalItems++;
+                            var qty = parseFloat(items[j].qty) || 0;
+                            var productId = items[j].product_id || (items[j].product ? items[j].product.id :
+                                null);
+                            var price = productId && latestPrices[productId] ? parseFloat(latestPrices[
+                                    productId]
+                                .net_unit_cost) || 0 : 0;
+                            totalQty += qty;
+                            grandTotal += qty * price;
+                        }
+                    }
+
+                    var totalItemsDisplay = document.getElementById('totalItemsDisplay');
+                    var totalQtyDisplay = document.getElementById('totalQtyDisplay');
+                    var grandTotalDisplay = document.getElementById('grandTotalDisplay');
+
+                    if (totalItemsDisplay) {
+                        totalItemsDisplay.textContent = totalItems;
+                    }
+                    if (totalQtyDisplay) {
+                        totalQtyDisplay.textContent = totalQty;
+                    }
+                    if (grandTotalDisplay) {
+                        grandTotalDisplay.textContent = 'TK ' + grandTotal.toFixed(2);
+                    }
                 }
             });
         </script>
     @endpush
     <div class="page-content m-2">
         <div class="container">
-            {{-- @include('admin.backend.report.body.report_top') --}}
         </div>
-        {{-- /// end Container  --}}
 
         <div class="card pt-3">
-
-            {{-- <nav class="navbar navbar-expand-lg bg-dark"> --}}
             <div class="container-fluid">
 
-                <form id="purchaseFilterForm" action="javascript:void(0);">
+                <form id="issueFilterForm" action="javascript:void(0);">
 
                     <div class="row">
 
@@ -354,6 +414,7 @@
                                 @endforelse
                             </select>
                         </div>
+
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
                             <label for="filter_department" class="form-label">Department</label>
                             <select id="filter_department" name="department_id" class="form-control large-select select2"
@@ -365,6 +426,7 @@
                                 @endforelse
                             </select>
                         </div>
+
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
                             <label for="filter_user" class="form-label">User</label>
                             <select id="filter_user" name="user_id" class="form-control large-select select2"
@@ -372,17 +434,19 @@
                                 <option value="" selected disabled>Select User</option>
                             </select>
                         </div>
+
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_subcategory" class="form-label">Subcategory</label>
-                            <select id="filter_subcategory" name="subcategory_id" class="form-control large-select select2"
-                                data-placeholder="Subcategory">
-                                <option value="" selected disabled>Subcategory</option>
-                                @forelse($subcategories as $key => $value)
-                                    <option value="{{ $value->id }}">{{ $value->subcategory_name }}</option>
+                            <label for="filter_issued_by" class="form-label">Issued By</label>
+                            <select id="filter_issued_by" name="issued_by" class="form-control large-select select2"
+                                data-placeholder="Issued By">
+                                <option value="" selected disabled>Issued By</option>
+                                @forelse($users as $key => $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @empty
                                 @endforelse
                             </select>
                         </div>
+
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
                             <label for="filter_product" class="form-label">Product</label>
                             <select id="filter_product" name="product_id" class="form-control large-select select2"
@@ -396,7 +460,7 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 col-12 mt-3 mb-3">
-                            <button type="submit" class="btn btn-primary">Filter Purchase</button>
+                            <button type="submit" class="btn btn-primary">Filter Issues</button>
                             <button type="button" class="btn btn-success ms-2" onclick="printTable()">Print</button>
                         </div>
 
@@ -405,191 +469,114 @@
                 </form>
 
             </div>
-            {{-- </nav> --}}
 
             <div class="card-body">
                 <!-- Report Header -->
                 <div class="text-center mb-4 print-header">
                     <img src="{{ asset('backend/assets/images/bubt.png') }}" alt="BUBT Logo"
                         style="width: 80px; height: auto; margin-bottom: 10px;">
-                    <h2 class="mb-1">Purchase Report</h2>
+                    <h2 class="mb-1">Issue Report</h2>
                     <p class="mb-0">Date: {{ date('Y-m-d') }}</p>
                 </div>
 
                 <div class="table-responsive">
-                    <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap5">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <table id="example" class="table table-striped table-bordered dataTable"
-                                    style="width: 100%;" role="grid" aria-describedby="example_info">
-                                    <thead>
-                                        <tr role="row">
-                                            <th>SL</th>
-                                            <th>Date</th>
-                                            <th>Tracking No</th>
-                                            <th>Note No</th>
-                                            <th>Semester</th>
-                                            <th>Department</th>
-                                            <th>Quantity</th>
-                                            <th>Unti Price</th>
-                                            <th>Status</th>
-                                            <th>Grand Total</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($purchases as $key => $purchase)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($purchase->date)->format('Y-m-d') }}</td>
-                                                <td>{{ $purchase->tracking_no ?? '-' }}</td>
-                                                <td>{{ $purchase->note_no ?? '-' }}</td>
-                                                <td>{{ $purchase->semester ? ($purchase->semester->code ? $purchase->semester->code . ' : ' : '') . $purchase->semester->name : '-' }}
-                                                </td>
-                                                <td>{{ $purchase->department->name ?? '-' }}</td>
-                                                <td>{{ $purchase->purchaseItems->sum('quantity') }}</td>
-                                                <td>{{ number_format($purchase->purchaseItems->avg('net_unit_cost') ?? 0, 2) }}
-                                                </td>
-                                                <td>{{ $purchase->status ?? 'N/A' }}</td>
-                                                <td>{{ number_format($purchase->grand_total ?? 0, 2) }}</td>
-                                                <td>
-                                                    <div class="d-flex flex-wrap gap-1">
-                                                        <a title="Details"
-                                                            href="{{ route('details.purchase', $purchase->id) }}"
-                                                            class="btn btn-info btn-sm"> <span
-                                                                class="mdi mdi-eye-circle mdi-18px"></span> </a>
-                                                        <a title="PDF Invoice"
-                                                            href="{{ route('invoice.purchase', $purchase->id) }}"
-                                                            class="btn btn-primary btn-sm"> <span
-                                                                class="mdi mdi-download-circle mdi-18px"></span> </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
+                    <table id="issueTable" class="table table-striped table-bordered dataTable" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>SL</th>
+                                <th>Date</th>
+                                <th>Product</th>
+                                <th>Issued By</th>
+                                <th>User</th>
+                                <th>Semester</th>
+                                <th>Department</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($issues as $key => $issue)
+                                @foreach ($issue->issueItems as $key => $item)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($issue->date)->format('Y-m-d') }}</td>
+                                        <td>{{ $item->product->name ?? '-' }}</td>
+                                        <td>{{ $issue->issuedByUser?->name ?? '-' }}</td>
+                                        <td>{{ $issue->user?->name ?? '-' }}</td>
+                                        <td>{{ $issue->semester ? ($issue->semester->code ? $issue->semester->code . ' : ' : '') . $issue->semester->name : '-' }}
+                                        </td>
+                                        <td>{{ $issue->department?->name ?? ($issue->user?->department?->name ?? '-') }}
+                                        </td>
+                                        <td>{{ $item->qty }}</td>
+                                        <td>TK {{ number_format($latestPrices[$item->product_id]->net_unit_cost ?? 0, 2) }}
+                                        </td>
+                                        <td>TK
+                                            {{ number_format($item->qty * ($latestPrices[$item->product_id]->net_unit_cost ?? 0) ?? 0, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
 
-                                </table>
+                    @php
+                        $totalItems = collect($issues)->reduce(function ($carry, $issue) {
+                            return $carry + ($issue->issueItems ? $issue->issueItems->count() : 0);
+                        }, 0);
+                        $totalQty = collect($issues)->reduce(function ($carry, $issue) {
+                            return $carry + ($issue->issueItems ? $issue->issueItems->sum('qty') : 0);
+                        }, 0);
+                        $grandTotal = collect($issues)->reduce(function ($carry, $issue) use ($latestPrices) {
+                            $total = 0;
+                            if ($issue->issueItems) {
+                                foreach ($issue->issueItems as $item) {
+                                    $price = isset($latestPrices[$item->product_id])
+                                        ? $latestPrices[$item->product_id]->net_unit_cost
+                                        : 0;
+                                    $total += $item->qty * $price;
+                                }
+                            }
+                            return $carry + $total;
+                        }, 0);
+                    @endphp
 
-                                @php
-                                    $totalItems = $purchases->count();
-                                    $totalQty = $purchases->reduce(function ($carry, $purchase) {
-                                        return $carry + ($purchase->purchaseItems->sum('quantity') ?? 0);
-                                    }, 0);
-                                    $grandTotal = $purchases->sum('grand_total');
-                                @endphp
-
-                                <div class="mt-3" style="text-align: right;">
-                                    <table style="width:320px; margin-left: auto;" class="table table-bordered">
-                                        <tr>
-                                            <td><strong>Total Items</strong></td>
-                                            <td class="text-end">{{ $totalItems }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Total Qty</strong></td>
-                                            <td class="text-end">{{ $totalQty }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Grand Total</strong></td>
-                                            <td class="text-end">TK {{ number_format($grandTotal ?? 0, 2) }}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-
-                        </div>
-
+                    <div class="mt-3" style="text-align: right;">
+                        <table style="width: 320px; margin-left: auto;" class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Total Items</strong></td>
+                                    <td class="text-end" id="totalItemsDisplay">{{ $totalItems }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Qty</strong></td>
+                                    <td class="text-end" id="totalQtyDisplay">{{ $totalQty }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Grand Total</strong></td>
+                                    <td class="text-end" id="grandTotalDisplay">TK {{ number_format($grandTotal ?? 0, 2) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-
                 </div>
             </div>
-
-
-
-
-
         </div>
-        {{-- /// End Card --}}
-
     </div>
 
     <style>
-        /* Ensure the navbar container is a positioning context */
-        .navbar .container-fluid {
-            position: relative;
-        }
-
-        /* Style the filter container */
-        .filter-container {
-            position: relative;
-            display: inline-block;
-            width: 200px;
-            /* Adjust width to fit the select */
-            margin-left: 10px;
-        }
-
-        /* Style the select element */
         .large-select {
             background-color: #343a40;
-            /* Match navbar background */
             color: white;
             border: 1px solid #495057;
             padding: 5px 10px;
             width: 100%;
             appearance: none;
-            /* Remove default dropdown arrow */
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 12px;
         }
 
-        /* Style the filter icon */
-        .mdi-filter-menu {
-            position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-            pointer-events: none;
-            /* Prevent icon from interfering with select */
-        }
-
-        /* Style the custom dropdown */
-        .custom-dropdown {
-            display: none;
-            /* Initially hidden */
-            position: absolute;
-            top: 100%;
-            /* Position below the select */
-            right: 0;
-            /* Align to the right of the filter container */
-            width: 250px;
-            /* Fixed width for consistency */
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            /* Ensure it appears above other elements */
-        }
-
-        /* Ensure the dropdown fits within the navbar on smaller screens */
-        @media (max-width: 991px) {
-            .filter-container {
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .custom-dropdown {
-                right: auto;
-                left: 0;
-                width: 100%;
-            }
-        }
-
-        /* Print styles - hide action column */
         @media print {
 
             .btn,

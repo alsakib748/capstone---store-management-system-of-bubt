@@ -243,6 +243,15 @@
                             </li>
 
                             <li>
+                                <a href="{{ route('damage.product.report') }}" class="tp-link">Damage Product Report
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('issue.report') }}" class="tp-link">Issue Report </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('all.report') }}" class="tp-link">All Reports </a>
                             </li>
 

@@ -249,11 +249,19 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/purchase/report', 'PurchaseReport')->name('purchase.report');
 
+        Route::get('/damage/product/report', 'DamageProductReport')->name('damage.product.report');
+
+        Route::get('/issue/report', 'IssueReport')->name('issue.report');
+
         Route::get('/purchase/return/report', 'PurchaseReturnReport')->name('purchase.return.report');
 
         Route::get('/product/stock/report', 'ProductStockReport')->name('product.stock.report');
 
         Route::get('/filter-purchases', 'FilterPurchases')->name('filter-purchases');
+
+        Route::get('/filter-damage-products', 'FilterDamageProducts')->name('filter-damage-products');
+
+        Route::get('/filter-issues', 'FilterIssues')->name('filter-issues');
 
     });
 

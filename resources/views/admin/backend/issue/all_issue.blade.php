@@ -47,7 +47,7 @@
                                                 <td>
                                                     {{ $item->semester ? ($item->semester->code ? $item->semester->code . ' : ' : '') . $item->semester->name : '-' }}
                                                 </td>
-                                                <td>{{ $item?->department?->name ?? '-' }}</td>
+                                                <td>{{ $item?->department?->name ?? $item?->user?->department?->name }}</td>
                                                 <td>{{ $item?->issuedByUser?->name ?? '-' }}</td>
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-1">
