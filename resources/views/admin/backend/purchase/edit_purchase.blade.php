@@ -142,6 +142,7 @@
                                                             <th>Qty</th>
                                                             <th>Discount</th>
                                                             <th>Subtotal</th>
+                                                            <th>Expiry Date</th>
                                                             <th>Action</th>
                                                         </tr>
                                                     </thead>
@@ -211,6 +212,20 @@
                                                                 <input type="hidden"
                                                                     name="products[{{ $item->product->id }}][subtotal]"
                                                                     value="{{ $item->subtotal }}">
+
+                                                                @if($item->product->fixed_asset == 1)
+                                                                <td>
+                                                                    <input type="date" class="form-control"
+                                                                        name="products[{{ $item->product->id }}][expiry_date]"
+                                                                        value="{{ $item->expiry_date }}"
+                                                                        style="max-width: 150px;">
+                                                                </td>
+                                                                @else
+                                                                <td style="color:#999">N/A</td>
+                                                                <input type="hidden"
+                                                                    name="products[{{ $item->product->id }}][expiry_date]"
+                                                                    value="">
+                                                                @endif
 
                                                                 <td><button type="button"
                                                                         class="btn btn-danger btn-sm remove-item"

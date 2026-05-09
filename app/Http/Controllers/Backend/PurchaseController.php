@@ -56,11 +56,23 @@ class PurchaseController extends Controller
             ->when($warehouseId, function ($q) use ($warehouseId) {
                 $q->where('warehouse_id', $warehouseId);
             })
-            ->select('id', 'name', 'code', 'sku', 'price', 'product_qty')
+            ->select('id', 'name', 'code', 'sku', 'price', 'product_qty', 'fixed_asset')
             ->limit(10)
             ->get();
 
-        return response()->json($products);
+        $formattedProducts = $products->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'code' => $product->code,
+                'sku' => $product->sku,
+                'price' => $product->price,
+                'product_qty' => $product->product_qty,
+                'fixed_asset' => $product->fixed_asset ?? 0,
+            ];
+        });
+
+        return response()->json($formattedProducts);
     }
     // End Method
 
@@ -133,6 +145,7 @@ class PurchaseController extends Controller
                     'quantity' => $productData['quantity'],
                     'discount' => $productData['discount'] ?? 0,
                     'subtotal' => $subtotal,
+                    'expiry_date' => $productData['expiry_date'] ?? null,
                 ]);
 
                 $product->increment('product_qty', $productData['quantity']);
@@ -229,6 +242,7 @@ class PurchaseController extends Controller
                     'quantity' => $productData['quantity'],
                     'discount' => $productData['discount'] ?? 0,
                     'subtotal' => $productData['subtotal'],
+                    'expiry_date' => $productData['expiry_date'] ?? null,
                 ]);
 
                 /// Update product stock by incremeting new quantity

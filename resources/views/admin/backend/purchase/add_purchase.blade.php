@@ -139,10 +139,11 @@
                                                             <th>Qty</th>
                                                             <th>Discount</th>
                                                             <th>Subtotal</th>
+                                                            <th>Expiry Date</th>
                                                             <th>Action</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody>
+                                                    <tbody id="orderItemsTableBody">
 
                                                     </tbody>
                                                 </table>

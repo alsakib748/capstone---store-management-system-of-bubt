@@ -46,7 +46,7 @@
                                     </tr>
                                     <tr>
                                         <td class="text-muted fw-medium">Department:</td>
-                                        <td>{{ $issue->department->name ?? '-' }}</td>
+                                        <td>{{ $issue?->department?->name ?? $issue?->user?->department?->name }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-muted fw-medium">Issued By:</td>
@@ -63,6 +63,40 @@
                 </div>
 
                 <div class="col-lg-6">
+                    {{-- Requisition Items --}}
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Requisition Items</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless table-centered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Code</th>
+                                            <th>Req Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($issue->requisition->requisitionItems ?? [] as $item)
+                                            <tr>
+                                                <td>{{ $item->product->name ?? '-' }}</td>
+                                                <td>{{ $item->product->code ?? '-' }}</td>
+                                                <td>{{ $item->qty }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center">No requisition items</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Issue Items --}}
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">Issue Items</h5>
@@ -74,7 +108,7 @@
                                         <tr>
                                             <th>Product</th>
                                             <th>Code</th>
-                                            <th>Qty</th>
+                                            <th>Issued Qty</th>
                                         </tr>
                                     </thead>
                                     <tbody>

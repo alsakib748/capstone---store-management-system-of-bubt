@@ -28,6 +28,16 @@ class Requisition extends Model
         return $this->hasMany(RequisitionItem::class);
     }
 
+    public function issues()
+    {
+        return $this->hasMany(Issue::class, 'requisition_id');
+    }
+
+    public function issue()
+    {
+        return $this->hasOne(Issue::class, 'requisition_id');
+    }
+
     // todo: check is this relationship possible
     // public function product()
     // {

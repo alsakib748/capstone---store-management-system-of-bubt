@@ -4,7 +4,7 @@
         <div class="d-flex flex-column-fluid">
             <div class="container-fluid my-4">
                 <div class="d-md-flex align-items-center justify-content-between">
-                    <h3 class="mb-0">Edit Requisition</h3>
+                    <h3 class="mb-0">Place Issues</h3>
                     <div class="text-end my-2 mt-md-0"><a class="btn btn-outline-primary"
                             href="{{ route('all.requisition') }}">Back</a></div>
                 </div>
@@ -15,7 +15,7 @@
                         <form action="{{ route('update.requisition', $editData->id) }}" method="post"
                             enctype="multipart/form-data">
                             @csrf
-
+                            <input type="hidden" name="action" value="issue">
 
                             <div class="row">
                                 <div class="col-xl-12">
@@ -111,13 +111,15 @@
                                                                 <td>
                                                                     <input type="number" class="form-control text-center"
                                                                         name="products[{{ $item->product->id }}][quantity]"
-                                                                        value="{{ $item->qty }}" min="1"
+                                                                        value="{{ $item->qty }}" min="0"
                                                                         style="max-width: 90px;">
                                                                 </td>
 
-                                                                <td><button type="button"
+                                                                <td>
+                                                                    <button type="button"
                                                                         class="btn btn-danger btn-sm remove-item"
-                                                                        data-id="{{ $item->id }}"><span
+                                                                        data-id="{{ $item->id }}" disabled
+                                                                        title="Cannot remove items"><span
                                                                             class="mdi mdi-delete-circle mdi-18px"></span></button>
                                                                 </td>
 
@@ -139,7 +141,7 @@
 
                             <div class="col-xl-12">
                                 <div class="d-flex mt-5 justify-content-end">
-                                    <button class="btn btn-primary me-3" type="submit">Save</button>
+                                    <button class="btn btn-primary me-3" type="submit">Place Issues</button>
                                     <a class="btn btn-secondary" href="{{ route('all.requisition') }}">Cancel</a>
                                 </div>
                             </div>
@@ -150,6 +152,7 @@
         </div>
     </div>
     </div>
+
 
 
     @push('scripts')
@@ -195,7 +198,7 @@
                         <td><input type="text" class="form-control" value="${product.category}" readonly></td>
                         <td><input type="text" class="form-control" value="${product.subcategory}" readonly></td>
                         <td>
-                            <input type="number" class="form-control text-center" name="products[${product.id}][quantity]" value="1" min="1" style="max-width: 90px;">
+                            <input type="number" class="form-control text-center" name="products[${product.id}][quantity]" value="1" min="0" style="max-width: 90px;">
                         </td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-item"><span class="mdi mdi-delete-circle mdi-18px"></span></button></td>
                     `;

@@ -184,9 +184,19 @@ class RequisitionController extends Controller
     public function EditRequisition($id)
     {
         $editData = Requisition::with(['requisitionItems.product', 'user'])->findOrFail($id);
+
+        // Prevent editing if requisition is already issued
+        if ($editData->status === 'issued') {
+            $notification = array(
+                'message' => 'Cannot edit an issued requisition.',
+                'alert-type' => 'error'
+            );
+            return redirect()->route('all.requisition')->with($notification);
+        }
+
         $semesters = Semester::all();
         $users = User::all();
-        $departments = \App\Models\Department::all();
+        $departments = Department::all();
         return view('admin.backend.requisition.edit_requisition', compact('editData', 'semesters', 'users', 'departments'));
     }
     // End Method
@@ -198,11 +208,19 @@ class RequisitionController extends Controller
             'date' => 'required|date',
         ]);
 
+        $action = $request->input('action', 'update');
+
         DB::beginTransaction();
 
         try {
 
             $requisition = Requisition::findOrFail($id);
+
+            // Prevent updating if requisition is already issued
+            if ($requisition->status === 'issued') {
+                throw new \Exception('Cannot update an issued requisition.');
+            }
+
             $roleIds = $this->getRoleIdsForRequisitionUser($request);
 
             // Keep the original user_id - never change it
@@ -216,6 +234,52 @@ class RequisitionController extends Controller
             ]);
 
 
+            // If action is 'issue', create Issue record WITHOUT modifying requisition
+            if ($action === 'issue') {
+                // Create Issue record
+                $issue = Issue::create([
+                    'date' => date('Y-m-d'),
+                    'requisition_id' => $requisition->id,
+                    'user_id' => $requisition->user_id,
+                    'issued_by' => auth()->id(),
+                    'semester_id' => $requisition->semester_id,
+                    'department_id' => $requisition->department_id,
+                    'notes' => $requisition->notes,
+                ]);
+
+                // Create Issue Items from the adjusted quantities in the request
+                foreach ($request->products as $product_id => $productData) {
+                    $qty = intval($productData['quantity']);
+
+                    // Create issue item even for qty 0
+                    IssueItem::create([
+                        'issue_id' => $issue->id,
+                        'product_id' => $product_id,
+                        'qty' => $qty,
+                    ]);
+
+                    // Decrement product stock only if qty > 0
+                    if ($qty > 0) {
+                        $product = Product::find($product_id);
+                        if ($product) {
+                            $product->decrement('product_qty', $qty);
+                        }
+                    }
+                }
+
+                // Update requisition status to issued
+                $requisition->update(['status' => 'issued']);
+
+                DB::commit();
+
+                $notification = array(
+                    'message' => 'Requisition Issued Successfully',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('all.requisition')->with($notification);
+            }
+
+            // Normal update (not issuing) - modify requisition table
             /// Get Old Purchase Items
             $oldRequisitionItems = RequisitionItem::where('requisition_id', $requisition->id)->get();
 
@@ -224,7 +288,6 @@ class RequisitionController extends Controller
                 $product = Product::find($oldItem->product_id);
                 if ($product) {
                     $product->decrement('product_qty', $oldItem->qty);
-                    // Decrement old quantity
                 }
             }
 
@@ -232,7 +295,6 @@ class RequisitionController extends Controller
             RequisitionItem::where('requisition_id', $requisition->id)->delete();
 
             // loop for new products and insert new purchase items
-
             foreach ($request->products as $product_id => $productData) {
                 $product = Product::findOrFail($product_id);
 
@@ -247,10 +309,9 @@ class RequisitionController extends Controller
                     'qty' => $productData['quantity'],
                 ]);
 
-                /// Update product stock by incremeting new quantity
+                /// Update product stock by incrementing new quantity
                 if ($product) {
                     $product->increment('product_qty', $productData['quantity']);
-                    // Increment new quantity
                 }
             }
 
@@ -271,7 +332,7 @@ class RequisitionController extends Controller
 
     public function DetailsRequisition($id)
     {
-        $requisition = Requisition::with(['user', 'semester', 'requisitionItems.product'])->find($id);
+        $requisition = Requisition::with(['user', 'semester', 'requisitionItems.product', 'issue.issueItems.product', 'issue.issuedByUser'])->find($id);
         return view('admin.backend.requisition.requisition_details', compact('requisition'));
 
     }
@@ -299,6 +360,16 @@ class RequisitionController extends Controller
         try {
             DB::beginTransaction();
             $requisition = Requisition::findOrFail($id);
+
+            // Prevent deleting if requisition is already issued
+            if ($requisition->status === 'issued') {
+                $notification = array(
+                    'message' => 'Cannot delete an issued requisition.',
+                    'alert-type' => 'error'
+                );
+                return redirect()->route('all.requisition')->with($notification);
+            }
+
             $requisitionItems = RequisitionItem::where('requisition_id', $id)->get();
 
             foreach ($requisitionItems as $item) {
@@ -328,6 +399,7 @@ class RequisitionController extends Controller
     {
         $request->validate([
             'issue_date' => 'required|date',
+            'items' => 'required|array|min:1',
         ]);
 
         try {
@@ -350,18 +422,23 @@ class RequisitionController extends Controller
                 'notes' => $requisition->notes,
             ]);
 
-            // Create Issue Items from Requisition Items
+            // Get adjusted quantities from request
+            $items = $request->input('items', []);
+
+            // Create Issue Items from Requisition Items with adjusted quantities
             foreach ($requisition->requisitionItems as $item) {
+                $adjustedQty = isset($items[$item->id]) ? max(1, intval($items[$item->id])) : $item->qty;
+
                 IssueItem::create([
                     'issue_id' => $issue->id,
                     'product_id' => $item->product_id,
-                    'qty' => $item->qty,
+                    'qty' => $adjustedQty,
                 ]);
 
                 // Decrement product stock when issued
                 $product = Product::find($item->product_id);
                 if ($product) {
-                    $product->decrement('product_qty', $item->qty);
+                    $product->decrement('product_qty', $adjustedQty);
                 }
             }
 

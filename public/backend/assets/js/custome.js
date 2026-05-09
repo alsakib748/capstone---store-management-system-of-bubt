@@ -61,7 +61,8 @@ document.addEventListener("DOMContentLoaded", function () {
                             data-code="${product.code}"
                             data-name="${product.name}"
                             data-cost="${product.price}"
-                            data-stock="${product.product_qty}">
+                            data-stock="${product.product_qty}"
+                            data-fixed-asset="${product.fixed_asset || 0}">
                             <span class="mdi mdi-text-search"></span>
                             ${product.code} - ${product.name}${skuPart}
                             </a> `;
@@ -92,11 +93,24 @@ document.addEventListener("DOMContentLoaded", function () {
         let productName = productElement.getAttribute("data-name");
         let netUnitCost = parseFloat(productElement.getAttribute("data-cost"));
         let stock = parseInt(productElement.getAttribute("data-stock"));
+        let fixedAsset = parseInt(productElement.getAttribute("data-fixed-asset") || 0);
 
         // Check if product already exists in table
         if (document.querySelector(`tr[data-id="${productId}"]`)) {
             alert("Product already added.");
             return;
+        }
+
+        // Add expiry date field - date input for fixed assets, N/A for others
+        let expiryDateCol = '';
+        if (fixedAsset === 1) {
+            expiryDateCol = `<td>
+              <input type="date" class="form-control expiry-date-input"
+                  name="products[${productId}][expiry_date]" style="width:150px">
+          </td>`;
+        } else {
+            expiryDateCol = `<td style="color:#999">N/A</td>
+              <input type="hidden" name="products[${productId}][expiry_date]" value="">`;
         }
 
         let row = `
@@ -133,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   name="products[${productId}][discount]" value="0" min="0" style="width:100px">
           </td>
           <td class="subtotal">${netUnitCost.toFixed(2)}</td>
+          ${expiryDateCol}
           <td><button class="btn btn-danger btn-sm remove-product"><span class="mdi mdi-delete-circle mdi-18px"></span></button></td>
       </tr>
   `;

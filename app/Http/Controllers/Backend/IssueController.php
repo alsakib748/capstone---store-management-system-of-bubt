@@ -224,7 +224,7 @@ class IssueController extends Controller
 
     public function DetailsIssue($id)
     {
-        $issue = Issue::with(['user', 'semester', 'department', 'issuedByUser', 'issueItems.product'])->find($id);
+        $issue = Issue::with(['user', 'semester', 'department', 'issuedByUser', 'issueItems.product', 'requisition.requisitionItems.product'])->find($id);
         return view('admin.backend.issue.issue_details', compact('issue'));
     }
 
