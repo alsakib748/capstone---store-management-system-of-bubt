@@ -253,6 +253,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/issue/report', 'IssueReport')->name('issue.report');
 
+        Route::get('/stock/report', 'StockReport')->name('stock.report');
+
         Route::get('/purchase/return/report', 'PurchaseReturnReport')->name('purchase.return.report');
 
         Route::get('/product/stock/report', 'ProductStockReport')->name('product.stock.report');
@@ -262,6 +264,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/filter-damage-products', 'FilterDamageProducts')->name('filter-damage-products');
 
         Route::get('/filter-issues', 'FilterIssues')->name('filter-issues');
+
+        Route::get('/filter-stock', 'FilterStock')->name('filter-stock');
 
     });
 

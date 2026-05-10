@@ -252,6 +252,10 @@
                             </li>
 
                             <li>
+                                <a href="{{ route('stock.report') }}" class="tp-link">Stock Report </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('all.report') }}" class="tp-link">All Reports </a>
                             </li>
 

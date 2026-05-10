@@ -86,6 +86,85 @@ class ReportController extends Controller
         return view('admin.backend.report.issue_report', compact('issues', 'semesters', 'departments', 'products', 'users', 'latestPrices'));
     }
 
+
+    public function StockReport()
+    {
+        $subcategories = Subcategory::all();
+        $products = Product::with(['category', 'subcategory', 'brand'])->get();
+        $brands = \App\Models\Brand::all();
+
+        // Get latest purchase price for each product from purchase_items table
+        $latestPrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $prices = DB::table('purchase_items as pi')
+            ->joinSub($latestPrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        return view('admin.backend.report.stock_wise_report', compact('subcategories', 'products', 'brands', 'prices'));
+    }
+
+    public function FilterStock(Request $request)
+    {
+        $subcategoryId = $request->input('subcategory_id');
+        $brandId = $request->input('brand_id');
+        $productId = $request->input('product_id');
+        $stockType = $request->input('stock_type');
+
+        $query = Product::with(['category', 'subcategory', 'brand']);
+
+        if ($productId) {
+            $query->where('id', $productId);
+        }
+
+        if ($subcategoryId) {
+            $query->where('subcategory_id', $subcategoryId);
+        }
+
+        if ($brandId) {
+            $query->where('brand_id', $brandId);
+        }
+
+        $products = $query->get();
+
+        // Filter by stock type
+        $filteredProducts = $products->filter(function ($product) use ($stockType) {
+            $stock = $product->product_qty ?? 0;
+            $alert = $product->stock_alert ?? 10;
+
+            switch ($stockType) {
+                case 'low_stock':
+                    return $stock > 0 && $stock <= $alert;
+                case 'out_stock':
+                    return $stock == 0;
+                case 'available':
+                    return $stock > $alert;
+                default:
+                    return true; // All stock
+            }
+        })->values();
+
+        // Get latest purchase price for each product from purchase_items table
+        $latestPrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $prices = DB::table('purchase_items as pi')
+            ->joinSub($latestPrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        return response()->json(['products' => $filteredProducts, 'prices' => $prices]);
+    }
+
     public function FilterIssues(Request $request)
     {
         $fromDate = $request->input('from_date');
