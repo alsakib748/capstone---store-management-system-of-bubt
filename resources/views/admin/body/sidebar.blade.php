@@ -211,6 +211,24 @@
                     </div>
                 </li>
 
+                <li>
+                    <a href="#IssueReturn" data-bs-toggle="collapse">
+                        <i data-feather="send"></i>
+                        <span> Issue Return Manage</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="IssueReturn">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{{ route('all.issue.return') }}" class="tp-link">All Issue Return</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('add.issue.return') }}" class="tp-link">Add Issue Return</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
                 {{-- <li>
                     <a href="#Transfers" data-bs-toggle="collapse">
                         <i data-feather="repeat"></i>

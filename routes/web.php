@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Backend\BrandController;
 use App\Http\Controllers\Backend\DamageProductController;
 use App\Http\Controllers\Backend\DepartmentController;
+use App\Http\Controllers\Backend\IssueReturnController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\PurchaseController;
 use App\Http\Controllers\Backend\ReportController;
@@ -229,6 +230,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/details/issue/{id}', 'DetailsIssue')->name('details.issue');
         Route::get('/invoice/issue/{id}', 'InvoiceIssue')->name('invoice.issue');
         Route::get('/delete/issue/{id}', 'DeleteIssue')->name('delete.issue');
+    });
+
+    Route::controller(IssueReturnController::class)->group(function () {
+        Route::get('/all/issue/return', 'AllIssueReturn')->name('all.issue.return');
+        Route::get('/add/issue/return', 'AddIssueReturn')->name('add.issue.return');
+        Route::get('/issue/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('issue.get.users.by.department');
+        Route::get('/issue/return/product/search', 'IssueProductSearch')->name('issue.return.product.search');
+        Route::get('/get/issue/products/{issueId}', 'GetIssueProducts')->name('get.issue.products');
+        Route::post('/store/issue/return', 'StoreIssueReturn')->name('store.issue.return');
+        Route::get('/edit/issue/return/{id}', 'EditIssueReturn')->name('edit.issue.return');
+        Route::post('/update/issue/return/{id}', 'UpdateIssueReturn')->name('update.issue.return');
+        Route::get('/details/issue/return/{id}', 'DetailsIssueReturn')->name('details.issue.return');
+        Route::get('/invoice/issue/return/{id}', 'InvoiceIssueReturn')->name('invoice.issue.return');
+        Route::get('/delete/issue/return/{id}', 'DeleteIssueReturn')->name('delete.issue.return');
     });
 
     Route::controller(TransferController::class)->group(function () {
