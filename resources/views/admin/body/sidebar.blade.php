@@ -213,7 +213,7 @@
 
                 <li>
                     <a href="#IssueReturn" data-bs-toggle="collapse">
-                        <i data-feather="send"></i>
+                        <i data-feather="rotate-ccw"></i>
                         <span> Issue Return Manage</span>
                         <span class="menu-arrow"></span>
                     </a>
@@ -224,6 +224,24 @@
                             </li>
                             <li>
                                 <a href="{{ route('add.issue.return') }}" class="tp-link">Add Issue Return</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <a href="#Quotation" data-bs-toggle="collapse">
+                        <i data-feather="rotate-ccw"></i>
+                        <span> Quotation Manage</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="Quotation">
+                        <ul class="nav-second-level">
+                            <li>
+                                <a href="{{ route('all.quotation') }}" class="tp-link">All Quotation</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('add.quotation') }}" class="tp-link">Add Quotation</a>
                             </li>
                         </ul>
                     </div>
@@ -267,6 +285,10 @@
 
                             <li>
                                 <a href="{{ route('issue.report') }}" class="tp-link">Issue Report </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('issue.return.report') }}" class="tp-link">Issue Return Report </a>
                             </li>
 
                             <li>

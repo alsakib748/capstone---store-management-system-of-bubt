@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\DamageProduct;
 use App\Models\Department;
 use App\Models\Issue;
+use App\Models\IssueReturn;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Purchase;
@@ -85,6 +86,72 @@ class ReportController extends Controller
         $products = Product::all();
         $users = User::all();
         return view('admin.backend.report.issue_report', compact('issues', 'semesters', 'departments', 'products', 'users', 'latestPrices'));
+    }
+
+    public function IssueReturnReport()
+    {
+        $issueReturns = IssueReturn::with(['issue', 'user', 'createdBy', 'issueReturnItems.product'])->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        $departments = Department::all();
+        $products = Product::all();
+        $users = User::all();
+        return view('admin.backend.report.issue_return_report', compact('issueReturns', 'departments', 'products', 'users', 'latestPrices'));
+    }
+
+    public function FilterIssueReturn(Request $request)
+    {
+        $query = IssueReturn::with(['issue', 'user', 'createdBy', 'issueReturnItems.product']);
+
+        if ($request->from_date) {
+            $query->where('return_date', '>=', $request->from_date);
+        }
+        if ($request->to_date) {
+            $query->where('return_date', '<=', $request->to_date);
+        }
+        if ($request->user_id) {
+            $query->where('user_id', $request->user_id);
+        }
+        if ($request->created_by) {
+            $query->where('created_by', $request->created_by);
+        }
+        if ($request->product_id) {
+            $query->whereHas('issueReturnItems', function ($q) use ($request) {
+                $q->where('product_id', $request->product_id);
+            });
+        }
+
+        $issueReturns = $query->get();
+
+        // Get latest purchase price for each product
+        $purchasePrices = DB::table('purchase_items')
+            ->select('product_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('product_id');
+
+        $latestPrices = DB::table('purchase_items as pi')
+            ->joinSub($purchasePrices, 'latest', function ($join) {
+                $join->on('pi.id', '=', 'latest.max_id');
+            })
+            ->select('pi.product_id', 'pi.net_unit_cost')
+            ->get()
+            ->keyBy('product_id');
+
+        return response()->json([
+            'issueReturns' => $issueReturns,
+            'latestPrices' => $latestPrices,
+        ]);
     }
 
 

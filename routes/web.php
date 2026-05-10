@@ -7,6 +7,7 @@ use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\IssueReturnController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\PurchaseController;
+use App\Http\Controllers\Backend\QuotationController;
 use App\Http\Controllers\Backend\ReportController;
 use App\Http\Controllers\Backend\RequisitionController;
 use App\Http\Controllers\Backend\IssueController;
@@ -258,6 +259,22 @@ Route::middleware('auth')->group(function () {
     });
 
 
+    Route::controller(QuotationController::class)->group(function () {
+        Route::get('/all/quotation', 'AllQuotation')->name('all.quotation');
+        Route::get('/add/quotation', 'AddQuotation')->name('add.quotation');
+        Route::get('/quotation/product/search', 'QuotationProductSearch')->name('quotation.product.search');
+        Route::get('/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('get.users.by.department');
+
+        Route::post('/store/quotation', 'StoreQuotation')->name('store.quotation');
+        Route::get('/edit/quotation/{id}', 'EditQuotation')->name('edit.quotation');
+        Route::post('/update/quotation/{id}', 'UpdateQuotation')->name('update.quotation');
+
+        Route::get('/details/quotation/{id}', 'DetailsQuotation')->name('details.quotation');
+        Route::get('/view/quotation/file/{id}', 'ViewQuotationFile')->name('view.quotation.file');
+        Route::get('/invoice/quotation/{id}', 'InvoiceQuotation')->name('invoice.quotation');
+        Route::get('/delete/quotation/{id}', 'DeleteQuotation')->name('delete.quotation');
+    });
+
     Route::controller(ReportController::class)->group(function () {
 
         Route::get('/all/report', 'AllReport')->name('all.report');
@@ -267,6 +284,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/damage/product/report', 'DamageProductReport')->name('damage.product.report');
 
         Route::get('/issue/report', 'IssueReport')->name('issue.report');
+
+        Route::get('/issue/return/report', 'IssueReturnReport')->name('issue.return.report');
+        Route::get('/filter/issue/return', 'FilterIssueReturn')->name('filter.issue.return');
 
         Route::get('/stock/report', 'StockReport')->name('stock.report');
 
