@@ -1,0 +1,28 @@
+Here's the current price and depreciation formula used in the fixed asset report:
+
+  Formula:
+  Step 1: Calculate Total Days and Remaining Days
+  - Total Days = Purchase Date → Expiry Date  - Remaining Days = Today → Expiry Date
+
+  Step 2: Calculate Expiry Ratio
+  - Expiry Ratio = Remaining Days / Total Days
+
+  Step 3: Calculate Current Price and Depreciation
+  - Current Price = Original Price × Expiry Ratio
+  - Depreciation = Original Price - Current Price
+
+  Step 4: Calculate Stock Value
+  - Stock Value = Current Price × Quantity
+
+  Example:
+  - Original Price: 1000 TK
+  - Purchase Date: 2026-01-01
+  - Expiry Date: 2026-12-31
+  - Total Days: 365
+  - Today: 2026-05-10
+  - Remaining Days: 235
+
+  Expiry Ratio = 235 / 365 = 0.644
+  Current Price = 1000 × 0.644 = 644 TK
+  Depreciation = 1000 - 644 = 356 TK
+  Stock Value = 644 × Quantity

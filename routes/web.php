@@ -255,6 +255,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/stock/report', 'StockReport')->name('stock.report');
 
+        Route::get('/fixed/asset/report', 'FixedAssetReport')->name('fixed.asset.report');
+
         Route::get('/purchase/return/report', 'PurchaseReturnReport')->name('purchase.return.report');
 
         Route::get('/product/stock/report', 'ProductStockReport')->name('product.stock.report');
@@ -266,6 +268,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/filter-issues', 'FilterIssues')->name('filter-issues');
 
         Route::get('/filter-stock', 'FilterStock')->name('filter-stock');
+
+        Route::get('/filter-fixed-asset', 'FilterFixedAsset')->name('filter-fixed-asset');
 
     });
 

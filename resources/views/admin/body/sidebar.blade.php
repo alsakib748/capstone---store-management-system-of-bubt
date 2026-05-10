@@ -256,6 +256,10 @@
                             </li>
 
                             <li>
+                                <a href="{{ route('fixed.asset.report') }}" class="tp-link">Fixed Asset Report </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('all.report') }}" class="tp-link">All Reports </a>
                             </li>
 

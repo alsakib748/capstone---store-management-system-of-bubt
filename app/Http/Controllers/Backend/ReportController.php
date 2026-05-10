@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use App\Models\Customer;
 use App\Models\DamageProduct;
 use App\Models\Department;
@@ -10,11 +11,11 @@ use App\Models\Issue;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Purchase;
-use App\Models\Subcategory;
 use App\Models\ReturnPurchase;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Semester;
+use App\Models\Subcategory;
 use App\Models\User;
 use App\Models\WareHouse;
 use Carbon\Carbon;
@@ -108,6 +109,150 @@ class ReportController extends Controller
 
         return view('admin.backend.report.stock_wise_report', compact('subcategories', 'products', 'brands', 'prices'));
     }
+
+
+    public function FixedAssetReport()
+    {
+        $subcategories = Subcategory::whereHas('products', function ($query) {
+            $query->where('fixed_asset', 1);
+        })->get();
+
+        $brands = Brand::whereHas('products', function ($query) {
+            $query->where('fixed_asset', 1);
+        })->get();
+
+        $products = Product::where('fixed_asset', 1)->get();
+
+        // Get fixed asset purchases with items and calculate depreciation
+        $purchases = Purchase::with(['purchaseItems.product.category', 'purchaseItems.product.subcategory', 'purchaseItems.product.brand'])
+            ->whereHas('purchaseItems.product', function ($query) {
+                $query->where('fixed_asset', 1);
+            })
+            ->get();
+
+        // Calculate current price and depreciation for each purchase item
+        $purchaseData = $this->calculateDepreciation($purchases);
+
+        return view('admin.backend.report.fixed_asset_report', compact('subcategories', 'brands', 'products', 'purchaseData'));
+    }
+
+    private function calculateDepreciation($purchases)
+    {
+        $data = [];
+        $today = Carbon::now()->startOfDay();
+
+        foreach ($purchases as $purchase) {
+            foreach ($purchase->purchaseItems as $item) {
+                $product = $item->product;
+                if (!$product || $product->fixed_asset != 1) {
+                    continue;
+                }
+
+                $originalPrice = floatval($item->net_unit_cost);
+                $purchaseDate = Carbon::parse($purchase->date)->startOfDay();
+                $expiryDate = $item->expiry_date ? Carbon::parse($item->expiry_date)->startOfDay() : null;
+
+                $currentPrice = $originalPrice;
+                $depreciation = 0;
+                $remainingDays = 0;
+                $totalDays = 0;
+
+                if ($expiryDate && $expiryDate > $today) {
+                    $remainingDays = $today->diffInDays($expiryDate, false);
+                    $totalDays = $purchaseDate->diffInDays($expiryDate, false);
+
+                    if ($totalDays > 0) {
+                        $expiryRatio = $remainingDays / $totalDays;
+                        $currentPrice = $originalPrice * $expiryRatio;
+                        $depreciation = $originalPrice - $currentPrice;
+                    }
+                } elseif ($expiryDate && $expiryDate <= $today) {
+                    // Expired - price becomes 0
+                    $currentPrice = 0;
+                    $depreciation = $originalPrice;
+                    $remainingDays = 0;
+                }
+
+                $data[] = [
+                    'purchase_id' => $purchase->id,
+                    'purchase_date' => $purchase->date,
+                    'tracking_no' => $purchase->tracking_no,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'category' => $product->category->category_name ?? '-',
+                    'subcategory' => $product->subcategory->subcategory_name ?? '-',
+                    'brand' => $product->brand->name ?? '-',
+                    'quantity' => $item->quantity,
+                    'original_price' => $originalPrice,
+                    'current_price' => $currentPrice,
+                    'depreciation' => $depreciation,
+                    'remaining_days' => $remainingDays,
+                    'expiry_date' => $item->expiry_date,
+                    'stock_value' => $currentPrice * $item->quantity,
+                    'total_value' => $originalPrice * $item->quantity,
+                ];
+            }
+        }
+
+        return collect($data);
+    }
+
+    public function FilterFixedAsset(Request $request)
+    {
+        $subcategoryId = $request->input('subcategory_id');
+        $brandId = $request->input('brand_id');
+        $productId = $request->input('product_id');
+        $sortBy = $request->input('sort_by');
+
+        $query = Purchase::with(['purchaseItems.product.category', 'purchaseItems.product.subcategory', 'purchaseItems.product.brand'])
+            ->whereHas('purchaseItems.product', function ($query) use ($subcategoryId, $brandId, $productId) {
+                $query->where('fixed_asset', 1);
+                if ($productId) {
+                    $query->where('id', $productId);
+                }
+                if ($subcategoryId) {
+                    $query->where('subcategory_id', $subcategoryId);
+                }
+                if ($brandId) {
+                    $query->where('brand_id', $brandId);
+                }
+            });
+
+        // Apply sorting
+        switch ($sortBy) {
+            case 'latest':
+                $query->latest('date');
+                break;
+            case 'oldest':
+                $query->oldest('date');
+                break;
+            case 'name_asc':
+                $query->orderBy('tracking_no', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('tracking_no', 'desc');
+                break;
+            case 'qty_asc':
+            case 'qty_desc':
+                // Need to handle this differently for purchase items
+                break;
+            default:
+                $query->latest('date');
+        }
+
+        $purchases = $query->get();
+        $purchaseData = $this->calculateDepreciation($purchases);
+
+        // Sort by quantity if needed
+        if ($sortBy === 'qty_asc') {
+            $purchaseData = $purchaseData->sortBy('quantity')->values();
+        } elseif ($sortBy === 'qty_desc') {
+            $purchaseData = $purchaseData->sortByDesc('quantity')->values();
+        }
+
+        return response()->json(['purchaseData' => $purchaseData]);
+    }
+
 
     public function FilterStock(Request $request)
     {
