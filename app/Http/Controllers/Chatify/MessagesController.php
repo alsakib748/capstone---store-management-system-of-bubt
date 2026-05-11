@@ -1,6 +1,6 @@
 <?php
 
-namespace Chatify\Http\Controllers;
+namespace App\Http\Controllers\Chatify;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -223,24 +223,34 @@ class MessagesController extends Controller
         // Allowed roles for chat
         $allowedRoles = ['Super Admin', 'Admin', 'Store Manager', 'Assistant Manager'];
 
-        // Get allowed user IDs from roles
-        $allowedUserIds = User::role($allowedRoles)->pluck('id');
+        // Check if current user has one of the allowed roles
+        $currentUserRoles = DB::table('model_has_roles')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->where('model_has_roles.model_id', '=', Auth::user()->id)
+            ->where('model_has_roles.model_type', '=', 'App\Models\User')
+            ->pluck('roles.name')
+            ->toArray();
 
-        // get all users that received/sent message from/to [Auth user]
-        $users = Message::join('users',  function ($join) {
-            $join->on('ch_messages.from_id', '=', 'users.id')
-                ->orOn('ch_messages.to_id', '=', 'users.id');
-        })
-        ->where(function ($q) {
-            $q->where('ch_messages.from_id', Auth::user()->id)
-            ->orWhere('ch_messages.to_id', Auth::user()->id);
-        })
-        ->where('users.id','!=',Auth::user()->id)
-        ->whereIn('users.id', $allowedUserIds)
-        ->select('users.*',DB::raw('MAX(ch_messages.created_at) max_created_at'))
-        ->orderBy('max_created_at', 'desc')
-        ->groupBy('users.id')
-        ->paginate($request->per_page ?? $this->perPage);
+        $hasAllowedRole = count(array_intersect($currentUserRoles, $allowedRoles)) > 0;
+
+        if ($hasAllowedRole) {
+            // If current user has allowed role, show ALL users (except themselves)
+            $users = User::where('id', '!=', Auth::user()->id)
+                ->orderBy('name', 'asc')
+                ->paginate($request->per_page ?? $this->perPage);
+        } else {
+            // If current user doesn't have allowed role, only show users with allowed roles
+            $allowedUserIds = DB::table('model_has_roles')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->whereIn('roles.name', $allowedRoles)
+                ->where('model_has_roles.model_type', '=', 'App\Models\User')
+                ->pluck('model_has_roles.model_id');
+
+            $users = User::whereIn('id', $allowedUserIds)
+                ->where('id', '!=', Auth::user()->id)
+                ->orderBy('name', 'asc')
+                ->paginate($request->per_page ?? $this->perPage);
+        }
 
         $usersList = $users->items();
 
@@ -312,7 +322,11 @@ class MessagesController extends Controller
     {
         // Allowed roles for chat
         $allowedRoles = ['Super Admin', 'Admin', 'Store Manager', 'Assistant Manager'];
-        $allowedUserIds = User::role($allowedRoles)->pluck('id');
+        $allowedUserIds = DB::table('model_has_roles')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->whereIn('roles.name', $allowedRoles)
+            ->where('model_has_roles.model_type', '=', 'App\Models\User')
+            ->pluck('model_has_roles.model_id');
 
         $favoritesList = null;
         $favorites = Favorite::where('user_id', Auth::user()->id)
@@ -349,13 +363,35 @@ class MessagesController extends Controller
         // Allowed roles for chat
         $allowedRoles = ['Super Admin', 'Admin', 'Store Manager', 'Assistant Manager'];
 
-        // Get allowed user IDs from roles
-        $allowedUserIds = User::role($allowedRoles)->pluck('id');
+        // Check if current user has one of the allowed roles
+        $currentUserRoles = DB::table('model_has_roles')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->where('model_has_roles.model_id', '=', Auth::user()->id)
+            ->where('model_has_roles.model_type', '=', 'App\Models\User')
+            ->pluck('roles.name')
+            ->toArray();
 
-        $records = User::where('id','!=',Auth::user()->id)
-                    ->whereIn('id', $allowedUserIds)
-                    ->where('name', 'LIKE', "%{$input}%")
-                    ->paginate($request->per_page ?? $this->perPage);
+        $hasAllowedRole = count(array_intersect($currentUserRoles, $allowedRoles)) > 0;
+
+        if ($hasAllowedRole) {
+            // If current user has allowed role, search ALL users (except themselves)
+            $records = User::where('id', '!=', Auth::user()->id)
+                ->where('name', 'LIKE', "%{$input}%")
+                ->paginate($request->per_page ?? $this->perPage);
+        } else {
+            // If current user doesn't have allowed role, only search users with allowed roles
+            $allowedUserIds = DB::table('model_has_roles')
+                ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+                ->whereIn('roles.name', $allowedRoles)
+                ->where('model_has_roles.model_type', '=', 'App\Models\User')
+                ->pluck('model_has_roles.model_id');
+
+            $records = User::where('id', '!=', Auth::user()->id)
+                ->whereIn('id', $allowedUserIds)
+                ->where('name', 'LIKE', "%{$input}%")
+                ->paginate($request->per_page ?? $this->perPage);
+        }
+
         foreach ($records->items() as $record) {
             $getRecords .= view('Chatify::layouts.listItem', [
                 'get' => 'search_item',
@@ -500,6 +536,50 @@ class MessagesController extends Controller
         $status = User::where('id', Auth::user()->id)->update(['active_status' => $activeStatus]);
         return Response::json([
             'status' => $status,
+        ], 200);
+    }
+
+    /**
+     * Get role-based users (Super Admin, Admin, Store Manager, Assistant Manager)
+     * who have active messages with current user
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getRoleBasedUsers(Request $request)
+    {
+        // Allowed roles for display
+        $allowedRoles = ['Super Admin', 'Admin', 'Store Manager', 'Assistant Manager'];
+        
+        // Get user IDs with allowed roles
+        $allowedUserIds = DB::table('model_has_roles')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->whereIn('roles.name', $allowedRoles)
+            ->where('model_has_roles.model_type', '=', 'App\Models\User')
+            ->pluck('model_has_roles.model_id')
+            ->toArray();
+
+        // Get users with these roles who have messages with current user
+        $users = User::whereIn('id', $allowedUserIds)
+            ->where('id', '!=', Auth::user()->id)
+            ->orderBy('name', 'asc')
+            ->paginate($request->per_page ?? $this->perPage);
+
+        $usersList = $users->items();
+
+        if (count($usersList) > 0) {
+            $contacts = '';
+            foreach ($usersList as $user) {
+                $contacts .= Chatify::getContactItem($user);
+            }
+        } else {
+            $contacts = '<p class="message-hint center-el"><span>No users available</span></p>';
+        }
+
+        return Response::json([
+            'contacts' => $contacts,
+            'total' => $users->total() ?? 0,
+            'last_page' => $users->lastPage() ?? 1,
         ], 200);
     }
 }

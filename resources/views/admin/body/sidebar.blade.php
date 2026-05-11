@@ -1,13 +1,15 @@
 <style>
     .user-info-box {
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         margin-bottom: 10px;
     }
+
     .user-info-box h6 {
         font-size: 14px;
         font-weight: 600;
         color: #fff;
     }
+
     .user-info-box .avatar-xs {
         width: 36px;
         height: 36px;
@@ -17,8 +19,9 @@
         font-size: 16px;
         font-weight: 600;
     }
+
     [data-sidebar="dark"] .user-info-box {
-        background: rgba(255,255,255,0.05);
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 8px;
         margin: 0 10px 15px 10px;
     }
@@ -30,7 +33,7 @@
         <div id="sidebar-menu">
 
             <div class="logo-box">
-                <a href="index.html" class="logo logo-light">
+                <a href="/dashboard" class="logo logo-light">
                     <span class="logo-sm">
                         <img src="{{ asset('backend/assets/images/logo-sm.png') }}" alt="" height="22">
                     </span>
@@ -38,7 +41,7 @@
                         <img src="{{ asset('backend/assets/images/logo-light.png') }}" alt="" height="24">
                     </span>
                 </a>
-                <a href="index.html" class="logo logo-dark">
+                <a href="/dashboard" class="logo logo-dark">
                     <span class="logo-sm">
                         <img src="{{ asset('backend/assets/images/logo-sm.png') }}" alt="" height="22">
                     </span>
@@ -47,25 +50,6 @@
                     </span>
                 </a>
             </div>
-
-            <!-- User Info Section -->
-            @auth
-            <div class="user-info-box px-3 py-3">
-                <div class="d-flex align-items-center">
-                    <div class="avatar-xs me-2">
-                        <span class="avatar-title rounded-circle bg-primary-subtle text-primary">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </span>
-                    </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                        <h6 class="mb-0 text-truncate">{{ Auth::user()->name }}</h6>
-                        <small class="text-muted text-truncate">
-                            {{ Auth::user()->getRoleNames()->first() }}
-                        </small>
-                    </div>
-                </div>
-            </div>
-            @endauth
 
             <ul id="side-menu">
 

@@ -9,7 +9,7 @@
  */
 
 use Illuminate\Support\Facades\Route;
-use Chatify\Http\Controllers\MessagesController;
+use App\Http\Controllers\Chatify\MessagesController;
 
 /*
  * This is the main app route [Chatify Messenger]

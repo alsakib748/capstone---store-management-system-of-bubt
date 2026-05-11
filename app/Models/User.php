@@ -81,6 +81,19 @@ class User extends Authenticatable
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * Get the user's avatar (use photo column).
+     */
+    public function getAvatarAttribute($value)
+    {
+        // Return photo if it exists and is not empty
+        if ($this->photo && !empty($this->photo)) {
+            return asset('upload/user_photos/' . $this->photo);
+        }
+        // Return default avatar
+        return asset('backend/assets/images/logo-sm.png');
+    }
+
 
 
 
