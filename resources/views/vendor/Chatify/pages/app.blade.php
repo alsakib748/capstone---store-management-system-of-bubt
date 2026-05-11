@@ -37,7 +37,10 @@
                 {!! view('Chatify::layouts.listItem', ['get' => 'saved']) !!}
                 {{-- Contact --}}
                 <p class="messenger-title"><span>All Messages</span></p>
-                <div class="listOfContacts" style="width: 100%;height: calc(100% - 272px);position: relative;"></div>
+                <div class="listOfContacts" style="width: 100%;position: relative;"></div>
+                {{-- Role-based users section --}}
+                <p class="messenger-title"><span>{{ __('Available Staff') }}</span></p>
+                <div class="roleBasedUsers" style="width: 100%;position: relative;"></div>
             </div>
             {{-- ---------------- [ Search Tab ] ---------------- --}}
             <div class="messenger-tab search-tab app-scroll" data-view="search">
@@ -111,6 +114,19 @@
         {!! view('Chatify::layouts.info')->render() !!}
     </div>
 </div>
+
+<style>
+    .roleBasedUsers {
+        display: block;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .roleBasedUsers .messenger-list-item {
+        display: block;
+        width: 100%;
+    }
+</style>
 
 @include('Chatify::layouts.modals')
 @include('Chatify::layouts.footerLinks')

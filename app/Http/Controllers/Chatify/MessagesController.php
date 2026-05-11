@@ -7,12 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Response;
 use App\Models\User;
-use App\Models\ChMessage as Message;
 use App\Models\ChFavorite as Favorite;
 use Chatify\Facades\ChatifyMessenger as Chatify;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Support\Str;
 class MessagesController extends Controller
 {
@@ -40,7 +38,7 @@ class MessagesController extends Controller
      * @param int $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    public function index( $id = null)
+    public function index($id = null)
     {
         $messenger_color = Auth::user()->messenger_color;
         return view('Chatify::pages.app', [
@@ -61,7 +59,7 @@ class MessagesController extends Controller
     {
         $favorite = Chatify::inFavorite($request['id']);
         $fetch = User::where('id', $request['id'])->first();
-        if($fetch){
+        if ($fetch) {
             $userAvatar = Chatify::getUserWithAvatar($fetch)->avatar;
         }
         return Response::json([
@@ -96,7 +94,7 @@ class MessagesController extends Controller
     public function send(Request $request)
     {
         // default variables
-        $error = (object)[
+        $error = (object) [
             'status' => 0,
             'message' => null
         ];
@@ -107,8 +105,8 @@ class MessagesController extends Controller
         if ($request->hasFile('file')) {
             // allowed extensions
             $allowed_images = Chatify::getAllowedImages();
-            $allowed_files  = Chatify::getAllowedFiles();
-            $allowed        = array_merge($allowed_images, $allowed_files);
+            $allowed_files = Chatify::getAllowedFiles();
+            $allowed = array_merge($allowed_images, $allowed_files);
 
             $file = $request->file('file');
             // check file size
@@ -134,14 +132,14 @@ class MessagesController extends Controller
                 'from_id' => Auth::user()->id,
                 'to_id' => $request['id'],
                 'body' => htmlentities(trim($request['message']), ENT_QUOTES, 'UTF-8'),
-                'attachment' => ($attachment) ? json_encode((object)[
+                'attachment' => ($attachment) ? json_encode((object) [
                     'new_name' => $attachment,
                     'old_name' => htmlentities(trim($attachment_title), ENT_QUOTES, 'UTF-8'),
                 ]) : null,
             ]);
             $messageData = Chatify::parseMessage($message);
             if (Auth::user()->id != $request['id']) {
-                Chatify::push("private-chatify.".$request['id'], 'messaging', [
+                Chatify::push("private-chatify." . $request['id'], 'messaging', [
                     'from_id' => Auth::user()->id,
                     'to_id' => $request['id'],
                     'message' => Chatify::messageCard($messageData, true)
@@ -179,7 +177,7 @@ class MessagesController extends Controller
 
         // if there is no messages yet.
         if ($totalMessages < 1) {
-            $response['messages'] ='<p class="message-hint center-el"><span>Say \'hi\' and start messaging</span></p>';
+            $response['messages'] = '<p class="message-hint center-el"><span>Say \'hi\' and start messaging</span></p>';
             return Response::json($response);
         }
         if (count($messages->items()) < 1) {
@@ -235,9 +233,7 @@ class MessagesController extends Controller
 
         if ($hasAllowedRole) {
             // If current user has allowed role, show ALL users (except themselves)
-            $users = User::where('id', '!=', Auth::user()->id)
-                ->orderBy('name', 'asc')
-                ->paginate($request->per_page ?? $this->perPage);
+            $usersQuery = User::where('id', '!=', Auth::user()->id);
         } else {
             // If current user doesn't have allowed role, only show users with allowed roles
             $allowedUserIds = DB::table('model_has_roles')
@@ -246,17 +242,29 @@ class MessagesController extends Controller
                 ->where('model_has_roles.model_type', '=', 'App\Models\User')
                 ->pluck('model_has_roles.model_id');
 
-            $users = User::whereIn('id', $allowedUserIds)
-                ->where('id', '!=', Auth::user()->id)
-                ->orderBy('name', 'asc')
-                ->paginate($request->per_page ?? $this->perPage);
+            $usersQuery = User::whereIn('id', $allowedUserIds)
+                ->where('id', '!=', Auth::user()->id);
         }
 
-        $usersList = $users->items();
+        $perPage = $request->per_page ?? $this->perPage;
+        $page = max((int) $request->get('page', 1), 1);
 
-        if (count($usersList) > 0) {
+        $allUsers = $usersQuery->get()->map(function ($user) {
+            $user->unseen_count = Chatify::countUnseenMessages($user->id);
+            return $user;
+        })->sort(function ($first, $second) {
+            if ($first->unseen_count !== $second->unseen_count) {
+                return $second->unseen_count <=> $first->unseen_count;
+            }
+
+            return strcasecmp($first->name, $second->name);
+        })->values();
+
+        $users = $allUsers->slice(($page - 1) * $perPage, $perPage)->values();
+
+        if (count($users) > 0) {
             $contacts = '';
-            foreach ($usersList as $user) {
+            foreach ($users as $user) {
                 $contacts .= Chatify::getContactItem($user);
             }
         } else {
@@ -265,8 +273,8 @@ class MessagesController extends Controller
 
         return Response::json([
             'contacts' => $contacts,
-            'total' => $users->total() ?? 0,
-            'last_page' => $users->lastPage() ?? 1,
+            'total' => $allUsers->count(),
+            'last_page' => (int) ceil($allUsers->count() / $perPage) ?: 1,
         ], 200);
     }
 
@@ -280,7 +288,7 @@ class MessagesController extends Controller
     {
         // Get user data
         $user = User::where('id', $request['user_id'])->first();
-        if(!$user){
+        if (!$user) {
             return Response::json([
                 'message' => 'User not found!',
             ], 401);
@@ -398,7 +406,7 @@ class MessagesController extends Controller
                 'user' => Chatify::getUserWithAvatar($record),
             ])->render();
         }
-        if($records->total() < 1){
+        if ($records->total() < 1) {
             $getRecords = '<p class="message-hint center-el"><span>Nothing to show.</span></p>';
         }
         // send the response
@@ -550,36 +558,40 @@ class MessagesController extends Controller
     {
         // Allowed roles for display
         $allowedRoles = ['Super Admin', 'Admin', 'Store Manager', 'Assistant Manager'];
-        
-        // Get user IDs with allowed roles
-        $allowedUserIds = DB::table('model_has_roles')
-            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->whereIn('roles.name', $allowedRoles)
-            ->where('model_has_roles.model_type', '=', 'App\Models\User')
-            ->pluck('model_has_roles.model_id')
+
+        // Get role IDs first
+        $roleIds = DB::table('roles')
+            ->whereIn('name', $allowedRoles)
+            ->pluck('id')
             ->toArray();
 
-        // Get users with these roles who have messages with current user
-        $users = User::whereIn('id', $allowedUserIds)
-            ->where('id', '!=', Auth::user()->id)
-            ->orderBy('name', 'asc')
-            ->paginate($request->per_page ?? $this->perPage);
+        // Get user IDs with allowed roles
+        $allowedUserIds = DB::table('model_has_roles')
+            ->whereIn('role_id', $roleIds)
+            ->where('model_type', '=', 'App\Models\User')
+            ->distinct()
+            ->pluck('model_id')
+            ->toArray();
 
-        $usersList = $users->items();
+        $contacts = '<p class="message-hint center-el"><span>No staff users available</span></p>';
 
-        if (count($usersList) > 0) {
-            $contacts = '';
-            foreach ($usersList as $user) {
-                $contacts .= Chatify::getContactItem($user);
+        // Check if there are users with allowed roles
+        if (count($allowedUserIds) > 0) {
+            // Get all users with these roles (including current user)
+            $users = User::whereIn('id', $allowedUserIds)
+                ->orderBy('name', 'asc')
+                ->get();
+
+            if (count($users) > 0) {
+                $contacts = '';
+                foreach ($users as $user) {
+                    $contacts .= Chatify::getContactItem($user);
+                }
             }
-        } else {
-            $contacts = '<p class="message-hint center-el"><span>No users available</span></p>';
         }
 
         return Response::json([
             'contacts' => $contacts,
-            'total' => $users->total() ?? 0,
-            'last_page' => $users->lastPage() ?? 1,
         ], 200);
     }
 }

@@ -97,6 +97,11 @@ Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->n
  */
 Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('activeStatus.set');
 
+/**
+ * Get role-based users (Super Admin, Admin, Store Manager, Assistant Manager)
+ */
+Route::get('/getRoleBasedUsers', [MessagesController::class, 'getRoleBasedUsers'])->name('roleBasedUsers.get');
+
 /*
  * [Group] view by id
  */
