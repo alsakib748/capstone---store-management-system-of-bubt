@@ -87,10 +87,6 @@
             <span>{{ $purchase->department->name ?? '-' }}</span>
         </div>
         <div class="d-flex align-items-center mb-3">
-            <strong class="me-2 text-muted">Users:</strong>
-            <span>{{ $purchase->roles->pluck('name')->implode(', ') ?: '-' }}</span>
-        </div>
-        <div class="d-flex align-items-center mb-3">
             <strong class="me-2 text-muted">Color Number:</strong>
             <span>{{ $purchase->color_number ?: '-' }}</span>
         </div>

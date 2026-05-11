@@ -231,7 +231,7 @@
 
                 <li>
                     <a href="#Quotation" data-bs-toggle="collapse">
-                        <i data-feather="rotate-ccw"></i>
+                        <i data-feather="file-text"></i>
                         <span> Quotation Manage</span>
                         <span class="menu-arrow"></span>
                     </a>

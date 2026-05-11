@@ -270,7 +270,7 @@ class PurchaseController extends Controller
 
     public function DetailsPurchase($id)
     {
-        $purchase = Purchase::with(['supplier', 'semester', 'department', 'roles', 'purchaseItems.product'])->find($id);
+        $purchase = Purchase::with(['supplier', 'semester', 'department', 'purchaseItems.product'])->find($id);
         return view('admin.backend.purchase.purchase_details', compact('purchase'));
 
     }
@@ -278,7 +278,7 @@ class PurchaseController extends Controller
 
     public function InvoicePurchase($id)
     {
-        $purchase = Purchase::with(['supplier', 'warehouse', 'semester', 'department', 'roles', 'purchaseItems.product'])->find($id);
+        $purchase = Purchase::with(['supplier', 'warehouse', 'semester', 'department', 'purchaseItems.product'])->find($id);
 
         $pdf = Pdf::loadView('admin.backend.purchase.invoice_pdf', compact('purchase'));
         return $pdf->download('purchase_' . $id . '.pdf');

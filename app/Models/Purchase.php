@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Models\Role;
 
 class Purchase extends Model
 {
@@ -27,11 +26,6 @@ class Purchase extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'purchase_roles');
     }
 
     public function semester()

@@ -263,7 +263,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/all/quotation', 'AllQuotation')->name('all.quotation');
         Route::get('/add/quotation', 'AddQuotation')->name('add.quotation');
         Route::get('/quotation/product/search', 'QuotationProductSearch')->name('quotation.product.search');
-        Route::get('/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('get.users.by.department');
 
         Route::post('/store/quotation', 'StoreQuotation')->name('store.quotation');
         Route::get('/edit/quotation/{id}', 'EditQuotation')->name('edit.quotation');

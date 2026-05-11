@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Models\Role;
 
 class ReturnPurchase extends Model
 {
@@ -22,11 +21,6 @@ class ReturnPurchase extends Model
     public function warehouse()
     {
         return $this->belongsTo(WareHouse::class, 'warehouse_id');
-    }
-
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'return_purchase_roles');
     }
 
     public function semester()

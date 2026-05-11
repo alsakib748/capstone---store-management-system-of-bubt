@@ -200,7 +200,8 @@
                     const discount = parseFloat(document.getElementById('discount')?.value) || 0;
                     grandTotal -= discount;
 
-                    document.getElementById('grandTotal').textContent = grandTotal > 0 ? 'TK ' + grandTotal.toFixed(2) : 'TK ';
+                    document.getElementById('grandTotal').textContent = grandTotal > 0 ? 'TK ' + grandTotal.toFixed(2) :
+                        'TK ';
                 }
 
                 searchInput.addEventListener('input', function() {

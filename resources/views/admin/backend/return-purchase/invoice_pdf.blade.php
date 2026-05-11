@@ -138,7 +138,6 @@
 <p><strong>Note No:</strong> {{ $purchase->note_no ?: '-' }} </p>
 <p><strong>Semester:</strong> {{ $purchase->semester ? (($purchase->semester->code ? $purchase->semester->code . ' : ' : '') . $purchase->semester->name) : '-' }} </p>
 <p><strong>Department:</strong> {{ $purchase->department->name ?? '-' }} </p>
-<p><strong>Users:</strong> {{ $purchase->roles->pluck('name')->implode(', ') ?: '-' }} </p>
 <p><strong>Color Number:</strong> {{ $purchase->color_number ?: '-' }} </p>
 <p><strong>Status:</strong> {{ $purchase->status }} </p>
 <p><strong>Grand Total:</strong> ৳{{ number_format($purchase->grand_total, 2)  }} </p>
