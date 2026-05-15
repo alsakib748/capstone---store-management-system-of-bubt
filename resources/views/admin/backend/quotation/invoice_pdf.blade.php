@@ -52,18 +52,40 @@
             font-size: 12px;
         }
         .table th { background: #e9ecef; font-weight: bold; color: #333; }
-        .summary-table {
-            width: 50%;
-            margin-left: auto;
-            margin-top: 20px;
+        .totals-footer {
+            width: 100%;
             border-collapse: collapse;
+            margin-top: 16px;
+            table-layout: fixed;
         }
-        .summary-table td {
-            padding: 5px;
+        .totals-footer td {
+            vertical-align: top;
+            padding: 0;
+        }
+        .totals-footer td.left-blank {
+            width: 60%;
+            padding-right: 10px;
+        }
+        .totals-footer td.right-totals {
+            width: 40%;
             text-align: right;
-            font-weight: bold;
-            border: none;
+            padding-left: 8px;
+        }
+        .totals-labels {
+            width: 100%;
+            max-width: 240px;
+            border-collapse: collapse;
+            margin-left: auto;
+        }
+        .totals-labels td {
+            border: 1px solid #ddd;
+            padding: 8px 10px;
             font-size: 12px;
+        }
+        .totals-labels .lbl { font-weight: bold; width: 42%; background: #f8f9fa; }
+        .totals-labels .blank { min-height: 26px; text-align: right; }
+        .blank-area {
+            min-height: 150px;
         }
         @page { margin: 20mm; }
         @media print {
@@ -92,7 +114,7 @@
                     <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($quotation->quotation_date)->format('Y-m-d') }} </p>
                     <p><strong>Tracking No:</strong> {{ $quotation->tracking_no ?? '-' }} </p>
                     <p><strong>Created By:</strong> {{ $quotation->createdBy->name ?? '-' }} </p>
-                    <p><strong>Grand Total:</strong> {{ $quotation->grand_total > 0 ? 'TK ' . number_format($quotation->grand_total, 2) : '' }} </p>
+                    <p><strong>Grand Total:</strong></p>
                 </td>
             </tr>
         </table>
@@ -115,9 +137,9 @@
                         <td>{{ $key + 1 }}</td>
                         <td>{{ $item->product_name ?? '-' }}</td>
                         <td>{{ $item->product_code ?? '-' }}</td>
-                        <td>{{ $item->qty > 0 ? $item->qty : '' }}</td>
-                        <td>{{ $item->price > 0 ? 'TK ' . number_format($item->price, 2) : '' }}</td>
-                        <td>{{ $item->total > 0 ? 'TK ' . number_format($item->total, 2) : '' }}</td>
+                        <td>{{ $item->qty ?? 0 }}</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                 @empty
                     <tr>
@@ -127,15 +149,27 @@
             </tbody>
         </table>
 
-        <table class="summary-table">
+        <table class="totals-footer">
             <tr>
-                <td><strong>Subtotal:</strong> {{ $quotation->subtotal > 0 ? 'TK ' . number_format($quotation->subtotal, 2) : '' }} </td>
-            </tr>
-            <tr>
-                <td><strong>Discount:</strong> {{ $quotation->discount > 0 ? 'TK ' . number_format($quotation->discount, 2) : '' }} </td>
-            </tr>
-            <tr>
-                <td><strong>Grand Total:</strong> {{ $quotation->grand_total > 0 ? 'TK ' . number_format($quotation->grand_total, 2) : '' }} </td>
+                <td class="left-blank">
+                    <div class="blank-area">&nbsp;</div>
+                </td>
+                <td class="right-totals">
+                    <table class="totals-labels">
+                        <tr>
+                            <td class="lbl">Subtotal:</td>
+                            <td class="blank">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">Discount:</td>
+                            <td class="blank">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">Grand Total:</td>
+                            <td class="blank">&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </table>
 

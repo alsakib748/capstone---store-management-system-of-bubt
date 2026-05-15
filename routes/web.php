@@ -6,6 +6,7 @@ use App\Http\Controllers\Backend\DamageProductController;
 use App\Http\Controllers\Backend\DepartmentController;
 use App\Http\Controllers\Backend\IssueReturnController;
 use App\Http\Controllers\Backend\ProductController;
+use App\Http\Controllers\Backend\ProductLifetimeReportController;
 use App\Http\Controllers\Backend\PurchaseController;
 use App\Http\Controllers\Backend\QuotationController;
 use App\Http\Controllers\Backend\ReportController;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
 
 Route::get('/dashboard', function () {
@@ -275,6 +276,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/quotation/{id}', 'DeleteQuotation')->name('delete.quotation');
     });
 
+
     Route::controller(ReportController::class)->group(function () {
 
         Route::get('/all/report', 'AllReport')->name('all.report');
@@ -305,6 +307,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/filter-stock', 'FilterStock')->name('filter-stock');
 
         Route::get('/filter-fixed-asset', 'FilterFixedAsset')->name('filter-fixed-asset');
+
+        Route::get('/product/trx/report', 'ProductTRXReport')->name('product.trx.report');
+
+        Route::get('/product/lifetime/report', [ProductLifetimeReportController::class, 'index'])->name('product.lifetime.report');
+
+        Route::post('/product/lifetime/report/generate', [ProductLifetimeReportController::class, 'generate'])->name('product.lifetime.report.generate');
+
+        Route::get('/product/lifetime/report/ajax', [ProductLifetimeReportController::class, 'ajaxGenerate'])->name('product.lifetime.report.ajax');
 
     });
 

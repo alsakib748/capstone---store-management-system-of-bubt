@@ -73,9 +73,9 @@
                         '<th>SL</th>' +
                         '<th>Return Date</th>' +
                         '<th>Product</th>' +
-                        '<th>User</th>' +
+                        '<th>Returned By</th>' +
                         '<th>Original Issue</th>' +
-                        '<th>Created By</th>' +
+                        '<th>Received By</th>' +
                         '<th>Qty</th>' +
                         '<th>Condition</th>' +
                         '<th>Unit Price</th>' +
@@ -288,10 +288,10 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_user" class="form-label">User (Returner)</label>
+                            <label for="filter_user" class="form-label">Returned By</label>
                             <select id="filter_user" name="user_id" class="form-control select2"
-                                data-placeholder="Select User">
-                                <option value="" selected>All Users</option>
+                                data-placeholder="Returned By">
+                                <option value="" selected>All Returned By</option>
                                 @forelse($users as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>
                                 @empty
@@ -300,9 +300,9 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_created_by" class="form-label">Created By</label>
+                            <label for="filter_created_by" class="form-label">Received By</label>
                             <select id="filter_created_by" name="created_by" class="form-control select2"
-                                data-placeholder="Created By">
+                                data-placeholder="Received By">
                                 <option value="" selected>All</option>
                                 @forelse($users as $user)
                                     <option value="{{ $user->id }}">{{ $user->name }}</option>

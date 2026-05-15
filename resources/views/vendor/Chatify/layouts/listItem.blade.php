@@ -1,6 +1,7 @@
 {{-- -------------------- Saved Messages -------------------- --}}
 @if ($get == 'saved')
-    <table class="messenger-list-item" data-contact="{{ Auth::user()->id }}">
+    {{-- <table class="messenger-list-item" data-contact="{{ Auth::user()->id }}"> --}}
+    <table class="messenger-list-item" data-contact="{{ Auth::id() ?? 0 }}">
         <tr data-action="0">
             {{-- Avatar side --}}
             <td>
@@ -10,7 +11,7 @@
             </td>
             {{-- center side --}}
             <td>
-                <p data-id="{{ Auth::user()->id }}" data-type="user">Saved Messages <span>You</span></p>
+                <p data-id="{{ Auth::id() ?? 0 }}" data-type="user">Saved Messages <span>You</span></p>
                 <span>Save messages secretly</span>
             </td>
         </tr>
@@ -25,6 +26,7 @@
     $lastMessageBody = $hasLast && strlen($lastMessageBody) > 30 ? mb_substr($lastMessageBody, 0, 30, 'UTF-8') . '..' : $lastMessageBody;
     $displayTime = $hasLast ? $lastMessage->timeAgo : '';
     ?>
+    {{-- <table class="messenger-list-item" data-contact="{{ $user->id }}"> --}}
     <table class="messenger-list-item" data-contact="{{ $user->id }}">
         <tr data-action="0">
             {{-- Avatar side --}}
@@ -55,7 +57,7 @@
                 </p>
                 <span>
                     @if ($hasLast)
-                        {!! $lastMessage->from_id == Auth::user()->id ? '<span class="lastMessageIndicator">You :</span>' : '' !!}
+                        {!! $lastMessage->from_id == (Auth::id() ?? 0) ? '<span class="lastMessageIndicator">You :</span>' : '' !!}
                         @if ($lastMessage->attachment == null)
                             {!! $lastMessageBody !!}
                         @else

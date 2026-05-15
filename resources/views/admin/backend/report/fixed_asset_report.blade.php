@@ -100,7 +100,7 @@
                         var item = purchaseData[i];
                         totalQty += item.quantity;
                         totalOriginal += item.original_price * item.quantity;
-                        totalCurrent += item.current_price * item.quantity;
+                        totalCurrent += Number(item.stock_value) || 0;
                         totalDepreciation += item.depreciation * item.quantity;
 
                         var statusClass = item.remaining_days <= 10 ? 'bg-danger' : (item.remaining_days <= 30 ?
@@ -114,9 +114,9 @@
                             '<td>' + (item.brand || '-') + '</td>' +
                             '<td>' + item.quantity + '</td>' +
                             '<td>' + item.original_price.toFixed(2) + '</td>' +
-                            '<td>' + item.current_price.toFixed(2) + '</td>' +
+                            '<td>' + (Math.floor(Number(item.current_price) || 0)).toLocaleString('en-US') + '</td>' +
                             '<td>' + item.depreciation.toFixed(2) + '</td>' +
-                            '<td>' + item.stock_value.toFixed(2) + '</td>' +
+                            '<td>' + (Number(item.stock_value) || 0).toLocaleString('en-US') + '</td>' +
                             '<td><span class="badge ' + statusClass + '">' + item.remaining_days + '</span></td>' +
                             '</tr>';
                     }
@@ -161,7 +161,7 @@
                         totalOriginal.toFixed(2) + '</td></tr>');
                     printWindow.document.write(
                         '<tr><td style="background:#f9f9f9;padding:8px;border:1px solid #ddd;"><strong>Total Current Value</strong></td><td style="text-align:right;padding:8px;border:1px solid #ddd;">TK ' +
-                        totalCurrent.toFixed(2) + '</td></tr>');
+                        Math.round(totalCurrent).toLocaleString('en-US') + '</td></tr>');
                     printWindow.document.write(
                         '<tr><td style="background:#f9f9f9;padding:8px;border:1px solid #ddd;"><strong>Total Depreciation</strong></td><td style="text-align:right;padding:8px;border:1px solid #ddd;">TK ' +
                         totalDepreciation.toFixed(2) + '</td></tr>');
@@ -203,7 +203,7 @@
                         document.getElementById('totalItems').textContent = '0';
                         document.getElementById('totalQty').textContent = '0';
                         document.getElementById('totalOriginal').textContent = '0.00';
-                        document.getElementById('totalCurrent').textContent = '0.00';
+                        document.getElementById('totalCurrent').textContent = 'TK 0';
                         document.getElementById('totalDepreciation').textContent = '0.00';
                         return;
                     }
@@ -211,7 +211,7 @@
                     purchaseData.forEach(item => {
                         totalQty += item.quantity;
                         totalOriginal += item.original_price * item.quantity;
-                        totalCurrent += item.current_price * item.quantity;
+                        totalCurrent += Number(item.stock_value) || 0;
                         totalDepreciation += item.depreciation * item.quantity;
 
                         let statusClass = item.remaining_days <= 10 ? 'bg-danger' : (item.remaining_days <= 30 ?
@@ -225,9 +225,9 @@
                             '<td>' + (item.brand || '-') + '</td>' +
                             '<td>' + item.quantity + '</td>' +
                             '<td>' + item.original_price.toFixed(2) + '</td>' +
-                            '<td>' + item.current_price.toFixed(2) + '</td>' +
+                            '<td>' + (Math.floor(Number(item.current_price) || 0)).toLocaleString('en-US') + '</td>' +
                             '<td>' + item.depreciation.toFixed(2) + '</td>' +
-                            '<td>' + item.stock_value.toFixed(2) + '</td>' +
+                            '<td>' + (Number(item.stock_value) || 0).toLocaleString('en-US') + '</td>' +
                             '<td><span class="badge ' + statusClass + '">' + item.remaining_days +
                             '</span></td>' +
                             '</tr>';
@@ -238,7 +238,8 @@
                     document.getElementById('totalItems').textContent = purchaseData.length;
                     document.getElementById('totalQty').textContent = totalQty;
                     document.getElementById('totalOriginal').textContent = totalOriginal.toFixed(2);
-                    document.getElementById('totalCurrent').textContent = totalCurrent.toFixed(2);
+                    document.getElementById('totalCurrent').textContent =
+                        'TK ' + Math.round(totalCurrent).toLocaleString('en-US');
                     document.getElementById('totalDepreciation').textContent = totalDepreciation.toFixed(2);
                 }
             });
@@ -348,9 +349,9 @@
                                                 <td>{{ $item['brand'] ?? '-' }}</td>
                                                 <td>{{ $item['quantity'] ?? 0 }}</td>
                                                 <td>{{ number_format($item['original_price'] ?? 0, 2) }}</td>
-                                                <td>{{ number_format($item['current_price'] ?? 0, 2) }}</td>
+                                                <td>{{ number_format((int) floor((float) ($item['current_price'] ?? 0)), 0, '.', ',') }}</td>
                                                 <td>{{ number_format($item['depreciation'] ?? 0, 2) }}</td>
-                                                <td>{{ number_format($item['stock_value'] ?? 0, 2) }}</td>
+                                                <td>{{ number_format((int) ($item['stock_value'] ?? 0), 0, '.', ',') }}</td>
                                                 <td>
                                                     @php
                                                         $remaining = $item['remaining_days'] ?? 0;
@@ -378,7 +379,7 @@
                                         return ($item['original_price'] ?? 0) * ($item['quantity'] ?? 0);
                                     });
                                     $totalCurrent = $purchaseData->sum(function ($item) {
-                                        return ($item['current_price'] ?? 0) * ($item['quantity'] ?? 0);
+                                        return (int) ($item['stock_value'] ?? 0);
                                     });
                                     $totalDepreciation = $purchaseData->sum(function ($item) {
                                         return ($item['depreciation'] ?? 0) * ($item['quantity'] ?? 0);
@@ -403,7 +404,7 @@
                                         <tr>
                                             <td><strong>Total Current Value</strong></td>
                                             <td class="text-end" id="totalCurrent">TK
-                                                {{ number_format($totalCurrent ?? 0, 2) }}</td>
+                                                {{ number_format((int) ($totalCurrent ?? 0), 0, '.', ',') }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Total Depreciation</strong></td>

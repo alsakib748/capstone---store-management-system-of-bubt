@@ -13,9 +13,28 @@ use Illuminate\Support\Facades\Hash;
 
 class RoleController extends Controller
 {
+    private function makePermissionName(string $groupName, string $permissionName): string
+    {
+        return $groupName . '::' . $permissionName;
+    }
+
+    private function getDisplayPermissionName(string $permissionName): string
+    {
+        if (str_contains($permissionName, '::')) {
+            return explode('::', $permissionName, 2)[1];
+        }
+
+        return $permissionName;
+    }
+
     public function AllPermission()
     {
-        $permissions = Permission::all();
+        $permissions = Permission::all()->map(function ($permission) {
+            $permission->display_name = $this->getDisplayPermissionName($permission->name);
+
+            return $permission;
+        });
+
         return view('admin.backend.pages.permission.all_permission', compact('permissions'));
     }
     // End Method
@@ -28,14 +47,20 @@ class RoleController extends Controller
 
     public function StorePermission(Request $request)
     {
+        $permissionName = $this->makePermissionName($request->group_name, $request->name);
 
-        Permission::create([
-            'name' => $request->name,
-            'group_name' => $request->group_name,
-        ]);
+        Permission::updateOrCreate(
+            [
+                'name' => $permissionName,
+                'guard_name' => 'web',
+            ],
+            [
+                'group_name' => $request->group_name,
+            ]
+        );
 
         $notification = array(
-            'message' => 'Permission Inserted Successfully',
+            'message' => 'Permission saved successfully',
             'alert-type' => 'success'
         );
         return redirect()->route('all.permission')->with($notification);
@@ -45,6 +70,8 @@ class RoleController extends Controller
     public function EditPermission($id)
     {
         $permissions = Permission::find($id);
+        $permissions->display_name = $this->getDisplayPermissionName($permissions->name);
+
         return view('admin.backend.pages.permission.edit_permission', compact('permissions'));
 
     }
@@ -53,9 +80,10 @@ class RoleController extends Controller
     public function UpdatePermission(Request $request)
     {
         $per_id = $request->id;
+        $permissionName = $this->makePermissionName($request->group_name, $request->name);
 
         Permission::find($per_id)->update([
-            'name' => $request->name,
+            'name' => $permissionName,
             'group_name' => $request->group_name,
         ]);
 
@@ -185,7 +213,16 @@ class RoleController extends Controller
 
     public function AllRolesPermission()
     {
-        $roles = Role::all();
+        $roles = Role::with('permissions')->get()->map(function ($role) {
+            $role->permissions->transform(function ($permission) {
+                $permission->display_name = $this->getDisplayPermissionName($permission->name);
+
+                return $permission;
+            });
+
+            return $role;
+        });
+
         return view('admin.backend.pages.rolesetup.all_roles_permission', compact('roles'));
     }
     // End Method

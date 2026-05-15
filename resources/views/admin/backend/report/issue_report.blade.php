@@ -168,7 +168,7 @@
                         '<th>Date</th>' +
                         '<th>Product</th>' +
                         '<th>Issued By</th>' +
-                        '<th>User</th>' +
+                        '<th>Issued To</th>' +
                         '<th>Semester</th>' +
                         '<th>Department</th>' +
                         '<th>Quantity</th>' +
@@ -428,10 +428,10 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
-                            <label for="filter_user" class="form-label">User</label>
+                            <label for="filter_user" class="form-label">Issued To</label>
                             <select id="filter_user" name="user_id" class="form-control large-select select2"
-                                data-placeholder="User">
-                                <option value="" selected disabled>Select User</option>
+                                data-placeholder="Issued To">
+                                <option value="" selected disabled>Select Issue To</option>
                             </select>
                         </div>
 

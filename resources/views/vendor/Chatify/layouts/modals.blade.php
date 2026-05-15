@@ -39,8 +39,31 @@
                 {{-- <div class="app-modal-header">Update your profile settings</div> --}}
                 <div class="app-modal-body">
                     {{-- Udate profile avatar --}}
+                    @php
+                        $authUser = Auth::user();
+                        if ($authUser) {
+                            $avatarName = $authUser->photo ?? null;
+                            if ($avatarName === 'avatar.png' && config('chatify.gravatar.enabled')) {
+                                $imageSize = config('chatify.gravatar.image_size');
+                                $imageset = config('chatify.gravatar.imageset');
+                                $avatarUrl =
+                                    'https://www.gravatar.com/avatar/' .
+                                    md5(strtolower(trim($authUser->email))) .
+                                    '?s=' .
+                                    $imageSize .
+                                    '&d=' .
+                                    $imageset;
+                            } else {
+                                $avatarUrl = $avatarName
+                                    ? asset('/upload/user_images/' . $avatarName)
+                                    : asset('/storage/users-avatar/avatar.png');
+                            }
+                        } else {
+                            $avatarUrl = asset('/storage/users-avatar/avatar.png');
+                        }
+                    @endphp
                     <div class="avatar av-l upload-avatar-preview chatify-d-flex"
-                        style="background-image: url('{{ asset('/upload/user_images/' . Chatify::getUserWithAvatar(Auth::user())->photo) }}');">
+                        style="background-image: url('{{ $avatarUrl }}');">
                     </div>
                     <p class="upload-avatar-details"></p>
                     <label class="app-btn a-btn-primary update" style="background-color:{{ $messengerColor }}">
@@ -50,9 +73,8 @@
                     {{-- Dark/Light Mode  --}}
                     <p class="divider"></p>
                     <p class="app-modal-header">Dark Mode <span
-                            class="
-                        {{ Auth::user()->dark_mode > 0 ? 'fas' : 'far' }} fa-moon dark-mode-switch"
-                            data-mode="{{ Auth::user()->dark_mode > 0 ? 1 : 0 }}"></span></p>
+                            class="{{ ($authUser?->dark_mode ?? 0) > 0 ? 'fas' : 'far' }} fa-moon dark-mode-switch"
+                            data-mode="{{ ($authUser?->dark_mode ?? 0) > 0 ? 1 : 0 }}"></span></p>
                     {{-- change messenger color  --}}
                     <p class="divider"></p>
                     {{-- <p class="app-modal-header">Change {{ config('chatify.name') }} Color</p> --}}

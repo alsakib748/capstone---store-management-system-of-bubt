@@ -328,6 +328,14 @@
                             </li>
 
                             <li>
+                                <a href="{{ route('product.trx.report') }}" class="tp-link">Product TRX Report </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('product.lifetime.report') }}" class="tp-link">Product Lifetime History </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('all.report') }}" class="tp-link">All Reports </a>
                             </li>
 

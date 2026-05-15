@@ -1,0 +1,24 @@
+Professional ERP-style UI with:
+  - Filter form (from_date, to_date, product, semester)
+  - Opening Summary section
+  - Current Period Summary (Purchase, Issue, Damage, Return)
+  - Final Closing Summary with stock formula
+  - Detailed transaction history tables
+  - Print functionality
+
+  5. Sidebar Menu
+
+  Added "Product Lifetime History" menu item in the sidebar.
+
+  Business Logic Implemented
+
+  Opening Stock Formula:
+  Opening Stock = Previous Purchase - Previous Issue - Previous Damage + Previous Return
+
+  Closing Stock Formula:
+  Closing Stock = Opening Stock + Purchase Qty - Issue Qty - Damage Qty + Return Qty
+
+  Stock Value:
+  Stock Value = Closing Stock × Average Purchase Price
+
+  The report is accessible from the Reports menu in the sidebar.

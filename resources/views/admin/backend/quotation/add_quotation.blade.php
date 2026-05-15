@@ -131,6 +131,11 @@
                 const productList = document.getElementById('product_list');
                 const productBody = document.getElementById('productBody');
 
+                function formatUnitPrice(product) {
+                    const p = parseFloat(product.unit_price);
+                    return (isNaN(p) ? 0 : p).toFixed(2);
+                }
+
                 function renderSearchResults(products) {
                     productList.innerHTML = '';
                     products.forEach((product) => {
@@ -138,7 +143,7 @@
                         item.href = '#';
                         item.className = 'list-group-item list-group-item-action';
                         item.textContent = product.code + ' - ' + product.name + ' (Stock: ' + product.stock +
-                            ')';
+                            ') · TK ' + formatUnitPrice(product);
                         item.addEventListener('click', function(e) {
                             e.preventDefault();
                             addProductToTable(product);
@@ -156,6 +161,7 @@
                         return;
                     }
 
+                    const unitPrice = formatUnitPrice(product);
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>
@@ -163,10 +169,10 @@
                             <input type="hidden" name="products[${product.id}][id]" value="${product.id}">
                         </td>
                         <td>
-                            <input type="number" class="form-control text-end" name="products[${product.id}][price]" value="" min="0" step="0.01" placeholder="0" style="max-width: 120px;">
+                            <input type="number" class="form-control text-end" name="products[${product.id}][price]" value="${unitPrice}" min="0" step="0.01" placeholder="0" style="max-width: 120px;">
                         </td>
                         <td>
-                            <input type="number" class="form-control text-center" name="products[${product.id}][quantity]" value="" min="0" placeholder="0" style="max-width: 80px;">
+                            <input type="number" class="form-control text-center" name="products[${product.id}][quantity]" value="1" min="1" placeholder="1" style="max-width: 80px;">
                         </td>
                         <td class="text-end">TK <span class="item-total">0.00</span></td>
                         <td><button type="button" class="btn btn-danger btn-sm remove-item"><span class="mdi mdi-delete-circle mdi-18px"></span></button></td>
@@ -187,6 +193,7 @@
 
                     priceInput.addEventListener('input', updateTotal);
                     qtyInput.addEventListener('input', updateTotal);
+                    updateTotal();
                 }
 
                 function updateGrandTotal() {

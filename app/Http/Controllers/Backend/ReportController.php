@@ -240,6 +240,8 @@ class ReportController extends Controller
                     $remainingDays = 0;
                 }
 
+                $currentPriceFloor = (int) floor($currentPrice);
+
                 $data[] = [
                     'purchase_id' => $purchase->id,
                     'purchase_date' => $purchase->date,
@@ -255,7 +257,7 @@ class ReportController extends Controller
                     'depreciation' => $depreciation,
                     'remaining_days' => $remainingDays,
                     'expiry_date' => $item->expiry_date,
-                    'stock_value' => $currentPrice * $item->quantity,
+                    'stock_value' => $currentPriceFloor * (int) $item->quantity,
                     'total_value' => $originalPrice * $item->quantity,
                 ];
             }
@@ -326,7 +328,6 @@ class ReportController extends Controller
         $subcategoryId = $request->input('subcategory_id');
         $brandId = $request->input('brand_id');
         $productId = $request->input('product_id');
-        $stockType = $request->input('stock_type');
 
         $query = Product::with(['category', 'subcategory', 'brand']);
 
@@ -344,22 +345,15 @@ class ReportController extends Controller
 
         $products = $query->get();
 
-        // Filter by stock type
-        $filteredProducts = $products->filter(function ($product) use ($stockType) {
-            $stock = $product->product_qty ?? 0;
-            $alert = $product->stock_alert ?? 10;
+        // Threshold is applied in the view/JS for status labels; all rows are returned (same as "All Stock").
+        $filteredProducts = $products->values();
 
-            switch ($stockType) {
-                case 'low_stock':
-                    return $stock > 0 && $stock <= $alert;
-                case 'out_stock':
-                    return $stock == 0;
-                case 'available':
-                    return $stock > $alert;
-                default:
-                    return true; // All stock
-            }
-        })->values();
+        $stockThreshold = 10.0;
+        $rawThreshold = $request->input('stock_less_than');
+        if ($rawThreshold !== null && $rawThreshold !== '' && is_numeric($rawThreshold)) {
+            $t = (float) $rawThreshold;
+            $stockThreshold = $t > 0 ? $t : 10.0;
+        }
 
         // Get latest purchase price for each product from purchase_items table
         $latestPrices = DB::table('purchase_items')
@@ -374,7 +368,11 @@ class ReportController extends Controller
             ->get()
             ->keyBy('product_id');
 
-        return response()->json(['products' => $filteredProducts, 'prices' => $prices]);
+        return response()->json([
+            'products' => $filteredProducts,
+            'prices' => $prices,
+            'stock_threshold' => $stockThreshold,
+        ]);
     }
 
     public function FilterIssues(Request $request)
@@ -540,44 +538,18 @@ class ReportController extends Controller
     }
     // End Method
 
+    public function ProductTRXReport()
+    {
+        $purchases = Purchase::with(['purchaseItems.product', 'supplier', 'warehouse', 'semester', 'department', 'user'])->get();
+        $semesters = Semester::all();
+        $products = Product::all();
+        return view('admin.backend.report.product_trx_report', compact('purchases', 'semesters', 'products'));
+    }
+
     public function PurchaseReturnReport()
     {
         $returnPurchases = ReturnPurchase::with(['purchaseItems.product', 'supplier', 'warehouse'])->get();
         return view('admin.backend.report.purchase_return_report', compact('returnPurchases'));
-    }
-    // End Method
-
-
-    public function SaleReport()
-    {
-        $saleReports = Sale::with(['saleItems.product', 'customer', 'warehouse'])->get();
-        return view('admin.backend.report.sale_report', compact('saleReports'));
-    }
-    // End Method
-
-    public function FilterSales(Request $request)
-    {
-
-        $startDate = $request->input('start_date');
-        $endDate = $request->input('end_date');
-        $query = Sale::with(['saleItems.product', 'customer', 'warehouse']);
-
-        if ($startDate && $endDate) {
-            $startDate = Carbon::parse($startDate)->startOfDay();
-            $endDate = Carbon::parse($endDate)->endOfDay();
-            $query->whereBetween('date', [$startDate, $endDate]);
-        }
-
-        $sales = $query->get();
-        return response()->json(['sales' => $sales]);
-
-    }
-    // End Method
-
-    public function SaleReturnReport()
-    {
-        $returnSales = SaleReturn::with(['saleReturnItems.product', 'customer', 'warehouse'])->get();
-        return view('admin.backend.report.sales_return_report', compact('returnSales'));
     }
     // End Method
 

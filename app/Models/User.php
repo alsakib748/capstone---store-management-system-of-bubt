@@ -58,7 +58,14 @@ class User extends Authenticatable
         $permissions = DB::table('permissions')
             ->select('name', 'id')
             ->where('group_name', $group_name)
-            ->get();
+            ->get()
+            ->map(function ($permission) {
+                $permission->display_name = str_contains($permission->name, '::')
+                    ? explode('::', $permission->name, 2)[1]
+                    : $permission->name;
+
+                return $permission;
+            });
         return $permissions;
 
     }

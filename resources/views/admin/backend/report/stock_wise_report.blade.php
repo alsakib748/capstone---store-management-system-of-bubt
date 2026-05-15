@@ -17,8 +17,51 @@
                     subcategory_id: '',
                     brand_id: '',
                     product_id: '',
-                    stock_type: ''
+                    stock_less_than: ''
                 };
+
+                function getStockThreshold() {
+                    var input = document.getElementById('stock_less_than');
+                    if (!input || input.value === '') {
+                        return 10;
+                    }
+                    var n = parseFloat(input.value);
+                    if (isNaN(n) || n <= 0) {
+                        return 10;
+                    }
+                    return n;
+                }
+
+                function stockStatusFromThreshold(qty, threshold) {
+                    var q = parseFloat(qty);
+                    var n = parseFloat(threshold);
+                    if (isNaN(q)) {
+                        q = 0;
+                    }
+                    if (isNaN(n) || n <= 0) {
+                        n = 10;
+                    }
+                    if (q === 0) {
+                        return {
+                            text: 'Out of Stock',
+                            statusClass: 'bg-danger',
+                            qtyClass: 'bg-danger'
+                        };
+                    }
+                    // N = your number: qty < N → Low Stock, qty > N → Available, qty == N → Low Stock
+                    if (q > n) {
+                        return {
+                            text: 'Available',
+                            statusClass: 'bg-success',
+                            qtyClass: 'bg-success'
+                        };
+                    }
+                    return {
+                        text: 'Low Stock',
+                        statusClass: 'bg-warning text-dark',
+                        qtyClass: 'bg-warning text-dark'
+                    };
+                }
 
                 // Initialize select2
                 const initSelect2 = () => {
@@ -39,7 +82,7 @@
                     currentFilters.subcategory_id = formData.get('subcategory_id') || '';
                     currentFilters.brand_id = formData.get('brand_id') || '';
                     currentFilters.product_id = formData.get('product_id') || '';
-                    currentFilters.stock_type = formData.get('stock_type') || '';
+                    currentFilters.stock_less_than = formData.get('stock_less_than') || '';
                     fetchFilteredData();
                 });
 
@@ -63,14 +106,8 @@
                             .product_id + '"]');
                         if (prodText) filterParts.push('Product: ' + prodText.textContent.trim());
                     }
-                    if (currentFilters.stock_type) {
-                        var stockText = {
-                            'low_stock': 'Low Stock',
-                            'out_stock': 'Out of Stock',
-                            'available': 'Available'
-                        };
-                        filterParts.push('Stock: ' + (stockText[currentFilters.stock_type] || currentFilters
-                            .stock_type));
+                    if (currentFilters.stock_less_than !== '') {
+                        filterParts.push('Stock less than (threshold): ' + currentFilters.stock_less_than);
                     }
 
                     var filterSummary = filterParts.length > 0 ? filterParts.join(' | ') : 'All Records';
@@ -91,25 +128,18 @@
                     var totalQty = 0;
                     var totalValue = 0;
 
+                    var printThreshold = getStockThreshold();
+
                     for (var i = 0; i < products.length; i++) {
                         var p = products[i];
                         var qty = parseFloat(p.product_qty) || 0;
                         var price = prices[p.id] ? parseFloat(prices[p.id].net_unit_cost) : 0;
                         var value = qty * price;
 
-                        var status = 'Available';
-                        var statusClass = 'bg-success';
-                        var alert = 10;
-                        if (qty === 0) {
-                            status = 'Out of Stock';
-                            statusClass = 'bg-danger';
-                        } else if (qty <= alert) {
-                            status = 'Low Stock';
-                            statusClass = 'bg-warning text-dark';
-                        }
-
-                        var qtyBadge = qty === 0 ? 'bg-danger' : (qty <= 10 ? 'bg-warning text-dark' :
-                            'bg-success');
+                        var st = stockStatusFromThreshold(qty, printThreshold);
+                        var status = st.text;
+                        var statusClass = st.statusClass;
+                        var qtyBadge = st.qtyClass;
                         tableHTML += '<tr>' +
                             '<td>' + (i + 1) + '</td>' +
                             '<td>' + (p.name || '-') + '</td>' +
@@ -185,12 +215,12 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            updateTable(data.products || [], data.prices || {});
+                            updateTable(data.products || [], data.prices || {}, data.stock_threshold);
                         })
                         .catch(error => console.error('Error fetching data:', error));
                 }
 
-                function updateTable(data, newPrices) {
+                function updateTable(data, newPrices, stockThresholdFromServer) {
                     products = data;
                     if (newPrices) {
                         prices = newPrices;
@@ -209,24 +239,23 @@
                         return;
                     }
 
+                    var tableThreshold = stockThresholdFromServer;
+                    if (tableThreshold === undefined || tableThreshold === null || tableThreshold === '') {
+                        tableThreshold = getStockThreshold();
+                    } else {
+                        var parsed = parseFloat(tableThreshold);
+                        tableThreshold = (isNaN(parsed) || parsed <= 0) ? getStockThreshold() : parsed;
+                    }
+
                     products.forEach(product => {
                         const qty = parseFloat(product.product_qty) || 0;
                         const price = prices[product.id] ? parseFloat(prices[product.id].net_unit_cost) : 0;
                         const value = qty * price;
-                        const alert = 10;
 
-                        let status = 'Available';
-                        let statusClass = 'bg-success';
-                        let qtyClass = 'bg-success';
-                        if (qty === 0) {
-                            status = 'Out of Stock';
-                            statusClass = 'bg-danger';
-                            qtyClass = 'bg-danger';
-                        } else if (qty <= alert) {
-                            status = 'Low Stock';
-                            statusClass = 'bg-warning text-dark';
-                            qtyClass = 'bg-warning text-dark';
-                        }
+                        const st = stockStatusFromThreshold(qty, tableThreshold);
+                        const status = st.text;
+                        const statusClass = st.statusClass;
+                        const qtyClass = st.qtyClass;
 
                         const row = '<tr>' +
                             '<td>' + sl + '</td>' +
@@ -300,6 +329,12 @@
                         </div>
 
                         <div class="col-lg-4 col-md-6 col-12 mb-3">
+                            <label for="stock_less_than" class="form-label">Stock less than</label>
+                            <input type="number" name="stock_less_than" id="stock_less_than" min="1" step="1"
+                                class="form-control" placeholder="e.g. 20 — qty below = Low, qty above = Available">
+                        </div>
+
+                        {{-- <div class="col-lg-4 col-md-6 col-12 mb-3">
                             <label for="stock_type" class="form-label">Stock Type</label>
                             <select id="stock_type" name="stock_type" class="form-control large-select select2">
                                 <option value="">All Stock</option>
@@ -307,7 +342,7 @@
                                 <option value="out_stock">Out of Stock</option>
                                 <option value="available">Available</option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         <div class="col-lg-4 col-md-6 col-12 mt-3 mb-3">
                             <button type="submit" class="btn btn-primary">Filter Stock</button>
@@ -345,11 +380,15 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php
+                                            $stockThreshold = 10.0;
+                                        @endphp
                                         @foreach ($products as $key => $product)
                                             @php
                                                 $unitPrice = isset($prices[$product->id])
                                                     ? $prices[$product->id]->net_unit_cost
                                                     : 0;
+                                                $qty = (float) ($product->product_qty ?? 0);
                                             @endphp
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
@@ -358,35 +397,26 @@
                                                 <td>{{ $product->subcategory->subcategory_name ?? '-' }}</td>
                                                 <td>{{ $product->brand->name ?? '-' }}</td>
                                                 <td>
-                                                    @php
-                                                        $qty = $product->product_qty ?? 0;
-                                                        $alert = 10;
-                                                        if ($qty == 0) {
-                                                            echo '<span class="badge bg-danger">0</span>';
-                                                        } elseif ($qty <= $alert) {
-                                                            echo '<span class="badge bg-warning text-dark">' .
-                                                                $qty .
-                                                                '</span>';
-                                                        } else {
-                                                            echo '<span class="badge bg-success">' . $qty . '</span>';
-                                                        }
-                                                    @endphp
+                                                    @if ($qty == 0)
+                                                        <span class="badge bg-danger">0</span>
+                                                    @elseif ($qty > $stockThreshold)
+                                                        <span class="badge bg-success">{{ $qty }}</span>
+                                                    @else
+                                                        <span
+                                                            class="badge bg-warning text-dark">{{ $qty }}</span>
+                                                    @endif
                                                 </td>
                                                 <td>{{ number_format($unitPrice, 2) }}</td>
                                                 <td>{{ number_format(($product->product_qty ?? 0) * $unitPrice, 2) }}
                                                 </td>
                                                 <td>
-                                                    @php
-                                                        $qty = $product->product_qty ?? 0;
-                                                        $alert = 10;
-                                                        if ($qty == 0) {
-                                                            echo '<span class="badge bg-danger">Out of Stock</span>';
-                                                        } elseif ($qty <= $alert) {
-                                                            echo '<span class="badge bg-warning text-dark">Low Stock</span>';
-                                                        } else {
-                                                            echo '<span class="badge bg-success">Available</span>';
-                                                        }
-                                                    @endphp
+                                                    @if ($qty == 0)
+                                                        <span class="badge bg-danger">Out of Stock</span>
+                                                    @elseif ($qty > $stockThreshold)
+                                                        <span class="badge bg-success">Available</span>
+                                                    @else
+                                                        <span class="badge bg-warning text-dark">Low Stock</span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -43,12 +43,34 @@ class QuotationController extends Controller
             ->limit(10)
             ->get();
 
-        $formattedProducts = $products->map(function ($product) {
+        $productIds = $products->pluck('id')->unique()->values()->all();
+        $priceByProductId = collect();
+        if (! empty($productIds)) {
+            $latestIds = DB::table('purchase_items')
+                ->select('product_id', DB::raw('MAX(id) as max_id'))
+                ->whereIn('product_id', $productIds)
+                ->groupBy('product_id');
+
+            $priceByProductId = DB::table('purchase_items as pi')
+                ->joinSub($latestIds, 'latest', function ($join) {
+                    $join->on('pi.id', '=', 'latest.max_id');
+                })
+                ->whereIn('pi.product_id', $productIds)
+                ->select('pi.product_id', 'pi.net_unit_cost')
+                ->get()
+                ->keyBy('product_id');
+        }
+
+        $formattedProducts = $products->map(function ($product) use ($priceByProductId) {
+            $row = $priceByProductId->get($product->id);
+            $unitPrice = $row ? (float) $row->net_unit_cost : 0.0;
+
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'code' => $product->code,
                 'stock' => $product->product_qty,
+                'unit_price' => round($unitPrice, 2),
             ];
         });
 
@@ -85,9 +107,9 @@ class QuotationController extends Controller
 
             foreach ($request->products as $productId => $productData) {
                 $product = Product::findOrFail($productId);
-                $price = $productData['price'] ?? 0;
-                $qty = $productData['quantity'] ?? 0;
-                $total = $price * $qty;
+                $price = isset($productData['price']) ? (float) $productData['price'] : 0.0;
+                $qty = isset($productData['quantity']) ? (int) $productData['quantity'] : 0;
+                $total = round($price * $qty, 2);
 
                 QuotationItem::create([
                     'quotation_id' => $quotation->id,
@@ -159,9 +181,9 @@ class QuotationController extends Controller
 
             foreach ($request->products as $productId => $productData) {
                 $product = Product::findOrFail($productId);
-                $price = $productData['price'] ?? 0;
-                $qty = $productData['quantity'] ?? 0;
-                $total = $price * $qty;
+                $price = isset($productData['price']) ? (float) $productData['price'] : 0.0;
+                $qty = isset($productData['quantity']) ? (int) $productData['quantity'] : 0;
+                $total = round($price * $qty, 2);
 
                 QuotationItem::create([
                     'quotation_id' => $quotation->id,
