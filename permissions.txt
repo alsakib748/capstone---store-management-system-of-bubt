@@ -1,0 +1,559 @@
+
+Full texts
+id
+group_name
+name
+guard_name
+created_at
+updated_at
+
+
+1
+Brand
+Brand::menu
+web
+2026-05-15 09:55:03
+2026-05-15 14:06:57
+
+
+2
+Brand
+add
+web
+2026-05-15 09:55:14
+2026-05-15 14:06:48
+
+
+3
+Brand
+edit
+web
+2026-05-15 09:55:26
+2026-05-15 09:55:26
+
+
+4
+Brand
+delete
+web
+2026-05-15 09:55:47
+2026-05-15 09:55:47
+
+5
+Supplier
+Supplier::menu
+web
+2026-05-15 14:07:15
+2026-05-15 14:07:15
+
+6
+Supplier
+Supplier::add
+web
+2026-05-15 14:08:40
+2026-05-15 14:08:40
+
+7
+Supplier
+Supplier::edit
+web
+2026-05-15 14:08:49
+2026-05-15 14:08:49
+
+8
+Supplier
+Supplier::delete
+web
+2026-05-15 14:08:59
+2026-05-15 14:08:59
+
+9
+Product
+Product::menu
+web
+2026-05-15 14:09:18
+2026-05-15 14:09:18
+
+10
+Product
+Product::add
+web
+2026-05-15 14:09:50
+2026-05-15 14:38:18
+
+11
+Product
+Product::edit
+web
+2026-05-15 14:38:27
+2026-05-15 14:38:27
+
+12
+Product
+Product::delete
+web
+2026-05-15 14:39:04
+2026-05-15 14:39:04
+
+13
+Category
+Category::menu
+web
+2026-05-15 14:39:17
+2026-05-15 14:39:17
+
+14
+Category
+Category::add
+web
+2026-05-15 14:39:24
+2026-05-15 14:39:24
+
+15
+Category
+Category::edit
+web
+2026-05-15 14:39:41
+2026-05-15 14:39:41
+
+16
+Category
+Category::delete
+web
+2026-05-15 14:39:48
+2026-05-15 14:39:48
+
+17
+SubCategory
+SubCategory::menu
+web
+2026-05-15 14:40:50
+2026-05-15 14:40:50
+
+18
+SubCategory
+SubCategory::add
+web
+2026-05-15 14:40:59
+2026-05-15 14:40:59
+
+19
+SubCategory
+SubCategory::edit
+web
+2026-05-15 14:41:10
+2026-05-15 14:41:10
+
+20
+SubCategory
+SubCategory::delete
+web
+2026-05-15 14:41:32
+2026-05-15 14:41:32
+
+21
+Damage Product
+Damage Product::menu
+web
+2026-05-15 14:41:51
+2026-05-15 14:41:51
+
+22
+Damage Product
+Damage Product::add
+web
+2026-05-15 14:42:09
+2026-05-15 14:42:09
+
+23
+Damage Product
+Damage Product::edit
+web
+2026-05-15 14:42:17
+2026-05-15 14:42:17
+
+24
+Damage Product
+Damage Product::delete
+web
+2026-05-15 14:42:26
+2026-05-15 14:42:26
+
+25
+Purchase
+Purchase::menu
+web
+2026-05-15 14:42:40
+2026-05-15 14:42:40
+
+26
+Purchase
+Purchase::add
+web
+2026-05-15 14:42:51
+2026-05-15 14:42:51
+
+27
+Purchase
+Purchase::edit
+web
+2026-05-15 14:43:03
+2026-05-15 14:43:03
+
+28
+Purchase
+Purchase::delete
+web
+2026-05-15 14:43:18
+2026-05-15 14:43:18
+
+29
+Purchase Return
+Purchase Return::menu
+web
+2026-05-15 14:43:39
+2026-05-15 14:43:39
+
+30
+Purchase Return
+Purchase Return::add
+web
+2026-05-15 14:43:48
+2026-05-15 14:43:48
+
+31
+Purchase Return
+Purchase Return::edit
+web
+2026-05-15 14:43:58
+2026-05-15 14:43:58
+
+32
+Purchase Return
+Purchase Return::delete
+web
+2026-05-15 14:44:11
+2026-05-15 14:44:11
+
+33
+Requisition
+Requisition::menu
+web
+2026-05-15 14:44:27
+2026-05-15 14:44:27
+
+34
+Requisition
+Requisition::add
+web
+2026-05-15 14:47:50
+2026-05-15 14:47:50
+
+35
+Requisition
+Requisition::edit
+web
+2026-05-15 14:47:58
+2026-05-15 14:47:58
+
+36
+Requisition
+Requisition::delete
+web
+2026-05-15 14:48:10
+2026-05-15 14:48:10
+
+37
+Issue
+Issue::menu
+web
+2026-05-15 14:48:22
+2026-05-15 14:48:22
+
+38
+Issue
+Issue::add
+web
+2026-05-15 14:48:41
+2026-05-15 14:48:41
+
+39
+Issue
+Issue::edit
+web
+2026-05-15 14:48:55
+2026-05-15 14:48:55
+
+40
+Issue
+Issue::delete
+web
+2026-05-15 14:49:09
+2026-05-15 14:49:09
+
+41
+Issue Return
+Issue Return::menu
+web
+2026-05-15 14:49:27
+2026-05-15 14:49:27
+
+42
+Issue Return
+Issue Return::add
+web
+2026-05-15 14:49:37
+2026-05-15 14:49:37
+
+43
+Issue Return
+Issue Return::edit
+web
+2026-05-15 14:50:05
+2026-05-15 14:50:05
+
+44
+Issue Return
+Issue Return::delete
+web
+2026-05-15 14:50:18
+2026-05-15 14:50:18
+
+45
+Quotation
+Quotation::menu
+web
+2026-05-15 14:50:35
+2026-05-15 14:50:35
+
+46
+Quotation
+Quotation::add
+web
+2026-05-15 14:50:47
+2026-05-15 14:50:47
+
+47
+Quotation
+Quotation::edit
+web
+2026-05-15 14:50:58
+2026-05-15 14:50:58
+
+48
+Quotation
+Quotation::delete
+web
+2026-05-15 14:51:09
+2026-05-15 14:51:09
+
+49
+Report
+Report::menu
+web
+2026-05-15 14:51:37
+2026-05-15 14:51:37
+
+50
+Report
+Report::purchase report
+web
+2026-05-15 14:51:56
+2026-05-15 14:51:56
+
+51
+Report
+Report::damage product report
+web
+2026-05-15 14:52:40
+2026-05-15 14:52:40
+
+52
+Report
+Report::issue report
+web
+2026-05-15 14:52:56
+2026-05-15 14:52:56
+
+53
+Report
+Report::issue return report
+web
+2026-05-15 14:53:15
+2026-05-15 14:53:15
+
+54
+Report
+Report::stock report
+web
+2026-05-15 14:53:31
+2026-05-15 14:53:31
+
+55
+Report
+Report::fixed asset report
+web
+2026-05-15 14:54:37
+2026-05-15 14:54:37
+
+56
+Report
+Report::product trx report
+web
+2026-05-15 14:55:03
+2026-05-15 14:55:03
+
+57
+Report
+Report::all reports
+web
+2026-05-15 14:55:19
+2026-05-15 14:55:19
+
+58
+Chat
+Chat::menu
+web
+2026-05-15 14:55:37
+2026-05-15 14:55:37
+
+59
+Semester
+Semester::menu
+web
+2026-05-15 14:56:12
+2026-05-15 14:56:12
+
+60
+Semester
+Semester::add
+web
+2026-05-15 14:56:31
+2026-05-15 14:56:31
+
+61
+Semester
+Semester::edit
+web
+2026-05-15 14:56:40
+2026-05-15 14:56:40
+
+62
+Semester
+Semester::delete
+web
+2026-05-15 14:56:49
+2026-05-15 14:56:49
+
+63
+Department
+Department::menu
+web
+2026-05-15 14:57:13
+2026-05-15 14:57:13
+
+64
+Department
+Department::add
+web
+2026-05-15 14:57:23
+2026-05-15 14:57:23
+
+65
+Department
+Department::edit
+web
+2026-05-15 14:57:33
+2026-05-15 14:57:33
+
+66
+Department
+Department::delete
+web
+2026-05-15 14:57:42
+2026-05-15 14:57:42
+
+67
+Role Permission
+Role Permission::menu
+web
+2026-05-15 14:58:19
+2026-05-15 14:58:19
+
+68
+Manage User
+Manage User::menu
+web
+2026-05-15 14:58:58
+2026-05-15 14:58:58
+
+69
+Manage User
+Manage User::add
+web
+2026-05-15 14:59:11
+2026-05-15 14:59:11
+
+70
+Manage User
+Manage User::edit
+web
+2026-05-15 14:59:20
+2026-05-15 14:59:20
+
+71
+Manage User
+Manage User::delete
+web
+2026-05-15 14:59:29
+2026-05-15 14:59:29
+
+72
+Stock
+Stock::quantity
+web
+2026-05-15 15:00:07
+2026-05-15 15:00:07
+
+73
+Requisition
+Requisition::my requisitions
+web
+2026-05-15 15:04:56
+2026-05-15 15:04:56
+
+74
+Requisition
+Requisition::all requisitions
+web
+2026-05-15 15:05:12
+2026-05-15 15:05:12
+
+75
+Issue
+Issue::my issues
+web
+2026-05-15 15:05:34
+2026-05-15 15:05:34
+
+76
+Issue
+Issue::all issues
+web
+2026-05-15 15:05:50
+2026-05-15 15:05:50
+
+77
+Product
+Product::Roles has permission
+web
+2026-05-15 18:36:22
+2026-05-15 18:36:22
+
+78
+Product
+Product::In Stock
+web
+2026-05-15 18:37:04
+2026-05-15 18:37:04
+

@@ -78,7 +78,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
 
-    Route::controller(BrandController::class)->group(function () {
+    Route::controller(BrandController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/brand', 'AllBrand')->name('all.brand');
         Route::get('/add/brand', 'AddBrand')->name('add.brand');
         Route::post('/store/brand', 'StoreBrand')->name('store.brand');
@@ -87,7 +87,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/brand/{id}', 'DeleteBrand')->name('delete.brand');
     });
 
-    Route::controller(WareHouseController::class)->group(function () {
+    Route::controller(WareHouseController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/warehouse', 'AllWarehouse')->name('all.warehouse');
         Route::get('/add/warehouse', 'AddWarehouse')->name('add.warehouse');
         Route::post('/store/warehouse', 'StoreWarehouse')->name('store.warehouse');
@@ -97,7 +97,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(SupplierController::class)->group(function () {
+    Route::controller(SupplierController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/supplier', 'AllSupplier')->name('all.supplier');
         Route::get('/add/supplier', 'AddSupplier')->name('add.supplier');
         Route::post('/store/supplier', 'StoreSupplier')->name('store.supplier');
@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/supplier/{id}', 'DeleteSupplier')->name('delete.supplier');
     });
 
-    Route::controller(SemesterController::class)->group(function () {
+    Route::controller(SemesterController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/semester', 'AllSemester')->name('all.semester');
         Route::get('/add/semester', 'AddSemester')->name('add.semester');
         Route::post('/store/semester', 'StoreSemester')->name('store.semester');
@@ -115,7 +115,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/semester/{id}', 'DeleteSemester')->name('delete.semester');
     });
 
-    Route::controller(DepartmentController::class)->group(function () {
+    Route::controller(DepartmentController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/department', 'AllDepartment')->name('all.department');
         Route::get('/add/department', 'AddDepartment')->name('add.department');
         Route::post('/store/department', 'StoreDepartment')->name('store.department');
@@ -124,7 +124,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/department/{id}', 'DeleteDepartment')->name('delete.department');
     });
 
-    Route::controller(SupplierController::class)->group(function () {
+    Route::controller(SupplierController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/customer', 'AllCustomer')->name('all.customer');
         Route::get('/add/customer', 'AddCustomer')->name('add.customer');
         Route::post('/store/customer', 'StoreCustomer')->name('store.customer');
@@ -134,7 +134,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(ProductController::class)->group(function () {
+    Route::controller(ProductController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/category', 'AllCategory')->name('all.category');
         Route::post('/store/category', 'StoreCategory')->name('store.category');
         Route::get('/edit/category/{id}', 'EditCategory');
@@ -152,7 +152,7 @@ Route::middleware('auth')->group(function () {
 
     });
 
-    Route::controller(ProductController::class)->group(function () {
+    Route::controller(ProductController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/product', 'AllProduct')->name('all.product');
         Route::get('/add/product', 'AddProduct')->name('add.product');
         Route::post('/store/product', 'StoreProduct')->name('store.product');
@@ -162,7 +162,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/details/product/{id}', 'DetailsProduct')->name('details.product');
     });
 
-    Route::controller(DamageProductController::class)->group(function () {
+    Route::controller(DamageProductController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/damage-product', 'AllDamageProduct')->name('all.damage.product');
         Route::get('/add/damage-product', 'AddDamageProduct')->name('add.damage.product');
         Route::get('/damage-product/product/search', 'DamageProductProductSearch')->name('damage.product.product.search');
@@ -177,7 +177,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/damage-product/{id}', 'DeleteDamageProduct')->name('delete.damage.product');
     });
 
-    Route::controller(PurchaseController::class)->group(function () {
+    Route::controller(PurchaseController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/purchase', 'AllPurchase')->name('all.purchase');
         Route::get('/add/purchase', 'AddPurchase')->name('add.purchase');
         Route::get('/purchase/product/search', 'PurchaseProductSearch')->name('purchase.product.search');
@@ -193,7 +193,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/purchase/{id}', 'DeletePurchase')->name('delete.purchase');
     });
 
-    Route::controller(ReturnPurchaseController::class)->group(function () {
+    Route::controller(ReturnPurchaseController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/return/purchase', 'AllReturnPurchase')->name('all.return.purchase');
         Route::get('/add/return/purchase', 'AddReturnPurchase')->name('add.return.purchase');
         Route::post('/store/return/purchase', 'StoreReturnPurchase')->name('store.return.purchase');
@@ -207,7 +207,7 @@ Route::middleware('auth')->group(function () {
 
     });
 
-    Route::controller(RequisitionController::class)->group(function () {
+    Route::controller(RequisitionController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/my/requisition', 'MyRequisition')->name('my.requisition');
         Route::get('/all/requisition', 'AllRequisition')->name('all.requisition');
         Route::get('/add/requisition', 'AddRequisition')->name('add.requisition');
@@ -221,7 +221,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/issue/requisition/{id}', 'IssueRequisition')->name('issue.requisition');
     });
 
-    Route::controller(IssueController::class)->group(function () {
+    Route::controller(IssueController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/my/issue', 'MyIssue')->name('my.issue');
         Route::get('/all/issue', 'AllIssue')->name('all.issue');
         Route::get('/add/issue', 'AddIssue')->name('add.issue');
@@ -235,7 +235,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/issue/{id}', 'DeleteIssue')->name('delete.issue');
     });
 
-    Route::controller(IssueReturnController::class)->group(function () {
+    Route::controller(IssueReturnController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/issue/return', 'AllIssueReturn')->name('all.issue.return');
         Route::get('/add/issue/return', 'AddIssueReturn')->name('add.issue.return');
         Route::get('/issue/get/users/by/department/{department_id}', 'GetUsersByDepartment')->name('issue.get.users.by.department');
@@ -249,7 +249,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/issue/return/{id}', 'DeleteIssueReturn')->name('delete.issue.return');
     });
 
-    Route::controller(TransferController::class)->group(function () {
+    Route::controller(TransferController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/transfer', 'AllTransfer')->name('all.transfer');
         Route::get('/add/transfer', 'AddTransfer')->name('add.transfer');
         Route::post('/store/transfer', 'StoreTransfer')->name('store.transfer');
@@ -261,7 +261,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(QuotationController::class)->group(function () {
+    Route::controller(QuotationController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/quotation', 'AllQuotation')->name('all.quotation');
         Route::get('/add/quotation', 'AddQuotation')->name('add.quotation');
         Route::get('/quotation/product/search', 'QuotationProductSearch')->name('quotation.product.search');
@@ -277,7 +277,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(ReportController::class)->group(function () {
+    Route::controller(ReportController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
 
         Route::get('/all/report', 'AllReport')->name('all.report');
 
@@ -319,7 +319,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(RoleController::class)->group(function () {
+    Route::controller(RoleController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/permission', 'AllPermission')->name('all.permission');
         Route::get('/add/permission', 'AddPermission')->name('add.permission');
         Route::post('/store/permission', 'StorePermission')->name('store.permission');
@@ -328,7 +328,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/permission/{id}', 'DeletePermission')->name('delete.permission');
     });
 
-    Route::controller(RoleController::class)->group(function () {
+    Route::controller(RoleController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/roles', 'AllRoles')->name('all.roles');
         Route::get('/add/roles', 'AddRoles')->name('add.roles');
         Route::post('/store/roles', 'StoreRoles')->name('store.roles');
@@ -337,7 +337,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/roles/{id}', 'DeleteRoles')->name('delete.roles');
     });
 
-    Route::controller(RoleController::class)->group(function () {
+    Route::controller(RoleController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/add/roles/permission', 'AddRolesPermission')->name('add.roles.permission');
         Route::post('/role/permission/store', 'RolePermissionStore')->name('role.permission.store');
         Route::get('/all/roles/permission', 'AllRolesPermission')->name('all.roles.permission');
@@ -349,7 +349,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-    Route::controller(RoleController::class)->group(function () {
+    Route::controller(RoleController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/admin', 'AllAdmin')->name('all.admin');
         Route::get('/add/admin', 'AddAdmin')->name('add.admin');
         Route::post('/store/admin', 'StoreAdmin')->name('store.admin');

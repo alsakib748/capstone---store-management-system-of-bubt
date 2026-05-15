@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All Department</h4>
             </div>
 
+            @can('Department::add')
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
                      <a href="{{ route('add.department') }}" class="btn btn-secondary">Add Department</a>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -44,8 +46,12 @@
                 <td>{{ $item->name }}</td>
                 <td>{{ $item->code }}</td>
                 <td>
-            <a href="{{ route('edit.department',$item->id) }}" class="btn btn-success btn-sm">Edit</a>
-            <a href="{{ route('delete.department',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+            @can('Department::edit')
+                <a href="{{ route('edit.department',$item->id) }}" class="btn btn-success btn-sm">Edit</a>
+            @endcan
+            @can('Department::delete')
+                <a href="{{ route('delete.department',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+            @endcan
                 </td>
             </tr>
             @endforeach

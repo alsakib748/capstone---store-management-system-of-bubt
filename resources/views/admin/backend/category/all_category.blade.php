@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All Product Category</h4>
             </div>
 
+            @can('Category::add')
             <div class="text-end">
-                <ol class="breadcrumb m-0 py-0"> 
-    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#standard-modal"> Add Category </button>
+                <ol class="breadcrumb m-0 py-0">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#standard-modal"> Add Category </button>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -43,11 +45,13 @@
                 <td>{{ $key+1 }}</td>
                 <td>{{ $item->category_name }}</td>
                 <td>{{ $item->category_slug }}</td> 
-                <td> 
-
-            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#category" id="{{ $item->id }}" onclick="categoryEdit(this.id)"> Edit</button>
-
-            <a href="{{ route('delete.category',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>    
+                <td>
+                    @can('Category::edit')
+                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#category" id="{{ $item->id }}" onclick="categoryEdit(this.id)"> Edit</button>
+                    @endcan
+                    @can('Category::delete')
+                        <a href="{{ route('delete.category',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+                    @endcan
                 </td> 
             </tr>
             @endforeach 

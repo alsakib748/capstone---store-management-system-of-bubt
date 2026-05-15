@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All Subcategory</h4>
             </div>
 
+            @can('SubCategory::add')
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
                     <a href="{{ route('add.subcategory') }}" class="btn btn-secondary">Add Subcategory</a>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -46,8 +48,12 @@
                                         <td>{{ $item->subcategory_name }}</td>
                                         <td>{{ $item->subcategory_slug }}</td>
                                         <td>
-                                            <a href="{{ route('edit.subcategory.page', $item->id) }}" class="btn btn-success btn-sm">Edit</a>
-                                            <a href="{{ route('delete.subcategory', $item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+                                            @can('SubCategory::edit')
+                                                <a href="{{ route('edit.subcategory.page', $item->id) }}" class="btn btn-success btn-sm">Edit</a>
+                                            @endcan
+                                            @can('SubCategory::delete')
+                                                <a href="{{ route('delete.subcategory', $item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @endforeach

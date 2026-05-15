@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All WareHouse</h4>
             </div>
 
+            @can('WareHouse::add')
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
                      <a href="{{ route('add.warehouse') }}" class="btn btn-secondary">Add WareHouse</a>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -48,8 +50,12 @@
                 <td>{{ $item->phone }}</td>
                 <td>{{ $item->city }}</td>
                 <td>
-            <a href="{{ route('edit.warehouse',$item->id) }}" class="btn btn-success btn-sm">Edit</a>  
-            <a href="{{ route('delete.warehouse',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>    
+            @can('WareHouse::edit')
+                <a href="{{ route('edit.warehouse',$item->id) }}" class="btn btn-success btn-sm">Edit</a>
+            @endcan
+            @can('WareHouse::delete')
+                <a href="{{ route('delete.warehouse',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+            @endcan
                 </td> 
             </tr>
             @endforeach 

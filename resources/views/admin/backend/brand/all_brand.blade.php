@@ -10,11 +10,13 @@
                     <h4 class="fs-18 fw-semibold m-0">All Brand</h4>
                 </div>
 
-                <div class="text-end">
-                    <ol class="breadcrumb m-0 py-0">
-                        <a href="{{ route('add.brand') }}" class="btn btn-secondary">Add Brand</a>
-                    </ol>
-                </div>
+                @can('Brand::add')
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <a href="{{ route('add.brand') }}" class="btn btn-secondary">Add Brand</a>
+                        </ol>
+                    </div>
+                @endcan
             </div>
 
             <!-- Datatables  -->
@@ -45,13 +47,19 @@
                                             </td>
                                             <td>
                                                 {{-- @if (Auth::guard('web')->user()->can('edit.brand'))   --}}
-                                                <a href="{{ route('edit.brand', $item->id) }}"
-                                                    class="btn btn-success btn-sm">Edit</a>
+                                                @can('Brand::edit')
+                                                    <a href="{{ route('edit.brand', $item->id) }}"
+                                                        class="btn btn-success btn-sm">Edit</a>
+                                                @endcan
+
                                                 {{-- @endif --}}
 
-                                                {{-- @if (Auth::guard('web')->user()->can('delete.brand'))   --}}
-                                                <a href="{{ route('delete.brand', $item->id) }}"
-                                                    class="btn btn-danger btn-sm" id="delete">Delete</a>
+                                                {{-- @if (Auth::guard('web')->user()->can('delete.brand'))
+                                                   --}}
+                                                @can('Brand::delete')
+                                                    <a href="{{ route('delete.brand', $item->id) }}"
+                                                        class="btn btn-danger btn-sm" id="delete">Delete</a>
+                                                @endcan
                                                 {{-- @endif --}}
 
                                             </td>

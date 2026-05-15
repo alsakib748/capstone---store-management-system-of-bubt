@@ -6,9 +6,11 @@
                 <div class="flex-grow-1">
                     <h4 class="fs-18 fw-semibold m-0">All Quotation</h4>
                 </div>
+                @can('Quotation::add')
                 <div class="text-end">
                     <a href="{{ route('add.quotation') }}" class="btn btn-primary">Add Quotation</a>
                 </div>
+                @endcan
             </div>
 
             <div class="row">
@@ -43,12 +45,16 @@
                                                         <a title="PDF Invoice" href="{{ route('invoice.quotation', $item->id) }}" class="btn btn-warning btn-sm" target="_blank">
                                                             <span class="mdi mdi-file-pdf-box mdi-18px"></span>
                                                         </a>
-                                                        <a title="Edit" href="{{ route('edit.quotation', $item->id) }}" class="btn btn-success btn-sm">
-                                                            <span class="mdi mdi-book-edit mdi-18px"></span>
-                                                        </a>
-                                                        <a title="Delete" href="{{ route('delete.quotation', $item->id) }}" class="btn btn-danger btn-sm" id="delete">
-                                                            <span class="mdi mdi-delete-circle mdi-18px"></span>
-                                                        </a>
+                                                        @can('Quotation::edit')
+                                                            <a title="Edit" href="{{ route('edit.quotation', $item->id) }}" class="btn btn-success btn-sm">
+                                                                <span class="mdi mdi-book-edit mdi-18px"></span>
+                                                            </a>
+                                                        @endcan
+                                                        @can('Quotation::delete')
+                                                            <a title="Delete" href="{{ route('delete.quotation', $item->id) }}" class="btn btn-danger btn-sm" id="delete">
+                                                                <span class="mdi mdi-delete-circle mdi-18px"></span>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>

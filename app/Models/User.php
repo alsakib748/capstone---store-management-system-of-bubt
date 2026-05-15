@@ -101,6 +101,22 @@ class User extends Authenticatable
         return asset('backend/assets/images/logo-sm.png');
     }
 
+    /**
+     * Check if the user has any permission in the given permission group.
+     * Super Admin and Admin automatically return true.
+     */
+    public function hasPermissionGroup(string $groupName): bool
+    {
+        if ($this->hasRole('Super Admin') || $this->hasRole('Admin')) {
+            return true;
+        }
+
+        $perms = $this->getAllPermissions();
+        return $perms->contains(function ($p) use ($groupName) {
+            return isset($p->group_name) && $p->group_name === $groupName;
+        });
+    }
+
 
 
 

@@ -42,9 +42,9 @@
                                 <li class="list-group-item"><strong>Name:</strong> {{ $product->name }} </li>
                                 <li class="list-group-item"><strong>Variant:</strong> {{ $product->code }} </li>
                                 <li class="list-group-item"><strong>Category:</strong>
-                                    {{ $product->category->category_name }} </li>
+                                    {{ $product->category->category_name ?? 'N/A' }} </li>
                                 <li class="list-group-item"><strong>SubCategory:</strong>
-                                    {{ $product->subcategory->subcategory_name }} </li>
+                                    {{ $product->subcategory->subcategory_name ?? 'N/A' }} </li>
                                 <li class="list-group-item"><strong>Brand:</strong> {{ $product->brand->name }} </li>
                                 <li class="list-group-item"><strong>Product Qty:</strong> {{ $product->product_qty }} </li>
                                 <li class="list-group-item"><strong>Fixed Asset:</strong>

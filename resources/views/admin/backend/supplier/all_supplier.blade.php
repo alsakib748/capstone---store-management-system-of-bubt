@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All Supplier</h4>
             </div>
 
+            @can('Supplier::add')
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
                      <a href="{{ route('add.supplier') }}" class="btn btn-secondary">Add Supplier</a>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -48,8 +50,12 @@
                 <td>{{ $item->phone }}</td>
                 <td>{{ Str::limit($item->address, 50, '...')  }}</td>
                 <td>
+            @can('Supplier::edit')
             <a href="{{ route('edit.supplier',$item->id) }}" class="btn btn-success btn-sm">Edit</a>
+            @endcan
+            @can('Supplier::delete')
             <a href="{{ route('delete.supplier',$item->id) }}" class="btn btn-danger btn-sm" id="delete">Delete</a>
+            @endcan
                 </td>
             </tr>
             @endforeach

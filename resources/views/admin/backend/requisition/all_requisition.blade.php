@@ -10,11 +10,13 @@
                     <h4 class="fs-18 fw-semibold m-0">All Requisition</h4>
                 </div>
 
+                @can('Requisition::add')
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0">
                         <a href="{{ route('add.requisition') }}" class="btn btn-secondary">Add Requisition</a>
                     </ol>
                 </div>
+                @endcan
             </div>
 
             <!-- Datatables  -->
@@ -69,12 +71,14 @@
                                                             class="btn btn-warning btn-sm" target="_blank"> <span
                                                                 class="mdi mdi-file-pdf-box mdi-18px"></span> </a>
 
-                                                        @if ($item->status !== 'issued')
-                                                            <a title="Place Issue"
-                                                                href="{{ route('edit.requisition', $item->id) }}"
-                                                                class="btn btn-success btn-sm"> <span
-                                                                    class="mdi mdi-check-circle mdi-18px"></span> </a>
-                                                        @endif
+                                                        @can('Requisition::edit')
+                                                            @if ($item->status !== 'issued')
+                                                                <a title="Place Issue"
+                                                                    href="{{ route('edit.requisition', $item->id) }}"
+                                                                    class="btn btn-success btn-sm"> <span
+                                                                        class="mdi mdi-check-circle mdi-18px"></span> </a>
+                                                            @endif
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>

@@ -11,11 +11,13 @@
                 <h4 class="fs-18 fw-semibold m-0">All Transfer </h4>
             </div>
 
+            @can('Transfer::add')
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
                      <a href="{{ route('add.transfer') }}" class="btn btn-secondary">Add Transfer</a>
                 </ol>
             </div>
+            @endcan
         </div>
 
         <!-- Datatables  -->
@@ -57,11 +59,15 @@
         @endforeach </td>
         
         <td>
-   <a title="Details" href="{{ route('details.transfer',$item->id) }}" class="btn btn-info btn-sm"> <span class="mdi mdi-eye-circle mdi-18px"></span> </a>  
+            <a title="Details" href="{{ route('details.transfer',$item->id) }}" class="btn btn-info btn-sm"> <span class="mdi mdi-eye-circle mdi-18px"></span> </a>
 
-    <a title="Edit" href="{{ route('edit.transfer',$item->id) }}" class="btn btn-success btn-sm"> <span class="mdi mdi-book-edit mdi-18px"></span> </a>  
+            @can('Transfer::edit')
+                <a title="Edit" href="{{ route('edit.transfer',$item->id) }}" class="btn btn-success btn-sm"> <span class="mdi mdi-book-edit mdi-18px"></span> </a>
+            @endcan
 
-    <a title="Delete" href="{{ route('delete.transfer',$item->id) }}" class="btn btn-danger btn-sm" id="delete"><span class="mdi mdi-delete-circle  mdi-18px"></span></a>    
+            @can('Transfer::delete')
+                <a title="Delete" href="{{ route('delete.transfer',$item->id) }}" class="btn btn-danger btn-sm" id="delete"><span class="mdi mdi-delete-circle  mdi-18px"></span></a>
+            @endcan
         </td> 
     </tr>
     @endforeach 

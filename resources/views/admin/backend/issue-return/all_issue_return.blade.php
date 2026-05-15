@@ -6,9 +6,11 @@
                 <div class="flex-grow-1">
                     <h4 class="fs-18 fw-semibold m-0">All Issue Return</h4>
                 </div>
+                @can('Issue Return::add')
                 <div class="text-end">
                     <a href="{{ route('add.issue.return') }}" class="btn btn-primary">Add Issue Return</a>
                 </div>
+                @endcan
             </div>
 
             <div class="row">
@@ -50,15 +52,19 @@
                                                             class="btn btn-warning btn-sm" target="_blank">
                                                             <span class="mdi mdi-file-pdf-box mdi-18px"></span>
                                                         </a>
-                                                        <a title="Edit" href="{{ route('edit.issue.return', $item->id) }}"
-                                                            class="btn btn-success btn-sm">
-                                                            <span class="mdi mdi-book-edit mdi-18px"></span>
-                                                        </a>
-                                                        <a title="Delete"
-                                                            href="{{ route('delete.issue.return', $item->id) }}"
-                                                            class="btn btn-danger btn-sm" id="delete">
-                                                            <span class="mdi mdi-delete-circle mdi-18px"></span>
-                                                        </a>
+                                                        @can('Issue Return::edit')
+                                                            <a title="Edit" href="{{ route('edit.issue.return', $item->id) }}"
+                                                                class="btn btn-success btn-sm">
+                                                                <span class="mdi mdi-book-edit mdi-18px"></span>
+                                                            </a>
+                                                        @endcan
+                                                        @can('Issue Return::delete')
+                                                            <a title="Delete"
+                                                                href="{{ route('delete.issue.return', $item->id) }}"
+                                                                class="btn btn-danger btn-sm" id="delete">
+                                                                <span class="mdi mdi-delete-circle mdi-18px"></span>
+                                                            </a>
+                                                        @endcan
                                                     </div>
                                                 </td>
                                             </tr>

@@ -10,11 +10,13 @@
                     <h4 class="fs-18 fw-semibold m-0">All Return Purchase</h4>
                 </div>
 
+                @can('Purchase Return::add')
                 <div class="text-end">
                     <ol class="breadcrumb m-0 py-0">
                         <a href="{{ route('add.return.purchase') }}" class="btn btn-secondary">Add Return Purchase</a>
                     </ol>
                 </div>
+                @endcan
             </div>
 
             <!-- Datatables  -->
@@ -64,13 +66,17 @@
                                                     class="btn btn-primary btn-sm"> <span
                                                         class="mdi mdi-download-circle mdi-18px"></span> </a>
 
-                                                <a title="Edit" href="{{ route('edit.return.purchase', $item->id) }}"
-                                                    class="btn btn-success btn-sm"> <span
-                                                        class="mdi mdi-book-edit mdi-18px"></span> </a>
+                                                @can('Purchase Return::edit')
+                                                    <a title="Edit" href="{{ route('edit.return.purchase', $item->id) }}"
+                                                        class="btn btn-success btn-sm"> <span
+                                                            class="mdi mdi-book-edit mdi-18px"></span> </a>
+                                                @endcan
 
-                                                <a title="Delete" href="{{ route('delete.return.purchase', $item->id) }}"
-                                                    class="btn btn-danger btn-sm" id="delete"><span
-                                                        class="mdi mdi-delete-circle  mdi-18px"></span></a>
+                                                @can('Purchase Return::delete')
+                                                    <a title="Delete" href="{{ route('delete.return.purchase', $item->id) }}"
+                                                        class="btn btn-danger btn-sm" id="delete"><span
+                                                            class="mdi mdi-delete-circle  mdi-18px"></span></a>
+                                                @endcan
                                                 </div>
                                             </td>
                                         </tr>
