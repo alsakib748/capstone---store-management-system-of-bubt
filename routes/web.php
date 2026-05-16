@@ -14,11 +14,7 @@ use App\Http\Controllers\Backend\RequisitionController;
 use App\Http\Controllers\Backend\IssueController;
 use App\Http\Controllers\Backend\ReturnPurchaseController;
 use App\Http\Controllers\Backend\RoleController;
-use App\Http\Controllers\Backend\SaleController;
-use App\Http\Controllers\Backend\SaleReturnController;
 use App\Http\Controllers\Backend\SupplierController;
-use App\Http\Controllers\Backend\TransferController;
-use App\Http\Controllers\Backend\WareHouseController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SemesterController;
 use Illuminate\Support\Facades\Route;
@@ -87,16 +83,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/delete/brand/{id}', 'DeleteBrand')->name('delete.brand');
     });
 
-    Route::controller(WareHouseController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
-        Route::get('/all/warehouse', 'AllWarehouse')->name('all.warehouse');
-        Route::get('/add/warehouse', 'AddWarehouse')->name('add.warehouse');
-        Route::post('/store/warehouse', 'StoreWarehouse')->name('store.warehouse');
-        Route::get('/edit/warehouse/{id}', 'EditWarehouse')->name('edit.warehouse');
-        Route::post('/update/warehouse', 'UpdateWarehouse')->name('update.warehouse');
-        Route::get('/delete/warehouse/{id}', 'DeleteWarehouse')->name('delete.warehouse');
-    });
-
-
     Route::controller(SupplierController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/supplier', 'AllSupplier')->name('all.supplier');
         Route::get('/add/supplier', 'AddSupplier')->name('add.supplier');
@@ -123,16 +109,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/update/department', 'UpdateDepartment')->name('update.department');
         Route::get('/delete/department/{id}', 'DeleteDepartment')->name('delete.department');
     });
-
-    Route::controller(SupplierController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
-        Route::get('/all/customer', 'AllCustomer')->name('all.customer');
-        Route::get('/add/customer', 'AddCustomer')->name('add.customer');
-        Route::post('/store/customer', 'StoreCustomer')->name('store.customer');
-        Route::get('/edit/customer/{id}', 'EditCustomer')->name('edit.customer');
-        Route::post('/update/customer', 'UpdateCustomer')->name('update.customer');
-        Route::get('/delete/customer/{id}', 'DeleteCustomer')->name('delete.customer');
-    });
-
 
     Route::controller(ProductController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/category', 'AllCategory')->name('all.category');
@@ -248,18 +224,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoice/issue/return/{id}', 'InvoiceIssueReturn')->name('invoice.issue.return');
         Route::get('/delete/issue/return/{id}', 'DeleteIssueReturn')->name('delete.issue.return');
     });
-
-    Route::controller(TransferController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
-        Route::get('/all/transfer', 'AllTransfer')->name('all.transfer');
-        Route::get('/add/transfer', 'AddTransfer')->name('add.transfer');
-        Route::post('/store/transfer', 'StoreTransfer')->name('store.transfer');
-        Route::get('/edit/transfer/{id}', 'EditTransfer')->name('edit.transfer');
-        Route::post('/update/transfer/{id}', 'UpdateTransfer')->name('update.transfer');
-        Route::get('/delete/transfer/{id}', 'DeleteTransfer')->name('delete.transfer');
-        Route::get('/details/transfer/{id}', 'DetailsTransfer')->name('details.transfer');
-
-    });
-
 
     Route::controller(QuotationController::class)->middleware(\App\Http\Middleware\CheckPermissionOrRole::class)->group(function () {
         Route::get('/all/quotation', 'AllQuotation')->name('all.quotation');

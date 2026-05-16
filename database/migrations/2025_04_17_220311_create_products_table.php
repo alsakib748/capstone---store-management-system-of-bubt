@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->json('image')->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
             $table->unsignedBigInteger('brand_id')->nullable();
-            $table->unsignedBigInteger('warehouse_id')->nullable();
             $table->unsignedBigInteger('supplier_id')->nullable();
             $table->decimal('price', 10, 2)->nullable();
             $table->integer('stock_alert')->nullable()->default(0);
@@ -31,7 +30,6 @@ return new class extends Migration {
             /// Foreign Key Constranints
             $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('cascade');
             $table->foreign('brand_id')->references('id')->on('brands')->onDelete('set null');
-            $table->foreign('warehouse_id')->references('id')->on('ware_houses')->onDelete('cascade');
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
 
         });

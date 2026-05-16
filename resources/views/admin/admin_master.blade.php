@@ -26,6 +26,9 @@
         <!-- Icons -->
         <link href="{{ asset('backend/assets/css/icons.min.css')}}" rel="stylesheet" type="text/css" />
 
+        <!-- Responsive CSS -->
+        <link href="{{ asset('backend/assets/css/responsive.css')}}" rel="stylesheet" type="text/css" />
+
         <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" >
 
         <!-- Select2 CSS -->
@@ -39,6 +42,8 @@
         <!-- Begin page -->
         <div id="app-layout">
 
+            <!-- Sidebar Overlay (Mobile) -->
+            <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
             <!-- Topbar Start -->
     @include('admin.body.header')
@@ -144,6 +149,116 @@
                     });
                 });
             });
+        </script>
+
+        <!-- Sidebar Toggle for Mobile -->
+        <script>
+            function toggleSidebar() {
+                var sidebar = document.querySelector('.app-sidebar');
+                var overlay = document.querySelector('.sidebar-overlay');
+                var body = document.body;
+
+                if (sidebar && overlay) {
+                    sidebar.classList.toggle('sidebar-enable');
+                    overlay.classList.toggle('show');
+                    body.classList.toggle('sidebar-open');
+                }
+            }
+
+            // Mobile menu toggle button handler
+            $(document).on('click', '.button-toggle-menu', function() {
+                toggleSidebar();
+            });
+
+            // Close sidebar when pressing Escape key
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    var sidebar = document.querySelector('.app-sidebar');
+                    if (sidebar && sidebar.classList.contains('sidebar-enable')) {
+                        toggleSidebar();
+                    }
+                }
+            });
+
+            // Close sidebar when clicking outside on mobile
+            $(document).on('click', '.sidebar-overlay', function() {
+                toggleSidebar();
+            });
+        </script>
+
+        <!-- Grab to Scroll for Tables -->
+        <script>
+            (function() {
+                function initGrabScroll() {
+                    var containers = document.querySelectorAll('.table-responsive');
+
+                    containers.forEach(function(container) {
+                        // Prevent adding multiple listeners
+                        if (container.dataset.grabScrollInit) return;
+                        container.dataset.grabScrollInit = 'true';
+
+                        var isDragging = false;
+                        var startX;
+                        var scrollLeft;
+                        var containerRect;
+
+                        // Mouse events (desktop)
+                        container.addEventListener('mousedown', function(e) {
+                            isDragging = true;
+                            container.classList.add('grabbing');
+                            startX = e.pageX - container.offsetLeft;
+                            scrollLeft = container.scrollLeft;
+                            containerRect = container.getBoundingClientRect();
+                            container.style.cursor = 'grabbing';
+                        });
+
+                        container.addEventListener('mouseleave', function() {
+                            isDragging = false;
+                            container.classList.remove('grabbing');
+                            container.style.cursor = 'grab';
+                        });
+
+                        container.addEventListener('mouseup', function() {
+                            isDragging = false;
+                            container.classList.remove('grabbing');
+                            container.style.cursor = 'grab';
+                        });
+
+                        container.addEventListener('mousemove', function(e) {
+                            if (!isDragging) return;
+                            e.preventDefault();
+                            var x = e.pageX - container.offsetLeft;
+                            var walk = (x - startX) * 1.5; // Scroll speed
+                            container.scrollLeft = scrollLeft - walk;
+                        });
+
+                        // Touch events (mobile/tablet)
+                        container.addEventListener('touchstart', function(e) {
+                            startX = e.touches[0].pageX - container.offsetLeft;
+                            scrollLeft = container.scrollLeft;
+                            containerRect = container.getBoundingClientRect();
+                        }, { passive: true });
+
+                        container.addEventListener('touchmove', function(e) {
+                            var x = e.touches[0].pageX - container.offsetLeft;
+                            var walk = (x - startX) * 1.5;
+                            container.scrollLeft = scrollLeft - walk;
+                        }, { passive: true });
+                    });
+                }
+
+                // Initialize on DOM ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initGrabScroll);
+                } else {
+                    initGrabScroll();
+                }
+
+                // Re-initialize after DataTables reload
+                $(document).on('draw.dt', function() {
+                    initGrabScroll();
+                });
+            })();
         </script>
 
     </body>

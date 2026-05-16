@@ -58,6 +58,12 @@
                                             </div>
 
                                             <div class="col-md-6 mb-3">
+                                                <label class="form-label">Semester:</label>
+                                                <input type="text" id="semester_name" class="form-control" value="-"
+                                                    readonly>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
                                                 <div class="form-group w-100">
                                                     <label class="form-label">Issue Reference : <span
                                                             class="text-danger">*</span></label>
@@ -69,7 +75,7 @@
                                                             <option value="{{ $issue->id }}">
                                                                 {{ $issue->tracking_no }} --
                                                                 {{ $issue->user->name ?? '-' }} --
-                                                                {{ $issue->semester->name ?? '-' }} --
+                                                                {{ $issue->semester?->name ?? '-' }} --
                                                                 {{ \Carbon\Carbon::parse($issue->date)->format('Y-m-d') }}
                                                             </option>
                                                         @endforeach
@@ -96,23 +102,25 @@
                                             <div class="col-md-12">
                                                 <label class="form-label">Return Items: <span
                                                         class="text-danger">*</span></label>
-                                                <table class="table table-striped table-bordered dataTable"
-                                                    style="width: 100%;">
-                                                    <thead>
-                                                        <tr role="row">
-                                                            <th>Product</th>
-                                                            <th>Brand</th>
-                                                            <th>Category</th>
-                                                            <th>Available Qty</th>
-                                                            <th>Return Qty</th>
-                                                            <th>Condition</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="productBody">
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered dataTable"
+                                                        style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th>Product</th>
+                                                                <th>Brand</th>
+                                                                <th>Category</th>
+                                                                <th>Available Qty</th>
+                                                                <th>Return Qty</th>
+                                                                <th>Condition</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="productBody">
 
-                                                    </tbody>
-                                                </table>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -146,6 +154,7 @@
                 const userSelect = document.getElementById('user_id');
                 const issueSelect = document.getElementById('issue_id');
                 const productBody = document.getElementById('productBody');
+                const semesterField = document.getElementById('semester_name');
 
                 // Filter users by department using jQuery for select2 compatibility
                 $('#department_id').on('change', function() {
@@ -176,6 +185,9 @@
                     const issueId = $(this).val();
                     const productBody = document.getElementById('productBody');
                     productBody.innerHTML = '';
+                    if (semesterField) {
+                        semesterField.value = '-';
+                    }
 
                     if (issueId) {
                         const url = "{{ route('get.issue.products', ':issue_id') }}".replace(':issue_id',
@@ -188,6 +200,9 @@
                             })
                             .then((response) => response.json())
                             .then((data) => {
+                                if (semesterField) {
+                                    semesterField.value = data.issue?.semester ?? '-';
+                                }
                                 if (data.products && data.products.length > 0) {
                                     data.products.forEach((product) => {
                                         addProductToTable(product);

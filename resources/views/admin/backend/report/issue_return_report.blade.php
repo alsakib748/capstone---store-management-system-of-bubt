@@ -75,6 +75,7 @@
                         '<th>Product</th>' +
                         '<th>Returned By</th>' +
                         '<th>Original Issue</th>' +
+                        '<th>Semester</th>' +
                         '<th>Received By</th>' +
                         '<th>Qty</th>' +
                         '<th>Condition</th>' +
@@ -102,6 +103,7 @@
                             var productName = item.product ? item.product.name : '-';
                             var userName = issueReturn.user ? issueReturn.user.name : '-';
                             var issueNo = issueReturn.issue ? issueReturn.issue.tracking_no : '-';
+                            var semesterName = issueReturn.semester ? issueReturn.semester.name : '-';
                             var createdByName = (issueReturn.createdBy || issueReturn.created_by) ? (issueReturn
                                 .createdBy || issueReturn.created_by).name : '-';
 
@@ -111,6 +113,7 @@
                                 '<td>' + productName + '</td>' +
                                 '<td>' + userName + '</td>' +
                                 '<td>' + issueNo + '</td>' +
+                                '<td>' + semesterName + '</td>' +
                                 '<td>' + createdByName + '</td>' +
                                 '<td>' + qty + '</td>' +
                                 '<td>' + (item.condition || '-') + '</td>' +
@@ -139,7 +142,7 @@
                     printWindow.document.write(
                         'table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
                     printWindow.document.write(
-                    'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
+                        'th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
                     printWindow.document.write('th { background-color: #f2f2f2; }');
                     printWindow.document.write('</style>');
                     printWindow.document.write('</head><body>');
@@ -196,7 +199,7 @@
 
                     if (!issueReturns.length) {
                         tbody.innerHTML =
-                            '<tr><td colspan="10" class="text-center">No data found for selected filters.</td></tr>';
+                            '<tr><td colspan="11" class="text-center">No data found for selected filters.</td></tr>';
                         return;
                     }
 
@@ -206,11 +209,12 @@
                         items.forEach(item => {
                             const qty = parseFloat(item.qty) || 0;
                             const productId = item.product_id || (item.product ? item.product.id :
-                            null);
+                                null);
                             const price = productId && latestPrices[productId] ? parseFloat(
                                 latestPrices[productId].net_unit_cost) || 0 : 0;
                             const totalValue = qty * price;
                             const productName = item.product ? item.product.name : '-';
+                            const semesterName = issueReturn.semester ? issueReturn.semester.name : '-';
 
                             const conditionBadge = item.condition === 'good' ?
                                 '<span class="badge bg-success">Good</span>' :
@@ -223,6 +227,7 @@
                                 '<td>' + (issueReturn.user ? issueReturn.user.name : '-') + '</td>' +
                                 '<td>' + (issueReturn.issue ? 'Issue #' + issueReturn.issue.id + ' (' +
                                     issueReturn.issue.date + ')' : '-') + '</td>' +
+                                '<td>' + semesterName + '</td>' +
                                 '<td>' + ((issueReturn.createdBy || issueReturn.created_by) ? (
                                     issueReturn.createdBy || issueReturn.created_by).name : '-') +
                                 '</td>' +
@@ -348,6 +353,7 @@
                                 <th>Product</th>
                                 <th>User</th>
                                 <th>Original Issue</th>
+                                <th>Semester</th>
                                 <th>Created By</th>
                                 <th>Qty</th>
                                 <th>Condition</th>
@@ -365,6 +371,7 @@
                                         <td>{{ $issueReturn->user?->name ?? '-' }}</td>
                                         <td>{{ $issueReturn->issue ? 'Issue #' . $issueReturn->issue->id . ' (' . \Carbon\Carbon::parse($issueReturn->issue->date)->format('Y-m-d') . ')' : '-' }}
                                         </td>
+                                        <td>{{ $issueReturn->semester->name ?? '-' }}</td>
                                         <td>{{ $issueReturn->createdBy?->name ?? '-' }}</td>
                                         <td>{{ $item->qty }}</td>
                                         <td>

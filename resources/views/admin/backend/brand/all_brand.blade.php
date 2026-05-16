@@ -29,16 +29,17 @@
                         </div><!-- end card header -->
 
                         <div class="card-body">
-                            <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
-                                <thead>
-                                    <tr>
-                                        <th>Sl</th>
-                                        <th>Brand Name</th>
-                                        <th>Image</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                            <div class="table-responsive">
+                                <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
+                                    <thead>
+                                        <tr>
+                                            <th>Sl</th>
+                                            <th>Brand Name</th>
+                                            <th>Image</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                     @foreach ($brand as $key => $item)
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
@@ -67,7 +68,8 @@
                                     @endforeach
 
                                 </tbody>
-                            </table>
+                                </table>
+                            </div>
                         </div>
 
                     </div>

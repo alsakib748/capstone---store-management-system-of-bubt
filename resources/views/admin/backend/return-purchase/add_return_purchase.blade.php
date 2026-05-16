@@ -98,6 +98,7 @@
                                             <div class="col-md-12">
                                                 <label class="form-label">Order items: <span
                                                         class="text-danger">*</span></label>
+                                                <div class="table-responsive">
                                                 <table class="table table-striped table-bordered dataTable"
                                                     style="width: 100%;">
                                                     <thead>
@@ -106,6 +107,7 @@
                                                             <th>Net Unit Cost</th>
                                                             <th>Stock</th>
                                                             <th>Qty</th>
+                                                            <th>Discount</th>
                                                             <th>Subtotal</th>
                                                             <th>Action</th>
                                                         </tr>
@@ -114,6 +116,7 @@
 
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
 

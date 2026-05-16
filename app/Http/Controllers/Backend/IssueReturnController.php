@@ -9,15 +9,15 @@ use App\Models\IssueItem;
 use App\Models\IssueReturn;
 use App\Models\IssueReturnItem;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class IssueReturnController extends Controller
 {
     public function AllIssueReturn()
     {
-        $allData = IssueReturn::with(['user', 'issue'])
+        $allData = IssueReturn::with(['user', 'issue', 'semester'])
             ->orderBy('id', 'desc')
             ->get();
         return view('admin.backend.issue-return.all_issue_return', compact('allData'));
@@ -27,7 +27,7 @@ class IssueReturnController extends Controller
     {
         $departments = Department::all();
         // Get issues that have products with qty > 0 (not fully returned)
-        $issues = Issue::with(['user', 'department'])
+        $issues = Issue::with(['user', 'department', 'semester'])
             ->whereHas('issueItems', function ($query) {
                 $query->where('qty', '>', 0);
             })
@@ -41,6 +41,7 @@ class IssueReturnController extends Controller
         $issue = Issue::with([
             'user',
             'department',
+            'semester',
             'issueItems.product.brand',
             'issueItems.product.category',
             'issueItems.product.subcategory'
@@ -79,6 +80,7 @@ class IssueReturnController extends Controller
                 'tracking_no' => $issue->tracking_no,
                 'user' => $issue->user?->name ?? '-',
                 'department' => $issue->department?->name ?? '-',
+                'semester' => $issue->semester?->name ?? '-',
             ],
             'products' => $products
         ]);
@@ -134,6 +136,7 @@ class IssueReturnController extends Controller
             $issueReturn = IssueReturn::create([
                 'return_date' => $request->date,
                 'issue_id' => $request->issue_id,
+                'semester_id' => $issue->semester_id,
                 'user_id' => $request->user_id,
                 'notes' => $request->notes,
                 'created_by' => auth()->id(),
@@ -185,10 +188,10 @@ class IssueReturnController extends Controller
 
     public function EditIssueReturn($id)
     {
-        $editData = IssueReturn::with(['issue', 'issueReturnItems.product', 'issueReturnItems.issueItem'])
+        $editData = IssueReturn::with(['issue', 'semester', 'issueReturnItems.product', 'issueReturnItems.issueItem'])
             ->findOrFail($id);
         $departments = Department::all();
-        $issues = Issue::with(['user', 'department'])->get();
+        $issues = Issue::with(['user', 'department', 'semester'])->get();
         return view('admin.backend.issue-return.edit_issue_return', compact('editData', 'departments', 'issues'));
     }
 
@@ -204,6 +207,7 @@ class IssueReturnController extends Controller
 
         try {
             $issueReturn = IssueReturn::findOrFail($id);
+            $issue = Issue::findOrFail($request->issue_id);
             $oldReturnItems = IssueReturnItem::where('issue_return_id', $issueReturn->id)->get();
 
             // Reverse old stock changes and qty
@@ -228,6 +232,7 @@ class IssueReturnController extends Controller
             $issueReturn->update([
                 'return_date' => $request->date,
                 'issue_id' => $request->issue_id,
+                'semester_id' => $issue->semester_id,
                 'user_id' => $request->user_id,
                 'notes' => $request->notes,
             ]);
@@ -278,6 +283,7 @@ class IssueReturnController extends Controller
             'issue',
             'user',
             'createdBy',
+            'semester',
             'issueReturnItems.product',
             'issueReturnItems.issueItem'
         ])->findOrFail($id);
@@ -291,10 +297,11 @@ class IssueReturnController extends Controller
             'issue',
             'user',
             'createdBy',
+            'semester',
             'issueReturnItems.product'
         ])->findOrFail($id);
 
-        $pdf = \Pdf::loadView('admin.backend.issue-return.invoice_pdf', compact('issueReturn'));
+        $pdf = Pdf::loadView('admin.backend.issue-return.invoice_pdf', compact('issueReturn'));
         return $pdf->download('issue_return_' . $id . '.pdf');
     }
 

@@ -18,11 +18,6 @@ class ReturnPurchase extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
-    public function warehouse()
-    {
-        return $this->belongsTo(WareHouse::class, 'warehouse_id');
-    }
-
     public function semester()
     {
         return $this->belongsTo(Semester::class, 'semester_id');
@@ -32,6 +27,5 @@ class ReturnPurchase extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
-
 
 }

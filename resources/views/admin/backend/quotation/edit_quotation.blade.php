@@ -67,6 +67,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <label class="form-label">Quotation Items:</label>
+                                    <div class="table-responsive">
                                     <table class="table table-striped table-bordered dataTable" style="width: 100%;">
                                         <thead>
                                             <tr>
@@ -110,6 +111,7 @@
                                             @endforelse
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
 

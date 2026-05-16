@@ -7,9 +7,9 @@
                     <h4 class="fs-18 fw-semibold m-0">All Issue Return</h4>
                 </div>
                 @can('Issue Return::add')
-                <div class="text-end">
-                    <a href="{{ route('add.issue.return') }}" class="btn btn-primary">Add Issue Return</a>
-                </div>
+                    <div class="text-end">
+                        <a href="{{ route('add.issue.return') }}" class="btn btn-primary">Add Issue Return</a>
+                    </div>
                 @endcan
             </div>
 
@@ -23,6 +23,7 @@
                                         <tr>
                                             <th>SL</th>
                                             <th>Date</th>
+                                            <th>Semester</th>
                                             <th>User</th>
                                             <th>Email</th>
                                             <th>Total Qty</th>
@@ -37,6 +38,7 @@
                                             <tr>
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($item->return_date)->format('Y-m-d') }}</td>
+                                                <td>{{ $item->semester?->name ?? '-' }}</td>
                                                 <td>{{ $item->user->name ?? '-' }}</td>
                                                 <td>{{ $item->user->email ?? '-' }}</td>
                                                 <td>{{ $totalQty }}</td>

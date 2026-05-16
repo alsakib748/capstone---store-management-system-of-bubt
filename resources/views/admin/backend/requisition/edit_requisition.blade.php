@@ -68,6 +68,7 @@
                                             <div class="col-md-12">
                                                 <label class="form-label">Order items: <span
                                                         class="text-danger">*</span></label>
+                                                <div class="table-responsive">
                                                 <table class="table table-striped table-bordered dataTable"
                                                     style="width: 100%;">
                                                     <thead>
@@ -128,6 +129,7 @@
 
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
 

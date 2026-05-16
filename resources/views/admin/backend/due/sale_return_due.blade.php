@@ -28,14 +28,15 @@
                     </div><!-- end card header -->
 
 <div class="card-body">
+    <div class="table-responsive">
     <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
         <thead>
         <tr>
             <th>Sl</th>
             <th>WareHouse</th>
-            <th>Customer Name</th> 
-            <th>Due Amount</th> 
-            <th>Full Payment</th> 
+            <th>Customer Name</th>
+            <th>Due Amount</th>
+            <th>Full Payment</th>
         </tr>
         </thead>
         <tbody>
@@ -51,10 +52,11 @@
  
         </td> 
     </tr>
-    @endforeach 
-                
+    @endforeach
+
         </tbody>
     </table>
+    </div>
 </div>
 
                 </div>

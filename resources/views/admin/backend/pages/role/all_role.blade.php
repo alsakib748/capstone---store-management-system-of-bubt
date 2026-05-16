@@ -28,11 +28,12 @@
                     </div><!-- end card header -->
 
 <div class="card-body">
+    <div class="table-responsive">
     <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
         <thead>
         <tr>
             <th>Sl</th>
-            <th>Roles Name</th> 
+            <th>Roles Name</th>
             <th>Action</th>
         </tr>
         </thead>
@@ -50,6 +51,7 @@
                 
         </tbody>
     </table>
+    </div>
 </div>
 
                 </div>

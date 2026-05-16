@@ -58,6 +58,13 @@
                                             </div>
 
                                             <div class="col-md-6 mb-3">
+                                                <label class="form-label">Semester:</label>
+                                                <input type="text" id="semester_name" class="form-control"
+                                                    value="{{ $editData->semester?->name ?? ($editData->issue?->semester?->name ?? '-') }}"
+                                                    readonly>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
                                                 <div class="form-group w-100">
                                                     <label class="form-label">Issue Reference : <span
                                                             class="text-danger">*</span></label>
@@ -66,9 +73,11 @@
                                                         data-placeholder="Select Issue">
                                                         <option value="">Select Issue</option>
                                                         @foreach ($issues as $issue)
-                                                            <option value="{{ $issue->id }}" {{ $editData->issue_id == $issue->id ? 'selected' : '' }}>
+                                                            <option value="{{ $issue->id }}"
+                                                                {{ $editData->issue_id == $issue->id ? 'selected' : '' }}>
                                                                 {{ $issue->tracking_no }} -
                                                                 {{ $issue->user->name ?? '-' }} -
+                                                                {{ $issue->semester?->name ?? '-' }} -
                                                                 {{ \Carbon\Carbon::parse($issue->date)->format('Y-m-d') }}
                                                             </option>
                                                         @endforeach
@@ -92,64 +101,74 @@
                                             <div class="col-md-12">
                                                 <label class="form-label">Return Items: <span
                                                         class="text-danger">*</span></label>
-                                                <table class="table table-striped table-bordered dataTable"
-                                                    style="width: 100%;">
-                                                    <thead>
-                                                        <tr role="row">
-                                                            <th>Product</th>
-                                                            <th>Brand</th>
-                                                            <th>Category</th>
-                                                            <th>Available Qty</th>
-                                                            <th>Return Qty</th>
-                                                            <th>Condition</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="productBody">
-                                                        @foreach ($editData->issueReturnItems as $item)
-                                                            @php
-                                                                $issueItem = $item->issueItem;
-                                                                $availableQty = $issueItem?->qty ?? 0;
-                                                            @endphp
-                                                            <tr>
-                                                                <td>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->code }} - {{ $item->product->name }}"
-                                                                        readonly>
-                                                                    <input type="hidden"
-                                                                        name="products[{{ $item->product_id }}][id]"
-                                                                        value="{{ $item->product_id }}">
-                                                                </td>
-                                                                <td><input type="text" class="form-control"
-                                                                        value="{{ $item->product->brand->name ?? '-' }}"
-                                                                        readonly></td>
-                                                                <td><input type="text" class="form-control"
-                                                                        value="{{ $item->product->category->category_name ?? '-' }}"
-                                                                        readonly></td>
-                                                                <td><input type="text" class="form-control text-center"
-                                                                        value="{{ $availableQty }}"
-                                                                        readonly style="max-width: 80px;"></td>
-                                                                <td>
-                                                                    <input type="number" class="form-control text-center"
-                                                                        name="products[{{ $item->product_id }}][quantity]"
-                                                                        value="{{ $item->qty }}" min="1"
-                                                                        max="{{ $availableQty + $item->qty }}"
-                                                                        style="max-width: 90px;">
-                                                                </td>
-                                                                <td>
-                                                                    <select name="products[{{ $item->product_id }}][condition]" class="form-select form-select-sm">
-                                                                        <option value="good" {{ $item->condition == 'good' ? 'selected' : '' }}>Good</option>
-                                                                        <option value="damaged" {{ $item->condition == 'damaged' ? 'selected' : '' }}>Damaged</option>
-                                                                    </select>
-                                                                </td>
-                                                                <td><button type="button"
-                                                                        class="btn btn-danger btn-sm remove-item"><span
-                                                                            class="mdi mdi-delete-circle mdi-18px"></span></button>
-                                                                </td>
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-bordered dataTable"
+                                                        style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th>Product</th>
+                                                                <th>Brand</th>
+                                                                <th>Category</th>
+                                                                <th>Available Qty</th>
+                                                                <th>Return Qty</th>
+                                                                <th>Condition</th>
+                                                                <th>Action</th>
                                                             </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
+                                                        </thead>
+                                                        <tbody id="productBody">
+                                                            @foreach ($editData->issueReturnItems as $item)
+                                                                @php
+                                                                    $issueItem = $item->issueItem;
+                                                                    $availableQty = $issueItem?->qty ?? 0;
+                                                                @endphp
+                                                                <tr>
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->code }} - {{ $item->product->name }}"
+                                                                            readonly>
+                                                                        <input type="hidden"
+                                                                            name="products[{{ $item->product_id }}][id]"
+                                                                            value="{{ $item->product_id }}">
+                                                                    </td>
+                                                                    <td><input type="text" class="form-control"
+                                                                            value="{{ $item->product->brand->name ?? '-' }}"
+                                                                            readonly></td>
+                                                                    <td><input type="text" class="form-control"
+                                                                            value="{{ $item->product->category->category_name ?? '-' }}"
+                                                                            readonly></td>
+                                                                    <td><input type="text"
+                                                                            class="form-control text-center"
+                                                                            value="{{ $availableQty }}" readonly
+                                                                            style="max-width: 80px;"></td>
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            class="form-control text-center"
+                                                                            name="products[{{ $item->product_id }}][quantity]"
+                                                                            value="{{ $item->qty }}" min="1"
+                                                                            max="{{ $availableQty + $item->qty }}"
+                                                                            style="max-width: 90px;">
+                                                                    </td>
+                                                                    <td>
+                                                                        <select
+                                                                            name="products[{{ $item->product_id }}][condition]"
+                                                                            class="form-select form-select-sm">
+                                                                            <option value="good"
+                                                                                {{ $item->condition == 'good' ? 'selected' : '' }}>
+                                                                                Good</option>
+                                                                            <option value="damaged"
+                                                                                {{ $item->condition == 'damaged' ? 'selected' : '' }}>
+                                                                                Damaged</option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td><button type="button"
+                                                                            class="btn btn-danger btn-sm remove-item"><span
+                                                                                class="mdi mdi-delete-circle mdi-18px"></span></button>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -181,11 +200,13 @@
                 const userSelect = document.getElementById('user_id');
                 const issueSelect = document.getElementById('issue_id');
                 const productBody = document.getElementById('productBody');
+                const semesterField = document.getElementById('semester_name');
 
                 // Set initial user selection
                 const initialUserId = "{{ $editData->user_id }}";
                 if (initialUserId) {
-                    $('#user_id').append('<option value="' + initialUserId + '" selected>{{ $editData->user->name ?? '' }}</option>');
+                    $('#user_id').append('<option value="' + initialUserId +
+                        '" selected>{{ $editData->user->name ?? '' }}</option>');
                 }
 
                 // Filter users by department using jQuery for select2 compatibility
@@ -217,29 +238,36 @@
                     const issueId = $(this).val();
                     const productBody = document.getElementById('productBody');
                     productBody.innerHTML = '';
+                    if (semesterField) {
+                        semesterField.value = '-';
+                    }
 
                     if (issueId) {
-                        const url = "{{ route('get.issue.products', ':issue_id') }}".replace(':issue_id', issueId);
+                        const url = "{{ route('get.issue.products', ':issue_id') }}".replace(':issue_id',
+                            issueId);
                         fetch(url, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.products && data.products.length > 0) {
-                                data.products.forEach((product) => {
-                                    addProductToTable(product);
-                                });
-                            } else {
-                                alert('No products available for return from this issue');
-                            }
-                        })
-                        .catch((error) => {
-                            console.error('Error loading products:', error);
-                            alert('Error loading products');
-                        });
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then((response) => response.json())
+                            .then((data) => {
+                                if (semesterField) {
+                                    semesterField.value = data.issue?.semester ?? '-';
+                                }
+                                if (data.products && data.products.length > 0) {
+                                    data.products.forEach((product) => {
+                                        addProductToTable(product);
+                                    });
+                                } else {
+                                    alert('No products available for return from this issue');
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error loading products:', error);
+                                alert('Error loading products');
+                            });
                     }
                 });
 

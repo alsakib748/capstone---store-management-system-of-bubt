@@ -11,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 11px;
@@ -19,22 +20,26 @@
             margin: 10mm;
             background: #fff;
         }
+
         .invoice-container {
             max-width: 100%;
             margin: 0 auto;
             padding: 10px;
             page-break-inside: avoid;
         }
+
         .invoice-header {
             text-align: center;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 2px solid #0066cc;
         }
+
         .invoice-header img {
             max-width: 60px;
             vertical-align: middle;
         }
+
         .invoice-header h2 {
             font-size: 16px;
             font-weight: bold;
@@ -43,44 +48,53 @@
             vertical-align: middle;
             margin-left: 10px;
         }
+
         .info-section {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
+
         .info-section td {
             width: 50%;
             padding: 6px 10px;
             vertical-align: top;
             border: 1px solid #dee2e6;
         }
+
         .info-section .label {
             font-weight: bold;
             color: #495057;
             width: 100px;
         }
+
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
         }
+
         .items-table th,
         .items-table td {
             border: 1px solid #dee2e6;
             padding: 6px 8px;
             text-align: left;
         }
+
         .items-table th {
             background-color: #f8f9fa;
             font-weight: bold;
             font-size: 10px;
         }
+
         .text-right {
             text-align: right;
         }
+
         .text-center {
             text-align: center;
         }
+
         .notes-section {
             margin-bottom: 15px;
             padding: 8px;
@@ -89,43 +103,53 @@
             border-radius: 4px;
             font-size: 10px;
         }
+
         .notes-section strong {
             display: block;
             margin-bottom: 3px;
         }
+
         .signature-section {
             margin-top: 25px;
             width: 100%;
             display: table;
             border-collapse: collapse;
         }
-        .signature-section > div {
+
+        .signature-section>div {
             display: table-row;
         }
-        .signature-section > div > div {
+
+        .signature-section>div>div {
             display: table-cell;
             width: 50%;
             padding-top: 25px;
         }
-        .signature-section > div > div:first-child {
+
+        .signature-section>div>div:first-child {
             text-align: left;
         }
-        .signature-section > div > div:last-child {
+
+        .signature-section>div>div:last-child {
             text-align: right;
         }
+
         .signature-line {
             border-top: 1px solid #333;
             width: 150px;
             margin-bottom: 3px;
         }
-        .signature-section > div > div:last-child .signature-line {
+
+        .signature-section>div>div:last-child .signature-line {
             margin-left: auto;
         }
+
         .signature-section p {
             font-weight: bold;
             margin: 0;
             font-size: 10px;
         }
+
         .footer {
             text-align: center;
             margin-top: 15px;
@@ -219,8 +243,14 @@
                     <p>Supervisor Signature</p>
                 </div>
                 <div>
-                    <div class="signature-line"></div>
-                    <p>Store Keeper Signature</p>
+                    <span class="label">Semester:</span>
+                    {{ $issueReturn->semester?->name ?? ($issueReturn->issue?->semester?->name ?? '-') }}
+                    </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <p>Store Keeper Signature</p>
                 </div>
             </div>
         </div>

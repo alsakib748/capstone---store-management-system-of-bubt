@@ -65,6 +65,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <label class="form-label">Quotation Items: <span class="text-danger">*</span></label>
+                                    <div class="table-responsive">
                                     <table class="table table-striped table-bordered dataTable" style="width: 100%;">
                                         <thead>
                                             <tr>
@@ -78,6 +79,7 @@
                                         <tbody id="productBody">
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
 

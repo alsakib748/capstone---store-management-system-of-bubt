@@ -43,8 +43,14 @@
                                         <td>{{ $issueReturn->issue->tracking_no ?? '-' }}</td>
                                     </tr>
                                     <tr>
+                                        <td class="text-muted fw-medium">Semester:</td>
+                                        <td>{{ $issueReturn->semester?->name ?? ($issueReturn->issue?->semester?->name ?? '-') }}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-muted fw-medium">Issue Date:</td>
-                                        <td>{{ $issueReturn->issue ? \Carbon\Carbon::parse($issueReturn->issue->date)->format('Y-m-d') : '-' }}</td>
+                                        <td>{{ $issueReturn->issue ? \Carbon\Carbon::parse($issueReturn->issue->date)->format('Y-m-d') : '-' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="text-muted fw-medium">Created By:</td>
@@ -84,7 +90,7 @@
                                                 <td>{{ $item->product->code ?? '-' }}</td>
                                                 <td>{{ $item->qty }}</td>
                                                 <td>
-                                                    @if($item->condition == 'good')
+                                                    @if ($item->condition == 'good')
                                                         <span class="badge bg-success">Good</span>
                                                     @else
                                                         <span class="badge bg-danger">Damaged</span>
@@ -105,13 +111,15 @@
                     <div class="card mt-3">
                         <div class="card-body">
                             <div class="d-flex gap-2">
-                                <a href="{{ route('invoice.issue.return', $issueReturn->id) }}" class="btn btn-warning" target="_blank">
+                                <a href="{{ route('invoice.issue.return', $issueReturn->id) }}" class="btn btn-warning"
+                                    target="_blank">
                                     <i class="mdi mdi-file-pdf-box me-1"></i> Invoice
                                 </a>
                                 <a href="{{ route('edit.issue.return', $issueReturn->id) }}" class="btn btn-success">
                                     <i class="mdi mdi-book-edit me-1"></i> Edit
                                 </a>
-                                <a href="{{ route('delete.issue.return', $issueReturn->id) }}" class="btn btn-danger" id="delete">
+                                <a href="{{ route('delete.issue.return', $issueReturn->id) }}" class="btn btn-danger"
+                                    id="delete">
                                     <i class="mdi mdi-delete-circle me-1"></i> Delete
                                 </a>
                             </div>
