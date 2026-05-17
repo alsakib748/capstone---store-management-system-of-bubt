@@ -9,7 +9,6 @@ use App\Models\ProductCategory;
 use App\Models\ProductImage;
 use App\Models\Subcategory;
 use App\Models\Supplier;
-use App\Models\WareHouse;
 use Illuminate\Http\Request;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -190,10 +189,9 @@ class ProductController extends Controller
         $categories = ProductCategory::all();
         $brands = Brand::all();
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $subcategories = Subcategory::all();
         $roles = Role::all();
-        return view('admin.backend.product.add_product', compact('categories', 'brands', 'suppliers', 'warehouses', 'subcategories', 'roles'));
+        return view('admin.backend.product.add_product', compact('categories', 'brands', 'suppliers', 'subcategories', 'roles'));
     }
     //End Method
 
@@ -210,7 +208,6 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'subcategory_id' => $request->subcategory_id,
             'brand_id' => $request->brand_id,
-            // 'warehouse_id' => $request->warehouse_id,
             // 'supplier_id' => $request->supplier_id,
             // 'price' => $request->price,
             // 'stock_alert' => $request->stock_alert,
@@ -266,11 +263,10 @@ class ProductController extends Controller
         $categories = ProductCategory::all();
         $brands = Brand::all();
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $subcategories = Subcategory::where('category_id', $editData->category_id)->get();
         $multiimg = ProductImage::where('product_id', $id)->get();
         $roles = Role::all();
-        return view('admin.backend.product.edit_product', compact('categories', 'brands', 'suppliers', 'warehouses', 'editData', 'multiimg', 'subcategories', 'roles'));
+        return view('admin.backend.product.edit_product', compact('categories', 'brands', 'suppliers', 'editData', 'multiimg', 'subcategories', 'roles'));
     }
     //End Method
 
@@ -293,7 +289,6 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->stock_alert = $request->stock_alert;
         $product->note = $request->note;
-        $product->warehouse_id = $request->warehouse_id;
         $product->supplier_id = $request->supplier_id;
         $product->product_qty = $request->product_qty;
         $product->fixed_asset = $request->has('fixed_asset') ? 1 : 0;

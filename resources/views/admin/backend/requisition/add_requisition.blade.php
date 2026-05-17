@@ -82,22 +82,22 @@
                                                 <label class="form-label">Order items: <span
                                                         class="text-danger">*</span></label>
                                                 <div class="table-responsive">
-                                                <table class="table table-striped table-bordered dataTable"
-                                                    style="width: 100%;">
-                                                    <thead>
-                                                        <tr role="row">
-                                                            <th>Product</th>
-                                                            <th>Brand</th>
-                                                            <th>Category</th>
-                                                            <th>Subcategory</th>
-                                                            <th>Qty</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="productBody">
+                                                    <table class="table table-striped table-bordered dataTable"
+                                                        style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th>Product</th>
+                                                                <th>Brand</th>
+                                                                <th>Category</th>
+                                                                <th>Subcategory</th>
+                                                                <th>Qty</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="productBody">
 
-                                                    </tbody>
-                                                </table>
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -135,6 +135,10 @@
                 const requisitionUserSelect = document.getElementById('user_id');
 
                 function renderSearchResults(products) {
+                    if (!Array.isArray(products)) {
+                        products = [];
+                    }
+
                     productList.innerHTML = '';
                     products.forEach((product) => {
                         const item = document.createElement('a');
@@ -196,8 +200,15 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                        .then((response) => response.json())
-                        .then((products) => renderSearchResults(products));
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error('Search request failed');
+                            }
+
+                            return response.json();
+                        })
+                        .then((products) => renderSearchResults(products))
+                        .catch(() => renderSearchResults([]));
                 });
 
                 if (requisitionUserSelect) {

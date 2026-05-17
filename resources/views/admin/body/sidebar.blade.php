@@ -305,15 +305,15 @@
                                         <a href="{{ route('fixed.asset.report') }}" class="tp-link">Fixed Asset Report </a>
                                     </li>
                                 @endcan
-                                @can('Report::product trx report')
+                                {{-- @can('Report::product trx report')
                                     <li>
                                         <a href="{{ route('product.trx.report') }}" class="tp-link">Product TRX Report </a>
                                     </li>
-                                @endcan
+                                @endcan --}}
                                 @can('Report::product trx report')
                                     <li>
-                                        <a href="{{ route('product.lifetime.report') }}" class="tp-link">Product Lifetime
-                                            History </a>
+                                        <a href="{{ route('product.lifetime.report') }}" class="tp-link">Product TRX
+                                            Report</a>
                                     </li>
                                 @endcan
                                 @can('Report::all reports')

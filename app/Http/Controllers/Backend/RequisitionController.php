@@ -14,7 +14,7 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class RequisitionController extends Controller
 {
@@ -63,43 +63,53 @@ class RequisitionController extends Controller
 
     public function RequisitionProductSearch(Request $request)
     {
-        $query = trim((string) $request->input('query', ''));
-        if (strlen($query) < 2) {
+        try {
+            $query = trim((string) $request->input('query', ''));
+            if (strlen($query) < 2) {
+                return response()->json([]);
+            }
+
+            $roleIds = $this->getRoleIdsForRequisitionUser($request);
+
+            if (empty($roleIds)) {
+                return response()->json([]);
+            }
+
+            $products = Product::query()
+                ->where(function ($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                        ->orWhere('code', 'like', "%{$query}%")
+                        ->orWhere('sku', 'like', "%{$query}%");
+                })
+                ->whereHas('allowedRoles', function ($q) use ($roleIds) {
+                    $q->whereIn('roles.id', $roleIds);
+                })
+                ->with(['brand:id,name', 'category:id,category_name', 'subcategory:id,subcategory_name'])
+                ->select('id', 'name', 'code', 'sku', 'brand_id', 'category_id', 'subcategory_id')
+                ->limit(10)
+                ->get();
+
+            $formattedProducts = $products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'code' => $product->code,
+                    'brand' => $product->brand?->name ?? '-',
+                    'category' => $product->category?->category_name ?? '-',
+                    'subcategory' => $product->subcategory?->subcategory_name ?? '-',
+                ];
+            });
+
+            return response()->json($formattedProducts->values());
+        } catch (\Throwable $e) {
+            Log::error('Requisition product search failed.', [
+                'query' => $request->input('query'),
+                'user_id' => $request->input('user_id'),
+                'message' => $e->getMessage(),
+            ]);
+
             return response()->json([]);
         }
-
-        $roleIds = $this->getRoleIdsForRequisitionUser($request);
-
-        if (empty($roleIds)) {
-            return response()->json([]);
-        }
-
-        $products = Product::query()
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('code', 'like', "%{$query}%")
-                    ->orWhere('sku', 'like', "%{$query}%");
-            })
-            ->whereHas('allowedRoles', function ($q) use ($roleIds) {
-                $q->whereIn('roles.id', $roleIds);
-            })
-            ->with(['brand:id,name', 'category:id,category_name', 'subcategory:id,subcategory_name'])
-            ->select('id', 'name', 'code', 'sku', 'brand_id', 'category_id', 'subcategory_id')
-            ->limit(10)
-            ->get();
-
-        $formattedProducts = $products->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'code' => $product->code,
-                'brand' => $product->brand?->name ?? '-',
-                'category' => $product->category?->category_name ?? '-',
-                'subcategory' => $product->subcategory?->subcategory_name ?? '-',
-            ];
-        });
-
-        return response()->json($formattedProducts);
     }
     // End Method
 
@@ -167,7 +177,7 @@ class RequisitionController extends Controller
                 'message' => 'Requisition Stored Successfully',
                 'alert-type' => 'success'
             );
-            return redirect()->route('all.requisition')->with($notification);
+            return redirect()->route('my.requisition')->with($notification);
 
         } catch (\Exception $e) {
             DB::rollBack();

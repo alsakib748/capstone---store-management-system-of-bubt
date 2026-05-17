@@ -129,7 +129,8 @@
 
                                             <div class="col-md-12 mb-3">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="fixed_asset" value="1" id="fixed_asset">
+                                                    <input class="form-check-input" type="checkbox" name="fixed_asset"
+                                                        value="1" id="fixed_asset">
                                                     <label class="form-check-label" for="fixed_asset">
                                                         Fixed Asset
                                                     </label>
@@ -148,20 +149,7 @@
                                         <div class="col-md-12 mb-3">
                                             <h4 class="text-center">Add Stock : </h4>
                                         </div>
-                                        {{-- <div class="col-md-12 mb-3">
-                                            <div class="form-group w-100">
-                                                <label class="form-label" for="formBasic">Warehouse : <span
-                                                        class="text-danger">*</span></label>
-                                                <select name="warehouse_id" id="warehouse_id"
-                                                    class="form-control form-select select2">
-                                                    <option value="">Select Warehouse</option>
-                                                    @foreach ($warehouses as $item)
-                                                        <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                                    @endforeach
-                                                </select>
 
-                                            </div>
-                                        </div> --}}
                                         {{-- <div class="col-md-12 mb-3">
                                             <div class="form-group w-100">
                                                 <label class="form-label" for="formBasic">Supplier : <span

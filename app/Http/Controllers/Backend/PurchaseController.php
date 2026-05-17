@@ -10,7 +10,6 @@ use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\Semester;
 use App\Models\Supplier;
-use App\Models\WareHouse;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,10 +30,9 @@ class PurchaseController extends Controller
     public function AddPurchase()
     {
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $semesters = Semester::all();
         $departments = Department::all();
-        return view('admin.backend.purchase.add_purchase', compact('suppliers', 'warehouses', 'semesters', 'departments'));
+        return view('admin.backend.purchase.add_purchase', compact('suppliers', 'semesters', 'departments'));
     }
     // End Method
 
@@ -45,16 +43,11 @@ class PurchaseController extends Controller
             return response()->json([]);
         }
 
-        $warehouseId = $request->input('warehouse_id');
-
         $products = Product::query()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
                     ->orWhere('code', 'like', "%{$query}%")
                     ->orWhere('sku', 'like', "%{$query}%");
-            })
-            ->when($warehouseId, function ($q) use ($warehouseId) {
-                $q->where('warehouse_id', $warehouseId);
             })
             ->select('id', 'name', 'code', 'sku', 'price', 'product_qty', 'fixed_asset')
             ->limit(10)
@@ -107,7 +100,6 @@ class PurchaseController extends Controller
 
             $purchase = Purchase::create([
                 'date' => $request->date,
-                'warehouse_id' => $request->warehouse_id,
                 'supplier_id' => $request->supplier_id,
                 'tracking_no' => $request->tracking_no,
                 'note_no' => $request->note_no,
@@ -173,10 +165,9 @@ class PurchaseController extends Controller
     {
         $editData = Purchase::with(['purchaseItems.product', 'user'])->findOrFail($id);
         $suppliers = Supplier::all();
-        $warehouses = WareHouse::all();
         $semesters = Semester::all();
         $departments = Department::all();
-        return view('admin.backend.purchase.edit_purchase', compact('editData', 'suppliers', 'warehouses', 'semesters', 'departments'));
+        return view('admin.backend.purchase.edit_purchase', compact('editData', 'suppliers', 'semesters', 'departments'));
     }
     // End Method
 
@@ -195,7 +186,6 @@ class PurchaseController extends Controller
 
             $purchase->update([
                 'date' => $request->date,
-                'warehouse_id' => $request->warehouse_id,
                 'supplier_id' => $request->supplier_id,
                 'tracking_no' => $request->tracking_no,
                 'note_no' => $request->note_no,
@@ -278,7 +268,7 @@ class PurchaseController extends Controller
 
     public function InvoicePurchase($id)
     {
-        $purchase = Purchase::with(['supplier', 'warehouse', 'semester', 'department', 'purchaseItems.product'])->find($id);
+        $purchase = Purchase::with(['supplier', 'semester', 'department', 'purchaseItems.product'])->find($id);
 
         $pdf = Pdf::loadView('admin.backend.purchase.invoice_pdf', compact('purchase'));
         return $pdf->download('purchase_' . $id . '.pdf');

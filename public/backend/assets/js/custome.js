@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    if (window.enableGlobalProductSearch !== true) {
+        return;
+    }
+
     let productSearchInput = document.getElementById("product_search");
     let warehouseDropdown = document.getElementById("warehouse_id");
     let productList = document.getElementById("product_list");
@@ -9,9 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ? window.useWarehouseForProductSearch
             : true;
 
-    // This script is included globally, but many pages don't have these elements.
-    // Warehouse / warehouse_error are optional (e.g. Create Purchase has no warehouse field).
-    // If the purchase/sale UI isn't present, exit early to avoid runtime errors.
+    // This script is enabled only on pages that opt in to the global product search widget.
     if (!productSearchInput || !productList || !orderItemsTableBody) {
         return;
     }
@@ -20,7 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
         let query = this.value.trim();
 
         // Optional warehouse: only some screens have a warehouse dropdown + error hint.
-        if (useWarehouseForProductSearch && warehouseDropdown && warehouseError) {
+        if (
+            useWarehouseForProductSearch &&
+            warehouseDropdown &&
+            warehouseError
+        ) {
             let warehouse_id = warehouseDropdown.value;
             if (!warehouse_id) {
                 warehouseError.classList.remove("d-none");
@@ -93,7 +99,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let productName = productElement.getAttribute("data-name");
         let netUnitCost = parseFloat(productElement.getAttribute("data-cost"));
         let stock = parseInt(productElement.getAttribute("data-stock"));
-        let fixedAsset = parseInt(productElement.getAttribute("data-fixed-asset") || 0);
+        let fixedAsset = parseInt(
+            productElement.getAttribute("data-fixed-asset") || 0,
+        );
 
         // Check if product already exists in table
         if (document.querySelector(`tr[data-id="${productId}"]`)) {
@@ -102,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Add expiry date field - date input for fixed assets, N/A for others
-        let expiryDateCol = '';
+        let expiryDateCol = "";
         if (fixedAsset === 1) {
             expiryDateCol = `<td>
               <input type="date" class="form-control expiry-date-input"
@@ -162,7 +170,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateEvents() {
         document
-            .querySelectorAll(".qty-input, .discount-input, .net-unit-cost-input")
+            .querySelectorAll(
+                ".qty-input, .discount-input, .net-unit-cost-input",
+            )
             .forEach((input) => {
                 input.addEventListener("input", function () {
                     let row = this.closest("tr");
@@ -406,7 +416,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 let subtotalCell = row.querySelector(".subtotal");
 
                 // Update price in table
-                let netUnitCostInput = row.querySelector(".net-unit-cost-input");
+                let netUnitCostInput = row.querySelector(
+                    ".net-unit-cost-input",
+                );
                 netUnitCostInput.value = updatedPrice.toFixed(2);
                 qtyInput.setAttribute("data-cost", updatedPrice);
 

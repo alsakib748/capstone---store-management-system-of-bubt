@@ -218,6 +218,7 @@
 
 
     <script>
+        window.enableGlobalProductSearch = true;
         var productSearchUrl = "{{ route('purchase.product.search') }}"
         window.useWarehouseForProductSearch = false;
     </script>

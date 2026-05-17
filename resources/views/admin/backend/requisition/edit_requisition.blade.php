@@ -69,66 +69,67 @@
                                                 <label class="form-label">Order items: <span
                                                         class="text-danger">*</span></label>
                                                 <div class="table-responsive">
-                                                <table class="table table-striped table-bordered dataTable"
-                                                    style="width: 100%;">
-                                                    <thead>
-                                                        <tr role="row">
-                                                            <th>Product</th>
-                                                            <th>Brand</th>
-                                                            <th>Category</th>
-                                                            <th>Subcategory</th>
-                                                            <th>Qty</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="productBody">
-                                                        @foreach ($editData->requisitionItems as $item)
-                                                            <tr data-id={{ $item->id }}>
-
-                                                                <td>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->code }} - {{ $item->product->name }}"
-                                                                        readonly>
-                                                                    <input type="hidden"
-                                                                        name="products[{{ $item->product->id }}][id]"
-                                                                        value="{{ $item->product->id }}">
-                                                                </td>
-
-                                                                <td>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->brand->name ?? '-' }}"
-                                                                        readonly>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->category->category_name ?? '-' }}"
-                                                                        readonly>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->subcategory->subcategory_name ?? '-' }}"
-                                                                        readonly>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="number" class="form-control text-center"
-                                                                        name="products[{{ $item->product->id }}][quantity]"
-                                                                        value="{{ $item->qty }}" min="0"
-                                                                        style="max-width: 90px;">
-                                                                </td>
-
-                                                                <td>
-                                                                    <button type="button"
-                                                                        class="btn btn-danger btn-sm remove-item"
-                                                                        data-id="{{ $item->id }}" disabled
-                                                                        title="Cannot remove items"><span
-                                                                            class="mdi mdi-delete-circle mdi-18px"></span></button>
-                                                                </td>
-
+                                                    <table class="table table-striped table-bordered dataTable"
+                                                        style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th>Product</th>
+                                                                <th>Brand</th>
+                                                                <th>Category</th>
+                                                                <th>Subcategory</th>
+                                                                <th>Qty</th>
+                                                                <th>Action</th>
                                                             </tr>
-                                                        @endforeach
+                                                        </thead>
+                                                        <tbody id="productBody">
+                                                            @foreach ($editData->requisitionItems as $item)
+                                                                <tr data-id={{ $item->id }}>
 
-                                                    </tbody>
-                                                </table>
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->code }} - {{ $item->product->name }}"
+                                                                            readonly>
+                                                                        <input type="hidden"
+                                                                            name="products[{{ $item->product->id }}][id]"
+                                                                            value="{{ $item->product->id }}">
+                                                                    </td>
+
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->brand->name ?? '-' }}"
+                                                                            readonly>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->category->category_name ?? '-' }}"
+                                                                            readonly>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->subcategory->subcategory_name ?? '-' }}"
+                                                                            readonly>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            class="form-control text-center"
+                                                                            name="products[{{ $item->product->id }}][quantity]"
+                                                                            value="{{ $item->qty }}" min="0"
+                                                                            style="max-width: 90px;">
+                                                                    </td>
+
+                                                                    <td>
+                                                                        <button type="button"
+                                                                            class="btn btn-danger btn-sm remove-item"
+                                                                            data-id="{{ $item->id }}" disabled
+                                                                            title="Cannot remove items"><span
+                                                                                class="mdi mdi-delete-circle mdi-18px"></span></button>
+                                                                    </td>
+
+                                                                </tr>
+                                                            @endforeach
+
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -167,6 +168,10 @@
                 const requisitionUserSelect = document.getElementById('user_id');
 
                 function renderSearchResults(products) {
+                    if (!Array.isArray(products)) {
+                        products = [];
+                    }
+
                     productList.innerHTML = '';
                     products.forEach((product) => {
                         const item = document.createElement('a');
@@ -228,8 +233,15 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                        .then((response) => response.json())
-                        .then((products) => renderSearchResults(products));
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error('Search request failed');
+                            }
+
+                            return response.json();
+                        })
+                        .then((products) => renderSearchResults(products))
+                        .catch(() => renderSearchResults([]));
                 });
 
                 if (requisitionUserSelect) {

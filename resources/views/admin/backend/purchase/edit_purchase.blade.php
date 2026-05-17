@@ -42,21 +42,6 @@
                                                 <div id="product_list" class="list-group mt-2"></div>
                                             </div>
 
-                                            {{-- <input type="hidden" name="warehouse_id" value="{{ $editData->warehouse_id }}"> --}}
-
-                                            {{-- <div class="col-md-4 mb-3">
-                <div class="form-group w-100">
-                <label class="form-label" for="formBasic">Warehouse : <span class="text-danger">*</span></label>
-                <select name="warehouse_id" id="warehouse_id" class="form-control form-select select2" disabled>
-    <option value="">Select Warehouse</option>
-    @foreach ($warehouses as $item)
-    <option value="{{ $item->id }}" {{ $editData->warehouse_id == $item->id ? 'selected' : '' }} >{{ $item->name }}</option>
-    @endforeach
-                </select>
-                <small id="warehouse_error" class="text-danger d-none">Please select the first warehouse.</small>
-                </div>
-          </div> --}}
-
                                             <div class="col-md-4 mb-3">
                                                 <div class="form-group w-100">
                                                     <label class="form-label" for="formBasic">Semester : <span
@@ -133,112 +118,112 @@
                                                 <label class="form-label">Order items: <span
                                                         class="text-danger">*</span></label>
                                                 <div class="table-responsive">
-                                                <table class="table table-striped table-bordered dataTable"
-                                                    style="width: 100%;">
-                                                    <thead>
-                                                        <tr role="row">
-                                                            <th>Product</th>
-                                                            <th>Net Unit Cost</th>
-                                                            <th>Stock</th>
-                                                            <th>Qty</th>
-                                                            <th>Discount</th>
-                                                            <th>Subtotal</th>
-                                                            <th>Expiry Date</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="productBody">
-                                                        @foreach ($editData->purchaseItems as $item)
-                                                            <tr data-id={{ $item->id }}>
-
-                                                                <td class="d-flex align-items-center gap-2">
-                                                                    <input type="text" class="form-control"
-                                                                        value="{{ $item->product->code }} - {{ $item->product->name }}"
-                                                                        readonly style="max-width: 300px">
-                                                                    <button type="button"
-                                                                        class="btn btn-primary btn-sm edit-discount-btn"
-                                                                        data-id="{{ $item->id }}"
-                                                                        data-name="{{ $item->product->name }}"
-                                                                        data-cost="{{ $item->net_unit_cost }}"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#discountModal">
-                                                                        <span class="mdi mdi-book-edit "></span>
-                                                                    </button>
-                                                                </td>
-
-                                                                <td>
-                                                                    <input type="number"
-                                                                        name="products[{{ $item->product->id }}][net_unit_cost]"
-                                                                        class="form-control net-cost"
-                                                                        value="{{ $item->net_unit_cost }}"
-                                                                        style="max-width: 90px;" readonly>
-
-                                                                </td>
-                                                                <td>
-                                                                    <input type="number"
-                                                                        name="products[{{ $item->product->id }}][stock]"
-                                                                        class="form-control"
-                                                                        value="{{ $item->product->product_qty }}"
-                                                                        style="max-width: 80px;" readonly>
-                                                                </td>
-
-                                                                <td>
-                                                                    <div class="input-group">
-                                                                        <button
-                                                                            class="btn btn-outline-secondary decrement-qty"
-                                                                            type="button">−</button>
-                                                                        <input type="text"
-                                                                            class="form-control text-center qty-input"
-                                                                            name="products[{{ $item->product->id }}][quantity]"
-                                                                            value="{{ $item->quantity }}" min="1"
-                                                                            max="{{ $item->stock }}"
-                                                                            data-cost="{{ $item->net_unit_cost }}"
-                                                                            style="max-width: 50px;">
-                                                                        <button
-                                                                            class="btn btn-outline-secondary increment-qty"
-                                                                            type="button">+</button>
-                                                                    </div>
-                                                                </td>
-
-                                                                <td>
-                                                                    <input type="number"
-                                                                        class="form-control discount-input"
-                                                                        name="products[{{ $item->product->id }}][discount]"
-                                                                        value="{{ $item->discount }}"
-                                                                        style="max-width: 100px;">
-                                                                </td>
-
-                                                                <td class="subtotal">
-                                                                    {{ number_format($item->subtotal, 2) }}</td>
-                                                                <input type="hidden"
-                                                                    name="products[{{ $item->product->id }}][subtotal]"
-                                                                    value="{{ $item->subtotal }}">
-
-                                                                @if($item->product->fixed_asset == 1)
-                                                                <td>
-                                                                    <input type="date" class="form-control"
-                                                                        name="products[{{ $item->product->id }}][expiry_date]"
-                                                                        value="{{ $item->expiry_date }}"
-                                                                        style="max-width: 150px;">
-                                                                </td>
-                                                                @else
-                                                                <td style="color:#999">N/A</td>
-                                                                <input type="hidden"
-                                                                    name="products[{{ $item->product->id }}][expiry_date]"
-                                                                    value="">
-                                                                @endif
-
-                                                                <td><button type="button"
-                                                                        class="btn btn-danger btn-sm remove-item"
-                                                                        data-id="{{ $item->id }}"><span
-                                                                            class="mdi mdi-delete-circle mdi-18px"></span></button>
-                                                                </td>
-
+                                                    <table class="table table-striped table-bordered dataTable"
+                                                        style="width: 100%;">
+                                                        <thead>
+                                                            <tr role="row">
+                                                                <th>Product</th>
+                                                                <th>Net Unit Cost</th>
+                                                                <th>Stock</th>
+                                                                <th>Qty</th>
+                                                                <th>Discount</th>
+                                                                <th>Subtotal</th>
+                                                                <th>Expiry Date</th>
+                                                                <th>Action</th>
                                                             </tr>
-                                                        @endforeach
+                                                        </thead>
+                                                        <tbody id="productBody">
+                                                            @foreach ($editData->purchaseItems as $item)
+                                                                <tr data-id={{ $item->id }}>
 
-                                                    </tbody>
-                                                </table>
+                                                                    <td class="d-flex align-items-center gap-2">
+                                                                        <input type="text" class="form-control"
+                                                                            value="{{ $item->product->code }} - {{ $item->product->name }}"
+                                                                            readonly style="max-width: 300px">
+                                                                        <button type="button"
+                                                                            class="btn btn-primary btn-sm edit-discount-btn"
+                                                                            data-id="{{ $item->id }}"
+                                                                            data-name="{{ $item->product->name }}"
+                                                                            data-cost="{{ $item->net_unit_cost }}"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#discountModal">
+                                                                            <span class="mdi mdi-book-edit "></span>
+                                                                        </button>
+                                                                    </td>
+
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            name="products[{{ $item->product->id }}][net_unit_cost]"
+                                                                            class="form-control net-cost"
+                                                                            value="{{ $item->net_unit_cost }}"
+                                                                            style="max-width: 90px;" readonly>
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            name="products[{{ $item->product->id }}][stock]"
+                                                                            class="form-control"
+                                                                            value="{{ $item->product->product_qty }}"
+                                                                            style="max-width: 80px;" readonly>
+                                                                    </td>
+
+                                                                    <td>
+                                                                        <div class="input-group">
+                                                                            <button
+                                                                                class="btn btn-outline-secondary decrement-qty"
+                                                                                type="button">−</button>
+                                                                            <input type="text"
+                                                                                class="form-control text-center qty-input"
+                                                                                name="products[{{ $item->product->id }}][quantity]"
+                                                                                value="{{ $item->quantity }}"
+                                                                                min="1" max="{{ $item->stock }}"
+                                                                                data-cost="{{ $item->net_unit_cost }}"
+                                                                                style="max-width: 50px;">
+                                                                            <button
+                                                                                class="btn btn-outline-secondary increment-qty"
+                                                                                type="button">+</button>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    <td>
+                                                                        <input type="number"
+                                                                            class="form-control discount-input"
+                                                                            name="products[{{ $item->product->id }}][discount]"
+                                                                            value="{{ $item->discount }}"
+                                                                            style="max-width: 100px;">
+                                                                    </td>
+
+                                                                    <td class="subtotal">
+                                                                        {{ number_format($item->subtotal, 2) }}</td>
+                                                                    <input type="hidden"
+                                                                        name="products[{{ $item->product->id }}][subtotal]"
+                                                                        value="{{ $item->subtotal }}">
+
+                                                                    @if ($item->product->fixed_asset == 1)
+                                                                        <td>
+                                                                            <input type="date" class="form-control"
+                                                                                name="products[{{ $item->product->id }}][expiry_date]"
+                                                                                value="{{ $item->expiry_date }}"
+                                                                                style="max-width: 150px;">
+                                                                        </td>
+                                                                    @else
+                                                                        <td style="color:#999">N/A</td>
+                                                                        <input type="hidden"
+                                                                            name="products[{{ $item->product->id }}][expiry_date]"
+                                                                            value="">
+                                                                    @endif
+
+                                                                    <td><button type="button"
+                                                                            class="btn btn-danger btn-sm remove-item"
+                                                                            data-id="{{ $item->id }}"><span
+                                                                                class="mdi mdi-delete-circle mdi-18px"></span></button>
+                                                                    </td>
+
+                                                                </tr>
+                                                            @endforeach
+
+                                                        </tbody>
+                                                    </table>
                                                 </div>
                                             </div>
                                         </div>
@@ -360,6 +345,7 @@
 
     @push('scripts')
         <script>
+            window.enableGlobalProductSearch = true;
             var productSearchUrl = "{{ route('purchase.product.search') }}";
             window.useWarehouseForProductSearch = false;
 
