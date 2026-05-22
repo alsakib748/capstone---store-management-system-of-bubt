@@ -278,7 +278,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/product/lifetime/report/generate', [ProductLifetimeReportController::class, 'generate'])->name('product.lifetime.report.generate');
 
-        Route::get('/product/lifetime/report/ajax', [ProductLifetimeReportController::class, 'ajaxGenerate'])->name('product.lifetime.report.ajax');
+        Route::post('/product/lifetime/report/ajax', [ProductLifetimeReportController::class, 'ajaxGenerate'])->name('product.lifetime.report.ajax');
 
     });
 

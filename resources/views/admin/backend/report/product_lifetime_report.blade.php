@@ -8,20 +8,8 @@
                 const filterBtn = document.getElementById('filterBtn');
                 const resetBtn = document.getElementById('resetBtn');
 
-                // Set default dates (first day of current month to today)
-                const today = new Date().toISOString().split('T')[0];
-                const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-                    .split('T')[0];
-
-                const fromDateInput = document.getElementById('from_date');
-                const toDateInput = document.getElementById('to_date');
-
-                if (fromDateInput && !fromDateInput.value) {
-                    fromDateInput.value = firstDayOfMonth;
-                }
-                if (toDateInput && !toDateInput.value) {
-                    toDateInput.value = today;
-                }
+                // No auto date selection - dates are optional
+                // Admin must manually select filters
 
                 // Print function
                 window.printLifetimeReport = function() {
@@ -89,7 +77,65 @@
                 // Handle form submission via AJAX
                 if (form) {
                     form.addEventListener('submit', function(e) {
-                        return;
+                        e.preventDefault();
+
+                        const productId = document.getElementById('filter_product').value;
+                        if (!productId) {
+                            alert('Please select a product.');
+                            return;
+                        }
+
+                        const fromDate = document.getElementById('from_date').value;
+                        const toDate = document.getElementById('to_date').value;
+                        const semesterId = document.getElementById('filter_semester').value;
+
+                        // Show loading
+                        const reportSection = document.getElementById('reportSection');
+                        const reportContent = document.getElementById('reportContent');
+                        reportSection.style.display = 'block';
+                        reportContent.innerHTML =
+                            '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading report...</p></div>';
+
+                        // Make AJAX request
+                        fetch('{{ route('product.lifetime.report.ajax') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    product_id: productId,
+                                    from_date: fromDate,
+                                    to_date: toDate,
+                                    semester_id: semesterId
+                                })
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.error) {
+                                    alert(data.error);
+                                    reportContent.innerHTML = '';
+                                    reportSection.style.display = 'none';
+                                    return;
+                                }
+                                try {
+                                    renderReport(data);
+                                } catch (e) {
+                                    console.error('Render error:', e);
+                                    alert('Error rendering report: ' + e.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while generating the report: ' + error.message);
+                                reportContent.innerHTML = '';
+                                reportSection.style.display = 'none';
+                            });
                     });
                 }
 
@@ -130,7 +176,7 @@
                         html += '<div class="card-body">';
                         html += '<div class="row">';
                         html += '<div class="col-md-3"><strong>Product Code:</strong> ' + (report.product
-                            .product_code || 'N/A') + '</div>';
+                            .code || 'N/A') + '</div>';
                         html += '<div class="col-md-3"><strong>Category:</strong> ' + (report.product.category ? report
                             .product.category.category_name : 'N/A') + '</div>';
                         html += '<div class="col-md-3"><strong>Subcategory:</strong> ' + (report.product.subcategory ?
@@ -141,10 +187,13 @@
                         html += '</div>';
                         html += '</div>';
                         html +=
-                            '<div class="alert alert-warning text-center"><strong>No transaction records found for this product in the selected date range.</strong><br><small>There might be no purchases, issues, damages, or returns recorded yet.</small></div>';
+                            '<div class="alert alert-warning text-center"><strong>No transaction records found for this product.</strong><br><small>There might be no purchases, issues, damages, or returns recorded yet.</small></div>';
+
+                        var noDataOpeningLabel = report.filters.semester_id ? 'Previous Semester' : (report.filters
+                            .from_date ? 'Before ' + report.filters.from_date : 'All Previous Records');
                         html += '<div class="card mb-4">';
                         html += '<div class="card-header bg-info text-white">';
-                        html += '<h5 class="mb-0">A. Opening Summary</h5>';
+                        html += '<h5 class="mb-0">A. Opening Summary (' + noDataOpeningLabel + ')</h5>';
                         html += '</div>';
                         html += '<div class="card-body">';
                         html += '<table class="table table-bordered table-sm">';
@@ -158,9 +207,20 @@
                         html += '<td class="text-center text-success"><strong>0.00</strong></td>';
                         html += '</tr></tbody></table>';
                         html += '</div></div>';
+
+                        var noDataPeriodLabel = 'All Records';
+                        if (report.filters.semester_id) {
+                            noDataPeriodLabel = 'Selected Semester';
+                        } else if (report.filters.from_date && report.filters.to_date) {
+                            noDataPeriodLabel = report.filters.from_date + ' to ' + report.filters.to_date;
+                        } else if (report.filters.from_date) {
+                            noDataPeriodLabel = 'From ' + report.filters.from_date;
+                        } else if (report.filters.to_date) {
+                            noDataPeriodLabel = 'Until ' + report.filters.to_date;
+                        }
                         html += '<div class="card mb-4">';
                         html += '<div class="card-header bg-warning">';
-                        html += '<h5 class="mb-0">B. Current Period Summary</h5>';
+                        html += '<h5 class="mb-0">B. Current Period Summary (' + noDataPeriodLabel + ')</h5>';
                         html += '</div>';
                         html += '<div class="card-body text-center text-muted">';
                         html += '<p>No transactions found for the selected period.</p>';
@@ -207,7 +267,7 @@
                     html += '</div>';
                     html += '<div class="card-body">';
                     html += '<div class="row">';
-                    html += '<div class="col-md-3"><strong>Product Code:</strong> ' + (report.product.product_code ||
+                    html += '<div class="col-md-3"><strong>Product Code:</strong> ' + (report.product.code ||
                         'N/A') + '</div>';
                     html += '<div class="col-md-3"><strong>Category:</strong> ' + (report.product.category ? report
                         .product.category.category_name : 'N/A') + '</div>';
@@ -220,8 +280,12 @@
                     html += '</div>';
 
                     // A. Opening Summary
-                    var openingDateLabel = report.filters.from_date ? 'Before ' + report.filters.from_date :
-                        'All Previous Records';
+                    var openingDateLabel = 'All Previous Records';
+                    if (report.filters.semester_id) {
+                        openingDateLabel = 'Previous Semester';
+                    } else if (report.filters.from_date) {
+                        openingDateLabel = 'Before ' + report.filters.from_date;
+                    }
                     html += '<div class="card mb-4">';
                     html += '<div class="card-header bg-info text-white">';
                     html += '<h5 class="mb-0">A. Opening Summary (' + openingDateLabel + ')</h5>';
@@ -249,10 +313,16 @@
                     html += '</div>';
 
                     // B. Current Period Summary
-                    var periodLabel = (report.filters.from_date && report.filters.to_date) ?
-                        (report.filters.from_date + ' to ' + report.filters.to_date) :
-                        (report.filters.from_date ? 'From ' + report.filters.from_date : (report.filters.to_date ?
-                            'Until ' + report.filters.to_date : 'All Records'));
+                    var periodLabel = 'All Records';
+                    if (report.filters.semester_id) {
+                        periodLabel = 'Selected Semester';
+                    } else if (report.filters.from_date && report.filters.to_date) {
+                        periodLabel = report.filters.from_date + ' to ' + report.filters.to_date;
+                    } else if (report.filters.from_date) {
+                        periodLabel = 'From ' + report.filters.from_date;
+                    } else if (report.filters.to_date) {
+                        periodLabel = 'Until ' + report.filters.to_date;
+                    }
                     html += '<div class="card mb-4">';
                     html += '<div class="card-header bg-warning">';
                     html += '<h5 class="mb-0">B. Current Period Summary (' + periodLabel + ')</h5>';
@@ -371,14 +441,16 @@
                             '<thead><tr><th>Date</th><th>Invoice No</th><th>Supplier</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>';
                         html += '<tbody>';
                         data.purchase_history.forEach(function(item) {
-                            var total = (item.quantity || 0) * (item.net_unit_cost || 0);
+                            var qty = parseFloat(item.quantity) || 0;
+                            var cost = parseFloat(item.net_unit_cost) || 0;
+                            var total = qty * cost;
                             html += '<tr>';
                             html += '<td>' + (item.purchase ? item.purchase.date : 'N/A') + '</td>';
                             html += '<td>' + (item.purchase ? item.purchase.tracking_no : 'N/A') + '</td>';
                             html += '<td>' + (item.purchase && item.purchase.supplier ? item.purchase.supplier
                                 .name : 'N/A') + '</td>';
-                            html += '<td>' + (item.quantity || 0) + '</td>';
-                            html += '<td>TK ' + (item.net_unit_cost || 0).toFixed(2) + '</td>';
+                            html += '<td>' + qty + '</td>';
+                            html += '<td>TK ' + cost.toFixed(2) + '</td>';
                             html += '<td>TK ' + total.toFixed(2) + '</td>';
                             html += '</tr>';
                         });
@@ -397,12 +469,15 @@
                         data.issue_history.forEach(function(item) {
                             html += '<tr>';
                             html += '<td>' + (item.issue ? item.issue.date : 'N/A') + '</td>';
-                            html += '<td>' + (item.issue ? item.issue.tracking_no : 'N/A') + '</td>';
-                            html += '<td>' + (item.issue && item.issue.department ? item.issue.department.name :
+                            html += '<td>' + (item.issue && item.issue.tracking_no ? item.issue.tracking_no :
                                 'N/A') + '</td>';
-                            html += '<td>' + (item.issue && item.issue.user ? item.issue.user.name : 'N/A') +
+                            html += '<td>' + (item.issue && item.issue.department && item.issue.department
+                                .name ? item.issue.department.name :
+                                'N/A') + '</td>';
+                            html += '<td>' + (item.issue && item.issue.user && item.issue.user.name ? item.issue
+                                    .user.name : 'N/A') +
                                 '</td>';
-                            html += '<td>' + (item.quantity || 0) + '</td>';
+                            html += '<td>' + (parseFloat(item.qty) || 0) + '</td>';
                             html += '</tr>';
                         });
                         html += '</tbody></table></div></div>';
@@ -424,8 +499,9 @@
                                 '</td>';
                             html += '<td>' + (item.damage_product && item.damage_product.semester ? item
                                 .damage_product.semester.name : 'N/A') + '</td>';
-                            html += '<td>' + (item.quantity || 0) + '</td>';
-                            html += '<td>' + (item.damage_product ? (item.damage_product.note_no || 'N/A') :
+                            html += '<td>' + (parseFloat(item.qty) || 0) + '</td>';
+                            html += '<td>' + (item.damage_product ? (item.damage_product.notes || item
+                                    .damage_product.note_no || 'N/A') :
                                 'N/A') + '</td>';
                             html += '</tr>';
                         });
@@ -445,13 +521,14 @@
                             html += '<tr>';
                             html += '<td>' + (item.issue_return ? item.issue_return.return_date : 'N/A') +
                                 '</td>';
-                            html += '<td>' + (item.issue_return ? item.issue_return.tracking_no : 'N/A') +
+                            html += '<td>' + (item.issue_return && item.issue_return.tracking_no ? item
+                                    .issue_return.tracking_no : 'N/A') +
                                 '</td>';
                             html += '<td>' + (item.issue_return && item.issue_return.issue ? item.issue_return
                                 .issue.tracking_no : 'N/A') + '</td>';
                             html += '<td>' + (item.issue_return && item.issue_return.user ? item.issue_return
                                 .user.name : 'N/A') + '</td>';
-                            html += '<td>' + (item.quantity || 0) + '</td>';
+                            html += '<td>' + (parseFloat(item.qty) || 0) + '</td>';
                             html += '</tr>';
                         });
                         html += '</tbody></table></div></div>';
@@ -501,11 +578,11 @@
                                 <label for="filter_product" class="form-label">Product <span
                                         class="text-danger">*</span></label>
                                 <select name="product_id" id="filter_product" class="form-control select2"
-                                    data-placeholder="Select Product" required>
+                                    data-placeholder="Select Product">
                                     <option value="" selected disabled>Select Product</option>
                                     @forelse($products as $product)
                                         <option value="{{ $product->id }}">{{ $product->name }}
-                                            ({{ $product->product_code }})
+                                            ({{ $product->code }})
                                         </option>
                                     @empty
                                     @endforelse
@@ -557,7 +634,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-3"><strong>Product Code:</strong>
-                                        {{ $reportData['product']->product_code ?? 'N/A' }}</div>
+                                        {{ $reportData['product']->code ?? 'N/A' }}</div>
                                     <div class="col-md-3"><strong>Category:</strong>
                                         {{ $reportData['product']->category->category_name ?? 'N/A' }}</div>
                                     <div class="col-md-3"><strong>Subcategory:</strong>

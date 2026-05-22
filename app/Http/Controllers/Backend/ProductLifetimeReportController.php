@@ -33,16 +33,21 @@ class ProductLifetimeReportController extends Controller
     public function generate(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|integer|exists:products,id',
+            'product_id' => 'nullable|integer|exists:products,id',
             'from_date' => 'nullable|date',
             'to_date' => 'nullable|date',
             'semester_id' => 'nullable|integer|exists:semesters,id',
         ]);
 
-        $fromDate = $request->input('from_date') ?: date('Y-m-01'); // Default to first day of month
-        $toDate = $request->input('to_date') ?: date('Y-m-d'); // Default to today
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
         $productId = $request->input('product_id');
         $semesterId = $request->input('semester_id');
+
+        // If no product selected, show error
+        if (!$productId) {
+            return redirect()->back()->with('error', 'Please select a product.');
+        }
 
         $reportData = $this->reportService->generateFinalReport($productId, $fromDate, $toDate, $semesterId);
 
@@ -63,16 +68,20 @@ class ProductLifetimeReportController extends Controller
     {
         try {
             $request->validate([
-                'product_id' => 'required|integer|exists:products,id',
+                'product_id' => 'nullable|integer|exists:products,id',
                 'from_date' => 'nullable|date',
                 'to_date' => 'nullable|date',
                 'semester_id' => 'nullable|integer|exists:semesters,id',
             ]);
 
             $fromDate = $request->input('from_date') ?: null;
-            $toDate = $request->input('to_date') ?: date('Y-m-d');
+            $toDate = $request->input('to_date') ?: null;
             $productId = $request->input('product_id');
             $semesterId = $request->input('semester_id') ?: null;
+
+            if (!$productId) {
+                return response()->json(['error' => 'Please select a product.'], 400);
+            }
 
             $reportData = $this->reportService->generateFinalReport($productId, $fromDate, $toDate, $semesterId);
 

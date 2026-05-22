@@ -20,11 +20,12 @@ class ProductLifetimeReportService
     /**
      * Calculate opening stock for a product before the given date
      * Opening Stock = Previous Purchases - Previous Issues - Previous Damages + Previous Returns
+     * If semester is selected, opening uses previous semester's data
      */
     public function calculateOpeningStock($productId, $fromDate, $semesterId = null)
     {
-        // If no from_date, opening stock is 0
-        if (!$fromDate) {
+        // If no from_date and no semester, opening stock is 0
+        if (!$fromDate && !$semesterId) {
             return [
                 'previous_purchase' => 0,
                 'previous_issue' => 0,
@@ -34,6 +35,63 @@ class ProductLifetimeReportService
             ];
         }
 
+        // If semester is selected, use previous semester for opening calculation
+        $previousSemesterId = null;
+        $useSemesterOpening = false;
+
+        if ($semesterId) {
+            $currentSemester = Semester::find($semesterId);
+            if ($currentSemester) {
+                // Find previous semester by code (e.g., 002 -> 001)
+                $currentCode = (int) $currentSemester->code;
+                if ($currentCode > 1) {
+                    $previousCode = str_pad($currentCode - 1, 3, '0', STR_PAD_LEFT);
+                    $previousSemester = Semester::where('code', $previousCode)->first();
+                    if ($previousSemester) {
+                        $previousSemesterId = $previousSemester->id;
+                        $useSemesterOpening = true;
+                    }
+                }
+            }
+        }
+
+        // If using semester opening, calculate from previous semester only
+        if ($useSemesterOpening) {
+            $previousPurchaseQty = DB::table('purchase_items')
+                ->join('purchases', 'purchase_items.purchase_id', '=', 'purchases.id')
+                ->where('purchase_items.product_id', $productId)
+                ->where('purchases.semester_id', $previousSemesterId)
+                ->sum('purchase_items.quantity') ?? 0;
+
+            $previousIssueQty = DB::table('issue_items')
+                ->join('issues', 'issue_items.issue_id', '=', 'issues.id')
+                ->where('issue_items.product_id', $productId)
+                ->where('issues.semester_id', $previousSemesterId)
+                ->sum('issue_items.qty') ?? 0;
+
+            $previousDamageQty = DB::table('damage_product_items')
+                ->join('damage_products', 'damage_product_items.damage_product_id', '=', 'damage_products.id')
+                ->where('damage_product_items.product_id', $productId)
+                ->where('damage_products.semester_id', $previousSemesterId)
+                ->sum('damage_product_items.qty') ?? 0;
+
+            $previousReturnQty = DB::table('issue_return_items')
+                ->join('issue_returns', 'issue_return_items.issue_return_id', '=', 'issue_returns.id')
+                ->where('issue_return_items.product_id', $productId)
+                ->where('issue_returns.semester_id', $previousSemesterId)
+                ->sum('issue_return_items.qty') ?? 0;
+
+            return [
+                'previous_purchase' => (float) $previousPurchaseQty,
+                'previous_issue' => (float) $previousIssueQty,
+                'previous_damage' => (float) $previousDamageQty,
+                'previous_return' => (float) $previousReturnQty,
+                'opening_stock' => (float) ($previousPurchaseQty - $previousIssueQty - $previousDamageQty + $previousReturnQty),
+                'previous_semester_id' => $previousSemesterId,
+            ];
+        }
+
+        // Default date-based calculation
         $fromDateStr = Carbon::parse($fromDate)->toDateString();
 
         // Previous Purchases - use join instead of whereHas for reliability
@@ -246,11 +304,11 @@ class ProductLifetimeReportService
             return null;
         }
 
-        // Handle null dates - use defaults
+        // Keep dates as null if not provided - no default dates
         $effectiveFromDate = $fromDate;
-        $effectiveToDate = $toDate ?? date('Y-m-d');
+        $effectiveToDate = $toDate;
 
-        // Calculate Opening Stock (before from_date)
+        // Calculate Opening Stock (before from_date or before semester)
         $openingData = $this->calculateOpeningStock($productId, $effectiveFromDate, $semesterId);
 
         // Calculate Purchase Summary (from_date to to_date)
@@ -316,7 +374,11 @@ class ProductLifetimeReportService
         $query = PurchaseItem::where('product_id', $productId)
             ->with(['purchase.supplier', 'purchase.semester']);
 
-        if ($fromDate && $toDate) {
+        if ($semesterId) {
+            $query->whereHas('purchase', function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            });
+        } elseif ($fromDate && $toDate) {
             $query->whereHas('purchase', function ($q) use ($fromDate, $toDate) {
                 $q->whereBetween('date', [
                     Carbon::parse($fromDate)->toDateString(),
@@ -344,7 +406,11 @@ class ProductLifetimeReportService
         $query = IssueItem::where('product_id', $productId)
             ->with(['issue.department', 'issue.user', 'issue.semester']);
 
-        if ($fromDate && $toDate) {
+        if ($semesterId) {
+            $query->whereHas('issue', function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            });
+        } elseif ($fromDate && $toDate) {
             $query->whereHas('issue', function ($q) use ($fromDate, $toDate) {
                 $q->whereBetween('date', [
                     Carbon::parse($fromDate)->toDateString(),
@@ -372,7 +438,11 @@ class ProductLifetimeReportService
         $query = DamageProductItem::where('product_id', $productId)
             ->with(['damageProduct.semester']);
 
-        if ($fromDate && $toDate) {
+        if ($semesterId) {
+            $query->whereHas('damageProduct', function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            });
+        } elseif ($fromDate && $toDate) {
             $query->whereHas('damageProduct', function ($q) use ($fromDate, $toDate) {
                 $q->whereBetween('date', [
                     Carbon::parse($fromDate)->toDateString(),
@@ -400,7 +470,11 @@ class ProductLifetimeReportService
         $query = IssueReturnItem::where('product_id', $productId)
             ->with(['issueReturn.issue', 'issueReturn.user', 'issueReturn.semester']);
 
-        if ($fromDate && $toDate) {
+        if ($semesterId) {
+            $query->whereHas('issueReturn', function ($q) use ($semesterId) {
+                $q->where('semester_id', $semesterId);
+            });
+        } elseif ($fromDate && $toDate) {
             $query->whereHas('issueReturn', function ($q) use ($fromDate, $toDate) {
                 $q->whereBetween('return_date', [
                     Carbon::parse($fromDate)->toDateString(),
